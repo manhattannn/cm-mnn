@@ -444,7 +444,9 @@ function mnn_internet_archive_file_status_value($file) {
     }
     else if ($local_status == ARCHIVE_FAILED &&
 	     $attempts >= variable_get('internet_archive_queue_attempts', 0)) {
-      $return_status = 'failed';
+      //$return_status = 'failed';
+      //changing return value so that we don't delete file
+      $return_status = 'queued';
     }
     else if ($local_status == ARCHIVE_FAILED) {
       $return_status = 'queued';
