@@ -1,6 +1,6 @@
 <?
-/**                                                                            
- * Helper function to get a single value off of a entity  
+/**
+ * Helper function to get a single value off of a entity
 */
 function cm_crew_connect_get_single_field_value($entity, $field_name,
 						$index = 'value') {
@@ -15,23 +15,23 @@ function cm_crew_connect_get_single_field_value($entity, $field_name,
   return NULL;
 }
 
-/**                                                         
+/**
  * Checks if the current user has a role
- *  
+ *
  * @param array $roles
  *
  * @return bool
- */ 
+ */
 function cm_crew_connect_user_has_role($roles = array()) {
   global $user;
-  foreach ($roles as $role) { 
+  foreach ($roles as $role) {
 
     if (in_array($role, $user->roles)) {
       return TRUE;
     }
   }
   return FALSE;
-}           
+}
 
 function cm_crew_connect_role_position_mapping() {
 
@@ -70,14 +70,15 @@ function cm_crew_connect_role_position_mapping() {
     ),
     'FH - Express' => array(
         "express_studios_general",
-    ),    
+    ),
 	  'PREM' => array(
 			  "editor_premiere",
-		),	       
+		),
 	  'FH - Premiere' => array(
 			  "editor_premiere",
 		),
     'DSTW' => array(
+			  "express_studios_general",
 				"editor_xpression_cg",
 				"studios_camera_manual",
 				"studios_camera_robotic",
@@ -103,7 +104,7 @@ function cm_crew_connect_role_position_mapping() {
     ),
     'OAEX' => array(
 			   "express_studios_general",
-    ),            
+    ),
 	       );
   return $ret;
 }
@@ -113,7 +114,7 @@ function cm_crew_connect_role_positions($mapping) {
   $is_first = TRUE;
   $sql = "SELECT name from {role}";
   $roles_result = db_query($sql);
-  
+
   while($role = $roles_result->fetchObject()) {
     if (!cm_crew_connect_user_has_role(array($role->name))) {
       continue;
@@ -127,7 +128,7 @@ function cm_crew_connect_role_positions($mapping) {
 	else {
 	  $is_first = FALSE;
 	}
-  
+
 	$positions .= $position;
       }
     }
@@ -174,28 +175,28 @@ function cm_crew_connect_override_messages() {
 	  strpos($message, 'has been created') ) {
 	$node = $_SESSION['cm_crew_connect_new_application'];
 	$_SESSION['cm_crew_connect_new_application'] = NULL;
-	
-	$req = 
-	  cm_crew_connect_get_single_field_value($node, 
+
+	$req =
+	  cm_crew_connect_get_single_field_value($node,
 						 'field_app_crew_connect_node',
 						 'target_id');
 
 	$req = $req ? node_load($req) : NULL;
 
-	$project_nid = $req ? 
+	$project_nid = $req ?
 	  cm_crew_connect_get_single_field_value($req,
 						 'field_crew_project_id',
 						 'target_id') : NULL;
 
 	$project_title = $project_nid ? node_load($project_nid)->title : "";
-	
-	$date = $req ? 
+
+	$date = $req ?
 	  cm_crew_connect_get_single_field_value($req,
-						 'field_crew_start_date') 
+						 'field_crew_start_date')
 	  : NULL;
 	$date = date('m/d/Y', strtotime($date));
 
-	$message = 
+	$message =
 	  t("You have successfully signed up to crew for !proj on !date.",
 	    array('!proj'=>$project_title, '!date'=>$date));
 
@@ -208,7 +209,7 @@ function cm_crew_connect_override_messages() {
 
 function cm_crew_connect_get_application_for_request($nid) {
   $sql =
-    "SELECT entity_id FROM field_data_field_app_crew_connect_node             
+    "SELECT entity_id FROM field_data_field_app_crew_connect_node
      WHERE field_app_crew_connect_node_target_id = :nid";
   $results = db_query($sql, array(':nid' => $nid));
   $result = $results->fetchObject();
