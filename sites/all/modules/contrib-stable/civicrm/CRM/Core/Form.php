@@ -641,6 +641,10 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
   public function addButtons($params) {
     $prevnext = $spacing = array();
     foreach ($params as $button) {
+      if (!empty($button['submitOnce'])) {
+        $button['js']['onclick'] = "return submitOnce(this,'{$this->_name}','" . ts('Processing') . "');";
+      }
+
       $attrs = array('class' => 'crm-form-submit') + (array) CRM_Utils_Array::value('js', $button);
 
       if (!empty($button['class'])) {
@@ -1287,6 +1291,37 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
   }
 
   /**
+   * Add a search for a range using date picker fields.
+   *
+   * @param string $fieldName
+   * @param string $label
+   * @param bool $isDateTime
+   *   Is this a date-time field (not just date).
+   * @param bool $required
+   * @param string $fromLabel
+   * @param string $toLabel
+   */
+  public function addDatePickerRange($fieldName, $label, $isDateTime = FALSE, $required = FALSE, $fromLabel = 'From', $toLabel = 'To') {
+
+    $options = array(
+      '' => ts('- any -'),
+      0 => ts('Choose Date Range'),
+    ) + CRM_Core_OptionGroup::values('relative_date_filters');
+
+    $this->add('select',
+      "{$fieldName}_relative",
+      $label,
+      $options,
+      $required,
+      NULL
+    );
+    $attributes = ['format' => 'searchDate'];
+    $extra = ['time' => $isDateTime];
+    $this->add('datepicker', $fieldName . '_low', ts($fromLabel), $attributes, $required, $extra);
+    $this->add('datepicker', $fieldName . '_high', ts($toLabel), $attributes, $required, $extra);
+  }
+
+  /**
    * Based on form action, return a string representing the api action.
    * Used by addField method.
    *
@@ -1903,10 +1938,10 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
    * @param array $props
    *   Mix of html and widget properties, including:.
    *   - select - params to give to select2 widget
-   *   - entity - defaults to contact
+   *   - entity - defaults to Contact
    *   - create - can the user create a new entity on-the-fly?
    *             Set to TRUE if entity is contact and you want the default profiles,
-   *             or pass in your own set of links. @see CRM_Core_BAO_UFGroup::getCreateLinks for format
+   *             or pass in your own set of links. @see CRM_Campaign_BAO_Campaign::getEntityRefCreateLinks for format
    *             note that permissions are checked automatically
    *   - api - array of settings for the getlist api wrapper
    *          note that it accepts a 'params' setting which will be passed to the underlying api
@@ -1918,14 +1953,12 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
    * @return HTML_QuickForm_Element
    */
   public function addEntityRef($name, $label = '', $props = array(), $required = FALSE) {
-    require_once "api/api.php";
-    $config = CRM_Core_Config::singleton();
     // Default properties
     $props['api'] = CRM_Utils_Array::value('api', $props, array());
-    $props['entity'] = _civicrm_api_get_entity_name_from_camel(CRM_Utils_Array::value('entity', $props, 'contact'));
+    $props['entity'] = CRM_Utils_String::convertStringToCamel(CRM_Utils_Array::value('entity', $props, 'Contact'));
     $props['class'] = ltrim(CRM_Utils_Array::value('class', $props, '') . ' crm-form-entityref');
 
-    if ($props['entity'] == 'contact' && isset($props['create']) && !(CRM_Core_Permission::check('edit all contacts') || CRM_Core_Permission::check('add contacts'))) {
+    if (array_key_exists('create', $props) && empty($props['create'])) {
       unset($props['create']);
     }
 

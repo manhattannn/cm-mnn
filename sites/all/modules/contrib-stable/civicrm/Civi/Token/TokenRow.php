@@ -136,13 +136,14 @@ class TokenRow {
    */
   public function customToken($entity, $customFieldID, $entityID) {
     $customFieldName = "custom_" . $customFieldID;
-    $fieldValue = civicrm_api3($entity, 'getvalue', array(
+    $record = civicrm_api3($entity, "getSingle", [
       'return' => $customFieldName,
-      'id' => $entityID,
-    ));
+       'id' => $entityID,
+    ]);
+    $fieldValue = \CRM_Utils_Array::value($customFieldName, $record, '');
 
     // format the raw custom field value into proper display value
-    if ($fieldValue) {
+    if (isset($fieldValue)) {
       $fieldValue = \CRM_Core_BAO_CustomField::displayValue($fieldValue, $customFieldID);
     }
 
@@ -217,6 +218,7 @@ class TokenRow {
       case 'text/html':
         // Plain => HTML.
         foreach ($textTokens as $entity => $values) {
+          $entityFields = civicrm_api3($entity, "getFields", array('api_action' => 'get'));
           foreach ($values as $field => $value) {
             if (!isset($htmlTokens[$entity][$field])) {
               // CRM-18420 - Activity Details Field are enclosed within <p>,
@@ -224,6 +226,10 @@ class TokenRow {
               // conversion of these tags resulting in raw HTML.
               if ($entity == 'activity' && $field == 'details') {
                 $htmlTokens[$entity][$field] = $value;
+              }
+              elseif (\CRM_Utils_Array::value('data_type', \CRM_Utils_Array::value($field, $entityFields['values'])) == 'Memo') {
+                // Memo fields aka custom fields of type Note are html.
+                $htmlTokens[$entity][$field] = CRM_Utils_String::purifyHTML($value);
               }
               else {
                 $htmlTokens[$entity][$field] = htmlentities($value);

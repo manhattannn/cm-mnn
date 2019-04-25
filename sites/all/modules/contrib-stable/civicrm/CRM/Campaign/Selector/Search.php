@@ -273,17 +273,17 @@ class CRM_Campaign_Selector_Search extends CRM_Core_Selector_Base implements CRM
       $cacheKey = "civicrm search {$this->_key}";
       Civi::service('prevnext')->deleteItem(NULL, $cacheKey, 'civicrm_contact');
 
-      $sql = $this->_query->searchQuery(0, 0, $sort,
+      $sql = $this->_query->getSearchSQLParts(0, 0, $sort,
         FALSE, FALSE,
         FALSE, FALSE,
-        TRUE, $this->_campaignWhereClause,
+        $this->_campaignWhereClause,
         NULL,
         $this->_campaignFromClause
       );
-      list($select, $from) = explode(' FROM ', $sql);
+
       $selectSQL = "
       SELECT %1, contact_a.id, contact_a.display_name
-FROM {$from}
+FROM {$sql['from']}
 ";
 
       try {
@@ -294,8 +294,10 @@ FROM {$from}
         return;
       }
 
-      // also record an entry in the cache key table, so we can delete it periodically
-      CRM_Core_BAO_Cache::setItem($cacheKey, 'CiviCRM Search PrevNextCache', $cacheKey);
+      if (Civi::service('prevnext') instanceof CRM_Core_PrevNextCache_Sql) {
+        // SQL-backed prevnext cache uses an extra record for pruning the cache.
+        CRM_Core_BAO_Cache::setItem($cacheKey, 'CiviCRM Search PrevNextCache', $cacheKey);
+      }
     }
   }
 

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b
+class ComposerStaticInit5c497419c84e5a596c5f14fa124a8318
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -18,6 +18,10 @@ class ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b
     );
 
     public static $prefixLengthsPsr4 = array (
+        'c' => 
+        array (
+            'cweagans\\Composer\\' => 18,
+        ),
         'Z' => 
         array (
             'Zend\\Validator\\' => 15,
@@ -38,6 +42,7 @@ class ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b
         'P' => 
         array (
             'Psr\\SimpleCache\\' => 16,
+            'Psr\\Log\\' => 8,
             'Psr\\Http\\Message\\' => 17,
             'PhpOffice\\PhpWord\\' => 18,
             'PhpOffice\\Common\\' => 17,
@@ -68,6 +73,10 @@ class ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b
     );
 
     public static $prefixDirsPsr4 = array (
+        'cweagans\\Composer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/cweagans/composer-patches/src',
+        ),
         'Zend\\Validator\\' => 
         array (
             0 => __DIR__ . '/..' . '/zendframework/zend-validator/src',
@@ -115,6 +124,10 @@ class ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b
         'Psr\\SimpleCache\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/simple-cache/src',
+        ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
         ),
         'Psr\\Http\\Message\\' => 
         array (
@@ -187,10 +200,6 @@ class ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b
         ),
         'P' => 
         array (
-            'Psr\\Log\\' => 
-            array (
-                0 => __DIR__ . '/..' . '/psr/log',
-            ),
             'PHPUnit_' => 
             array (
                 0 => __DIR__ . '/../..' . '/packages',
@@ -215,6 +224,10 @@ class ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b
             array (
                 0 => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib',
             ),
+            'Mail' => 
+            array (
+                0 => __DIR__ . '/..' . '/pear/mail',
+            ),
         ),
         'F' => 
         array (
@@ -228,6 +241,10 @@ class ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b
             'Crypt' => 
             array (
                 0 => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib',
+            ),
+            'Console' => 
+            array (
+                0 => __DIR__ . '/..' . '/pear/console_getopt',
             ),
             'Civi\\' => 
             array (
@@ -250,6 +267,10 @@ class ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b
                 0 => __DIR__ . '/..' . '/pear/auth_sasl',
             ),
         ),
+    );
+
+    public static $fallbackDirsPsr0 = array (
+        0 => __DIR__ . '/..' . '/pear/pear-core-minimal/src',
     );
 
     public static $classMap = array (
@@ -397,10 +418,11 @@ class ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInitc5b733dde8aafbae6e2efa95d0e10a1b::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit5c497419c84e5a596c5f14fa124a8318::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit5c497419c84e5a596c5f14fa124a8318::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit5c497419c84e5a596c5f14fa124a8318::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit5c497419c84e5a596c5f14fa124a8318::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit5c497419c84e5a596c5f14fa124a8318::$classMap;
 
         }, null, ClassLoader::class);
     }

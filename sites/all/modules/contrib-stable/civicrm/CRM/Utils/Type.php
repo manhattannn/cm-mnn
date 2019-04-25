@@ -68,6 +68,16 @@ class CRM_Utils_Type {
     HUGE = 45;
 
   /**
+   * Maximum size of a MySQL BLOB or TEXT column in bytes.
+   */
+  const BLOB_SIZE = 65535;
+
+  /**
+   * Maximum value of a MySQL signed INT column.
+   */
+  const INT_MAX = 2147483647;
+
+  /**
    * Gets the string representation for a data type.
    *
    * @param int $type
@@ -424,6 +434,7 @@ class CRM_Utils_Type {
       'ExtensionKey',
       'Json',
       'Alphanumeric',
+      'Color',
     );
     if (!in_array($type, $possibleTypes)) {
       if ($isThrowException) {
@@ -541,6 +552,12 @@ class CRM_Utils_Type {
 
       case 'Alphanumeric':
         if (CRM_Utils_Rule::alphanumeric($data)) {
+          return $data;
+        }
+        break;
+
+      case 'Color':
+        if (CRM_Utils_Rule::color($data)) {
           return $data;
         }
         break;

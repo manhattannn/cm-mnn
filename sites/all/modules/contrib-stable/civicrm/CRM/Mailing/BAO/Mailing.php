@@ -1366,7 +1366,7 @@ ORDER BY   civicrm_email.is_bulkmail DESC
       }
     }
     elseif ($type == 'url') {
-      if ($this->url_tracking) {
+      if ($this->url_tracking && !empty($this->id)) {
         $data = CRM_Mailing_BAO_TrackableURL::getTrackerURL($token, $this->id, $event_queue_id);
         if (!empty($html)) {
           $data = htmlentities($data, ENT_NOQUOTES);
@@ -2179,12 +2179,10 @@ ORDER BY   civicrm_email.is_bulkmail DESC
     );
 
     $actionLinks = array(CRM_Core_Action::VIEW => array('name' => ts('Report')));
-    if (CRM_Core_Permission::check('view all contacts')) {
-      $actionLinks[CRM_Core_Action::ADVANCED] = array(
-        'name' => ts('Advanced Search'),
-        'url' => 'civicrm/contact/search/advanced',
-      );
-    }
+    $actionLinks[CRM_Core_Action::ADVANCED] = array(
+      'name' => ts('Advanced Search'),
+      'url' => 'civicrm/contact/search/advanced',
+    );
     $action = array_sum(array_keys($actionLinks));
 
     $report['event_totals']['actionlinks'] = array();
