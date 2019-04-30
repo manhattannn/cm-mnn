@@ -1,3 +1,7 @@
+/**
+ * @file
+ * Javascript for views-accordion.
+ */
 Drupal.behaviors.views_accordion = {
   attach: function(context) {
     if(Drupal.settings.views_accordion){
@@ -8,13 +12,19 @@ Drupal.behaviors.views_accordion = {
           var viewname = this.viewname;
           var display = this.display;
 
+          /* Our panel heightStyle setting */
+          var heightStyle = (this.autoheight == 1) ? 'auto' : (this.fillspace == 1 ? 'fill' : 'content');
+
           /* the selectors we have to play with */
           var displaySelector = '.view-id-' + viewname + '.view-display-id-' + display + ' > .view-content';
           var headerSelector = this.header;
 
+          /* The row count to be used if Row to display opened on start is set to random */
+          var row_count = 0;
+
           /* Prepare our markup for jquery ui accordion */
           $(displaySelector + ' ' + headerSelector + ':not(.ui-accordion-header)').each(function(i){
-        	// Hash to use for accordion navigation option.
+            // Hash to use for accordion navigation option.
             var hash = "#" + viewname + "-" + display + "-" + i;
             var $this = $(this);
             var $link = $this.find('a');
@@ -35,20 +45,55 @@ Drupal.behaviors.views_accordion = {
             if (!usegroupheader) {
               $this.siblings().wrapAll('<div></div>');
             }
+            row_count++;
           });
 
-          /* jQuery UI accordion call */
-          $(displaySelector + ':not(.ui-accordion)').accordion({
+          if (this.rowstartopen == 'random') {
+            this.rowstartopen = Math.floor(Math.random() * row_count);
+          }
+
+          var options = {};
+
+          if (this.newoptions) {
+            // Slide was removed from jQuery UI easings, provide sensible fallbacks.
+            if (this.animated === 'slide' || this.animated === 'bounceslide') {
+              this.animated = 'swing';
+            }
+
+            /* jQuery UI accordion options format changed for jquery >= 1.9 */
+            options = {
+              header: headerSelector,
+              active: this.rowstartopen,
+              collapsible: this.collapsible,
+              event: this.event,
+              heightStyle: this.autoheight ? 'auto' : this.fillspace ? 'fill' : 'content',
+            };
+            if (this.animated === false) {
+              options.animate = false;
+            }
+            else {
+              options.animate = {
+                easing: this.animated,
+                duration: this.duration,
+              }
+            }
+          }
+          else {
+            options = {
               header: headerSelector,
               animated: this.animated,
               active: this.rowstartopen,
               collapsible: this.collapsible,
               autoHeight: this.autoheight,
+              heightStyle: heightStyle,
               event: this.event,
               fillSpace: this.fillspace,
               navigation: this.navigation,
               clearstyle: this.clearstyle
-          });
+            };
+          }
+          /* jQuery UI accordion call */
+          $(displaySelector + ':not(.ui-accordion)').accordion(options);
         });
       })(jQuery);
     }
