@@ -12,7 +12,8 @@ CKEDITOR.editorConfig = function(config) {
 
   // [ Left, Center, Right, Justified ]
   config.justifyClasses = [ 'rteleft', 'rtecenter', 'rteright', 'rtejustify' ];
-
+	  //(added by openflows per https://www.drupal.org/node/2624208  Allow all content and do not strip iframes.
+	  config.allowedContent = true;
   // The minimum editor width, in pixels, when resizing it with the resize handle.
   config.resize_minWidth = 450;
 
