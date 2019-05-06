@@ -30,7 +30,7 @@
   <div class="region region-header">
     <div id="block-mnn-branding" class="block block-system block-system-branding-block">
       <a href="http://mnn.org" target="_blank" title="Home" rel="home" class="site-logo">
-        <img src="/sites/all/themes/custom/mnn_2019/images/logo.png" alt="Home" />
+        <img src="/sites/all/themes/mnn_theme/mnn_2019/images/logo.png" alt="Home" />
       </a>
     </div>
   </div>
