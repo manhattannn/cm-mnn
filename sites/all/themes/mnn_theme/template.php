@@ -63,7 +63,7 @@ function mnn_theme_css_alter(&$css) {
 
   // Unset civicrm css file for event register paths
   if ($path == 'civicrm/event/register') {
-    unset($css['sites/all/modules/civicrm/css/civicrm.css']);
+    unset($css['sites/all/modules/contrib-stable/civicrm/css/civicrm.css']);
   }
 
   //print_r($path);
