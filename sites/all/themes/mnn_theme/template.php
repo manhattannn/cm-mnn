@@ -61,7 +61,12 @@ function mnn_theme_form_user_login_block_alter(&$form, &$form_state, $form_id) {
 function mnn_theme_css_alter(&$css) {
   $path = current_path();
 
-  print_r($path);
+  // Unset civicrm css file for event register paths
+  if ($path == 'civicrm/event/register') {
+    unset($css['sites/all/modules/civicrm/css/civicrm.css']);
+  }
+
+  //print_r($path);
   //unset($css['sites/all/modules/civicrm/css/civicrm.css']);
 }
 
