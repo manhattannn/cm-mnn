@@ -1,0 +1,190 @@
+.page-civicrm-event-register {
+  .header-top {
+    background-color: #0c0c0c;
+    display: none;
+    @media (min-width: 960px) {
+      display: grid;
+      grid-template-columns: 1fr repeat(12,minmax(auto,5em)) 1fr;
+      grid-column-gap: 30px;
+      grid-row-gap: 30px;
+      height: 2.625rem;
+    }
+    .region-header-top {
+      position: relative;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: end;
+      -ms-flex-pack: end;
+      justify-content: flex-end;
+      padding: 0.625rem 0;
+
+      @media (min-width: 960px){
+        grid-column: 2/14;
+      }
+
+      .visually-hidden {
+        position: absolute !important;
+        clip: rect(1px,1px,1px,1px);
+        overflow: hidden;
+        height: 1px;
+        width: 1px;
+        word-wrap: normal;
+      }
+
+      ul.menu {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+
+        margin: 0;
+        padding: 0;
+
+        list-style: none outside;
+        text-align: left;
+
+        li.menu-item {
+          padding-top: 0;
+          margin: 0;
+          margin-left: 1.875rem;
+          font-family: "Rubik",sans-serif;
+          font-size: 0.8125rem;
+          text-transform: uppercase;
+          line-height: 1.3125rem;
+          a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+
+            &:focus {
+              outline: 2px solid #fff;
+            }
+
+            &:before {
+              content: "";
+              display: inline-block;
+              position: relative;
+              height: 14px;
+              width: 14px;
+              margin-right: 0.3125rem;
+              top: 0.125rem;
+            }
+            &.link-live-schedule:before {
+              background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/icon-calendar.svg);
+              background-repeat: no-repeat;
+              background-position: center center;
+              background-size: contain;
+            }
+            &.link-producer-login:before {
+              background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/icon-lock.svg);
+              background-repeat: no-repeat;
+              background-position: center center;
+              background-size: contain;
+            }
+            &.link-search:before {
+              content: "";
+              display: inline-block;
+              position: relative;
+              height: 14px;
+              width: 14px;
+              margin-right: 0.3125rem;
+              top: 0.125rem;
+              background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/icon-search.svg);
+              background-repeat: no-repeat;
+              background-position: center center;
+              background-size: contain;
+            }
+          }
+        }
+      }
+    }
+    // google translate
+    .block-mnn-block-translate {
+      position: relative;
+      margin-left: 1.875rem;
+      top: -0.1875rem;
+      .goog-te-gadget {
+        font-family: inherit;
+      }
+      .goog-te-gadget-simple {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        background: transparent;
+        border-color: #666 #333 #333;
+        border-radius: 0.125rem;
+        padding: 0.25rem;
+      }
+    }
+  }
+  header.header {
+    display: grid;
+    grid-template-columns: 1fr repeat(12,minmax(auto,5em)) 1fr;
+    grid-column-gap: 20px;
+    grid-row-gap: 20px;
+    background-color: #fff;
+    @media (min-width: 960px) {
+      grid-column-gap: 30px;
+      grid-row-gap: 30px;
+    }
+    & > * {
+      grid-column: 2/14;
+    }
+    .region-header {
+      position: relative;
+      height: 3.75rem;
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+      justify-content: space-between;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
+      align-items: center;
+
+      @media (min-width: 960px){
+        height: 5.625rem;
+      }
+      .block-system-branding-block {
+        a {
+          display: inline-block;
+        }
+        img {
+          max-height: 1.875rem;
+          width: auto;
+          @media (min-width: 960px) {
+            max-height: 3.125rem;
+          }
+        }
+      }
+    }
+  }
+  .page-header {
+    display: grid;
+    grid-template-columns: 1fr repeat(12,minmax(auto,5em)) 1fr;
+    grid-column-gap: 20px;
+    grid-row-gap: 20px;
+    padding-top: 1.875rem;
+    @media (min-width: 960px) {
+      grid-column-gap: 30px;
+      grid-row-gap: 30px;
+    }
+    .page-header-title {
+      font-size: 1.125rem;
+      grid-column: 2/14;
+      h1 {
+        font-size: 1.25rem;
+        margin-top: 0;
+        margin-bottom: 0.625rem;
+        font-family: "Rubik",sans-serif;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 1.25rem;
+        @media (min-width: 960px){
+          font-size: 2.25rem;
+        }
+      }
+    }
+  }
+}

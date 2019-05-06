@@ -1,0 +1,19 @@
+// basic
+.page-civicrm-event-register {
+  // fonts
+  @import url('https://fonts.googleapis.com/css?family=Rubik:400,500,700|Work+Sans');
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  // general
+  margin: 0;
+  * {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+}
+
+// Atoms
+@import "atoms/header";
+@import "atoms/footer";
+@import "atoms/forms";
