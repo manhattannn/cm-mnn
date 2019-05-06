@@ -1,2 +1,4 @@
 TEST: page--civicrm--event.tpl.php
-<?php print render($page['content']); ?>
+<div class="region region-content">
+  <?php print render($page['content']); ?>  
+</div>
