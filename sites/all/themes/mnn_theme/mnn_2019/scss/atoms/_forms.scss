@@ -4,7 +4,7 @@
   $DARK: #0c0c0c;
 
   // grid
-  .region.region-content {
+  .crm-main-content-wrapper {
     @media (min-width: 1210px) {
       display: grid;
       grid-template-columns: 1fr repeat(12,minmax(auto,5em)) 1fr;
