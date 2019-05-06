@@ -2,7 +2,9 @@
 <?php include 'components/header.tpl.php';?>
 
 <div class="region region-content">
-  <?php print render($page['content']); ?>
+  <div id="block-system-main" class="block block-system">
+    <?php print render($page['content']); ?>
+  </div>
 </div>
 
 <!-- footer -->
