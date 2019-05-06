@@ -23,11 +23,9 @@
     </nav>
   </div>
 </div>
-
 <!-- footer bottom -->
 <footer role="contentinfo" class="footer">
   <div class="region region-footer">
-
     <nav role="navigation" aria-labelledby="block-mainnavigation-2-menu" id="block-mainnavigation-2" class="footer-navigation block block-menu navigation menu--main">
       <h2 class="visually-hidden" id="block-mainnavigation-2-menu">Main navigation</h2>
       <ul class="menu">
@@ -51,7 +49,6 @@
         </li>
       </ul>
     </nav>
-
     <nav role="navigation" aria-labelledby="block-quicklinks-menu" id="block-quicklinks" class="footer-quick-links block block-menu navigation menu--quick-links">
       <h2 id="block-quicklinks-menu">Quick Links</h2>
       <ul class="menu">
@@ -66,7 +63,6 @@
         </li>
       </ul>
     </nav>
-
     <div id="block-locations" class="footer-locations">
       <div class="clearfix footer-locations-contentinfo">
         <h2><a href="https://www.mnn.org/locations">Locations</a></h2>
@@ -78,6 +74,5 @@
         New York, NY 10029</a></p>
       </div>
     </div>
-
   </div>
 </footer>

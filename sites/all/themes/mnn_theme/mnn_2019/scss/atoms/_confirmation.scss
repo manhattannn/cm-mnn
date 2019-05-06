@@ -1,0 +1,213 @@
+.page-civicrm-event-register {
+  // intro
+  div.help {
+    padding: 1.875rem 1.25rem;
+    background-color: #f7faf7;
+    color: $PRIMARY;
+    border-bottom: 0.625rem solid $PRIMARY;
+
+    // putting margin HERE
+    margin-bottom: 1.875rem;
+
+    p {
+      margin-top: 0;
+      margin-bottom: 0;
+      font-weight: 600;
+      margin-left: 35px;
+      position: relative;
+      &:first-of-type {
+        margin-bottom: 0;
+
+        &:before {
+          content: '';
+          vertical-align: super;
+          display: block;
+          position: absolute;
+          left: -35px;
+          background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/icon-success.svg);
+          background-repeat: no-repeat;
+          background-size: 25px 25px;
+          width: 25px;
+          height: 25px;
+        }
+      }
+    }
+
+    a {
+      color: $PRIMARY;
+      text-decoration: underline;
+      &:focus {
+        outline: 2px solid $PRIMARY;
+      }
+    }
+    @media (min-width: 960px) {
+      padding: 3.125rem;
+    }
+  }
+
+  // hide character
+  div#tell-a-friend a span {
+    overflow: hidden;
+    text-indent: -10px;
+    display: block;
+  }
+
+  .header-dark {
+    font-size: 1.25rem;
+    margin-top: 0;
+    margin-bottom: .625rem;
+    font-family: Rubik,sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
+  }
+
+  .spacer {
+    height: 2rem;
+  }
+
+  .crm-group.event_info-group,
+  .crm-group.participant_info-group,
+  .crm-group.participant_role-group,
+  .crm-section.crm-socialnetwork.help {
+    padding: 1.875rem 1.25rem;
+    background-color: #fff;
+    color: $DARK;
+    border-bottom: 0.625rem solid $DARK;
+
+    // putting margin HERE
+    margin-bottom: 1.875rem;
+
+    p {
+      margin-top: 0;
+      margin-bottom: 1.25rem;
+    }
+
+    a {
+      color: $PRIMARY;
+      text-decoration: underline;
+      &:focus {
+        outline: 2px solid $PRIMARY;
+      }
+    }
+    @media (min-width: 960px) {
+      padding: 3.125rem;
+    }
+  }
+
+  .crm-group.event_info-group {
+    .display-block {
+      table.form-layout {
+        width: 100%;
+        tbody {
+          border-top: none;
+          border-bottom: none;
+          width: 100%;
+          tr {
+            border-spacing: 27px 15px;
+            border-bottom: 13px solid transparent;
+
+            @media (max-width: 960px ) {
+              display: flex;
+              flex-direction: column;
+            }
+            td {
+              vertical-align: top;
+              &:first-of-type {
+                font-family: Rubik,sans-serif;
+                font-size: .8125rem;
+                text-transform: uppercase;
+                line-height: 1.3125rem;
+                font-weight: 500;
+              }
+              &:last-of-type {
+                width: 85% !important;
+              }
+            }
+            &:first-of-type {
+              td {
+                text-transform: none;
+                font-family: WorkSans, sans-serif;
+                font-size: 1rem;
+                line-height: normal;
+                font-weight: 400;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  .crm-group.participant_info-group {
+    .bold.crm-profile-view-title {
+      display: none;
+    }
+    .label {
+      color: $DARK !important;
+      font-family: Rubik,sans-serif;
+      font-size: .8125rem;
+      text-transform: uppercase;
+      line-height: 1.3125rem;
+      margin-bottom: .25rem;
+      font-weight: 500;
+    }
+    .crm-public-form-item {
+      margin-bottom: 1rem;
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+    }
+  }
+  .action-link.section.event_info_link-section {
+    margin-bottom: 2rem;
+    a {
+      color: $PRIMARY;
+      text-decoration: underline;
+      font-weight: 600;
+      // hide character
+      overflow: hidden;
+      text-indent: -14px;
+      display: block;
+    }
+  }
+  .action-link.section.iCal_links-section {
+    display: none;
+  }
+  .crm-section.crm-socialnetwork.help {
+    h3.nobackground {
+      font-size: 1.25rem;
+      margin-top: 0;
+      margin-bottom: .625rem;
+      font-family: Rubik,sans-serif;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+    }
+
+    .description a {
+      display: block;
+    }
+
+    .crm-fb-tweet-buttons {
+      display: flex;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+
+      .label:first-of-type {
+        width: 62px;
+        margin-right: .5rem;
+      }
+      .label:nth-of-type(3) {
+        width: 53px !important;
+        height: 30px;
+        overflow: hidden;
+        margin-right: .5rem;
+      }
+      .label:last-of-type {
+        margin-top: -.25rem;
+        width: 63px;
+        overflow: hidden;
+      }
+    }
+  }
+}

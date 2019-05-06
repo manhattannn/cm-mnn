@@ -14,15 +14,19 @@
           <a href="https://cm.mnn.org/search" class="link-search" target="_blank">Search</a>
         </li>
       </ul>
-      <div id="block-googletranslate" class="block block-mnn-block block-mnn-block-translate">
-        <div id="google_translator_element" class="google_translator"></div>
-        <script type="text/javascript">
-          function googleTranslateElementInit() {
-            new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'es,fr'}, 'google_translate_element');
-          }
-        </script>
-      </div>
     </nav>
+    <div id="block-googletranslate" class="block block-mnn-block block-mnn-block-translate">
+      <div id="google_translator_element" class="google_translator"></div>
+      <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+          pageLanguage: 'en',
+          includedLanguages: 'en,es',
+          layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+        }, 'google_translator_element');
+      }
+      </script>
+    </div>
   </div>
 </div>
 <!-- bottom header -->
@@ -35,15 +39,4 @@
     </div>
   </div>
 </header>
-<!-- header title -->
-<div class="page-header">
-  <div class="page-header-title">
-    <h1 class="page-title">
-      <span class="field field--name-title field--type-string field--label-hidden">
-        MNN Registration
-      </span>
-    </h1>
-  </div>
-</div>
-
 <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>

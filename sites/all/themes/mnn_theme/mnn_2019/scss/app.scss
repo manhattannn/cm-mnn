@@ -1,3 +1,7 @@
+// vars
+$PRIMARY: #0a7c07;
+$DARK: #0c0c0c;
+
 // basic
 .page-civicrm-event-register {
   // fonts
@@ -14,6 +18,8 @@
 }
 
 // Atoms
-@import "atoms/header";
-@import "atoms/footer";
 @import "atoms/forms";
+@import "atoms/header";
+@import "atoms/banner";
+@import "atoms/footer";
+@import "atoms/confirmation"

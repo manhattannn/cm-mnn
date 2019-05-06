@@ -1,7 +1,4 @@
 .page-civicrm-event-register {
-  // vars
-  $PRIMARY: #0a7c07;
-  $DARK: #0c0c0c;
 
   // grid
   .region.region-content {
@@ -88,6 +85,10 @@
     @media (min-width: 960px) {
       padding: 3.125rem;
     }
+  }
+
+  div.status, .ok {
+    color: $DARK;
   }
 
   // messages
@@ -235,7 +236,7 @@
     cursor: pointer;
   }
 
-  input[type="submit"], a#checkavailability {
+  input[type="submit"], a#checkavailability, a.button {
     display: inline-block;
     border: 0;
     text-decoration: none !important;

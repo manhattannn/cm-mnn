@@ -114,6 +114,38 @@
         border-color: #666 #333 #333;
         border-radius: 0.125rem;
         padding: 0.25rem;
+        font-size: 10pt;
+        cursor: pointer;
+        zoom: 1;
+
+        &:before {
+          content: "";
+          display: inline-block;
+          position: relative;
+          height: 20px;
+          width: 20px;
+          margin-right: 0.3125rem;
+          background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/logo-google.png);
+          background-repeat: no-repeat;
+          background-position: center center;
+          background-size: contain;
+        }
+        .goog-te-menu-value {
+          color: #fff;
+          span {
+            text-decoration: none;
+          }
+          *:nth-child(3) {
+            border-left: 1px solid #333 !important;
+          }
+        }
+      }
+      .goog-te-gadget-icon {
+        display: none;
+      }
+      img {
+        width: auto;
+        display: inline-block;
       }
     }
   }
