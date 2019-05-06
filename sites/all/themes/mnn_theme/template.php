@@ -55,6 +55,16 @@ function mnn_theme_form_user_login_block_alter(&$form, &$form_state, $form_id) {
   $form['pass']['#required'] = FALSE;
 }
 
+/**
+ * Implements hook_css_alter().
+ */
+function mnn_theme_css_alter(&$css) {
+  $path = current_path();
+
+  print_r($path);
+  //unset($css['sites/all/modules/civicrm/css/civicrm.css']);
+}
+
 /***********************
 Let's load some CSS on specific targets - uncomment to use
 ************************/
