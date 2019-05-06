@@ -27,9 +27,9 @@ function mnn_theme_links($variables) {
  * Implements template_preprocess_page().
  */
 function mnn_theme_preprocess_page(&$vars) {
-  $debug = $variables['theme_hook_suggestions'];
+  $debug = $vars['theme_hook_suggestions'];
   print_r($debug);
-  
+
   $vars['user_menu'] =  theme('links', array('links' => menu_navigation_links('user-menu'), 'attributes' => array('class '=> array('links', 'site-menu'))));
 }
 
