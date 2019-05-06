@@ -57,7 +57,7 @@ stylesheets[all][] = css/responsive-nav.css
 stylesheets[all][] = css/cm.css
 
 ; Add CSS for CiviCRM Events
-stylesheets[all][] = mnn-2019/css/app.min.css
+stylesheets[all][] = mnn_2019/css/app.min.css
 
 ; Built-in conditional stylesheet support has been removed from Zen 7.x-5.x.
 ; Instead, Zen now adds conditional-comment-included classes to the html
