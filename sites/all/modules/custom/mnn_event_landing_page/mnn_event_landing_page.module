@@ -2,7 +2,7 @@
 
 /**
  *@file
- * Creates a custom event landing page that checks for prerequisite 
+ * Creates a custom event landing page that checks for prerequisite
  * requirements for events before allowing a producer to register
  * for an event
  *
@@ -22,17 +22,18 @@ define("EVENT_SIGNUP", 4);
  */
 function mnn_event_landing_page_menu() {
   $items = array();
-  
-  // Implement event landing page 
+
+  // Implement event landing page
   $items[MNN_EVENT_LANDING_PAGE_PATH.'%'] = array(
-      'title' => t("Class Registration"),
-      'page callback'    => 'mnn_event_landing_page_display',    
-      'page arguments' => array(1),
-      //'access arguments' => array('access content'),
-      'access callback' => TRUE,
-      'type' => MENU_CALLBACK,
+    'title' => t("Class Registration"),
+    'page callback'    => 'mnn_event_landing_page_display',
+    'page arguments' => array(1),
+    //'access arguments' => array('access content'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
 	);
-    // Administration settings for class/even landing page
+
+  // Administration settings for class/even landing page
   $items['admin/config/civicrm/event_landing'] = array(
     'title' => 'CiviEvent Class/Event Landing',
     'page callback' => 'drupal_get_form',
@@ -42,8 +43,25 @@ function mnn_event_landing_page_menu() {
     'description' => 'Define settings for class/event landing page.',
     'type' => MENU_NORMAL_ITEM,
   );
-  
+
+  // Route for events interim page.
+  $items['events-interim'] = array(
+    'page callback' => 'mnn_event_landing_page_events_interim',
+    'access callback' => TRUE,
+  );
+
   return $items;
+}
+
+/**
+ * An empty pg callback for 'events-interim' route.
+ *
+ * @see sites/all/themes/mnn_theme/templates/page--events--interim.tpl.php
+ *
+ * @return string $output
+ */
+function mnn_event_landing_page_events_interim() {
+  return ' ';
 }
 
 /**
@@ -57,14 +75,14 @@ function mnn_event_landing_page_admin_settings($form, &$form_state) {
         'Settings for the class/event landing page ' .
         '(/event_landing_page/% - where % is the event ID).') . '</div>',
   );
-   
+
   $form['event_landing_message'] = array(
    '#type' => 'textarea',
    '#title' => t('Class/Event Landing Message'),
    '#rows' => 15,
    '#default_value' => variable_get('event_landing_message'),
    '#description' => '<div>' . t(
-       'Define the message shown for users that atempt to register for an event but do not meet the required prerequites to register for an event. This must be entered in HTML format.') 
+       'Define the message shown for users that atempt to register for an event but do not meet the required prerequites to register for an event. This must be entered in HTML format.')
         . '</div>',
  );
 
@@ -74,40 +92,40 @@ function mnn_event_landing_page_admin_settings($form, &$form_state) {
    '#rows' => 15,
    '#default_value' => variable_get('event_login_message'),
    '#description' => '<div>' . t(
-       'Define the message shown on the login screen when users attempt to register for an event/class with a prerequiste. This must be entered in HTML format.') 
+       'Define the message shown on the login screen when users attempt to register for an event/class with a prerequiste. This must be entered in HTML format.')
         . '</div>',
  );
-  
- return system_settings_form($form);  
+
+ return system_settings_form($form);
 }
 
 
 function mnn_event_landing_page_display ($event_id) {
- 
+
   $html = mnn_event_landing_page_get_title($event_id, $title);
 
   $prereq_status = mnn_event_landing_page_prereq_check($event_id);
   //dpm($prereq_status, '$prereq_status');
 
-  switch ($prereq_status) { 
+  switch ($prereq_status) {
     case PREREQ_FORM:
-      //show them what they need to do before they can register for the event      
+      //show them what they need to do before they can register for the event
       $html .= mnn_event_landing_page_necessary_prereq_get_html(
-                    $eventid, 
+                    $eventid,
                     $title);
       break;
-    
+
     case PREREQ_LOGIN:
       // the user needs to login
       mnn_event_landing_page_user_login($event_id);
       break;
-      
+
     case EVENT_SIGNUP:
       // display the event description for registration
       mnn_event_landing_page_event_url($event_id);
       break;
   }
-  
+
   return $html;
 }
 
@@ -128,79 +146,81 @@ function mnn_event_landing_page_event_url($event_id) {
  */
 function mnn_event_landing_page_is_user_logged_in() {
   global $user;
- 
+
   return $user->uid;
 }
 
 /**
  * Build the html for the event title and prerequesites
- * 
+ *
  * @param type $event_id
  * @param type $title
  * @return string
  */
 function mnn_event_landing_page_get_title($event_id, &$title) {
   $ret = "";
-  
+
   if (civicrm_initialize()) {
     require_once 'api/v3/Event.php';
-     
+
     $params = array('id' => $event_id,
-        'version' => 3, 
+        'version' => 3,
         'sequential' => 1,
         'return' => 'title',
     );
-    $event = civicrm_api('Event', 'get', $params);    
+    $event = civicrm_api('Event', 'get', $params);
 
     $title = $event['values'][0]['title'];
     $ret .= "<h2>".t("Registration for @title",
-         array('@title' => $title))."</h2>";    
-    
+         array('@title' => $title))."</h2>";
+
     return $ret;
   }
 }
 
 /**
- * Redirect the user to the login page with event_landing_page as 
+ * Redirect the user to the login page with event_landing_page as
  * destination
- * 
+ *
  * @param type $event_id
  */
 function mnn_event_landing_page_user_login($event_id) {
-  
-  drupal_goto('', array('query' => array(
-        'destination' => MNN_EVENT_LANDING_PAGE_PATH.$event_id)));
+  drupal_goto('events-interim', array(
+    'query' => array(
+      'destination' => MNN_EVENT_LANDING_PAGE_PATH.$event_id
+    )
+  ));
 }
 
 /**
  * Build html for message that use is missing prerequesites
- * 
+ *
  * @param type $title
  * @return type
  */
 function mnn_event_landing_page_necessary_prereq_get_html($eventid, $title) {
-  
+
   // get from a admin settings
   $ret = "";
 
   $ret .= "<h3>".t("You do not have the required prerequisites to register " .
       " for @title",
 		   array('@title' =>$title))."</h3>";
-  
+
   // if a message has been configured through admin settings
   // use that text
   $landing_message = variable_get('event_landing_message');
   if (!empty($landing_message)) {
     $ret .= $landing_message;
   }
- 
+
   return $ret;
 }
 
 /**
  * Check to see if the user meets the prerequisite requirements for
  * the event
- * 
+ *
  * @param type $event_id
  * @param int $uid = NULL
  * @return boolean
@@ -210,23 +230,23 @@ function mnn_event_landing_page_prereq_check($event_id) {
  * event_type_label is used instead of event_type_name when retrieving
  * and matching the Event Type options. This is because Event Type
  * options were reused and thus the labels and names do not always
- * match one another. For instance, 59th St - Express Studio Production 
- * Certification is the label but Mini Express Studio Workshop is the name 
+ * match one another. For instance, 59th St - Express Studio Production
+ * Certification is the label but Mini Express Studio Workshop is the name
  * stored in the database for value 79. This might be even be different
  * in staging versus live. So only labels of Event Types and labels of the
  * Multiple Choice Options for Prerequisites should correspond.
  */
-  
+
   if (civicrm_initialize()) {
-    
+
     require_once 'api/v3/Event.php';
 
     $prereqs_groups = array();
 
   // ALL EVENTS REQUIRED
-      // event_type_name of each required prerequisite  
+      // event_type_name of each required prerequisite
       $params = array('entity_id' => $event_id, 'version' => 3, 'sequential' => 1,
-            'return.custom_13' => 1,); 
+            'return.custom_13' => 1,);
       $prereqs_all = civicrm_api('CustomValue', 'get', $params);
       //dpm($prereqs_all['values'][0][0], '$prereqs_all');
 
@@ -234,55 +254,55 @@ function mnn_event_landing_page_prereq_check($event_id) {
           $i=0;
           foreach ($prereqs_all['values'][0][0] as $key => $event_type_label) {
 
-    $event_type_value = 
+    $event_type_value =
         mnn_event_landing_page_get_event_type($event_type_label);
-    $prereqs_groups['all'][$i++] = 
+    $prereqs_groups['all'][$i++] =
         mnn_event_landing_page_get_cert_event_type_groups($event_type_value);
 
-          }         
+          }
       }
 
     // AT LEAST ONE EVENT REQUIRED
-    // event_type_name of each prerequisite 
+    // event_type_name of each prerequisite
     $params = array('entity_id' => $event_id, 'version' => 3, 'sequential' => 1,
-          'return.custom_15' => 1,); 
+          'return.custom_15' => 1,);
     $prereqs_one = civicrm_api('CustomValue', 'get', $params);
-    
+
     if (isset($prereqs_one['values'][0][0][0])) {
         $i=0;
         foreach ($prereqs_one['values'][0][0] as $key => $event_type_label) {
-  $event_type_value = 
+  $event_type_value =
       mnn_event_landing_page_get_event_type($event_type_label);
-  
-  $prereqs_groups['one'][$i++] = 
+
+  $prereqs_groups['one'][$i++] =
       mnn_event_landing_page_get_cert_event_type_groups($event_type_value);
-  
-        }          
+
+        }
     }
-    //dpm($prereqs_groups, '$prereqs_groups'); 
-  
- 
+    //dpm($prereqs_groups, '$prereqs_groups');
+
+
     // are prereq  required
     $is_prereq_req = (empty($prereqs_groups)) ?
-      PREREQ_NOT_REQUIRED : PREREQ_REQUIRED;  
-    
+      PREREQ_NOT_REQUIRED : PREREQ_REQUIRED;
+
     // if not required, let user signup
     if ($is_prereq_req == PREREQ_NOT_REQUIRED) {
       return EVENT_SIGNUP;
     }
-    
-    // if required, the user must be logged in 
+
+    // if required, the user must be logged in
     // to see if prereqs requirements met
     $uid = mnn_event_landing_page_is_user_logged_in();
     if ($is_prereq_req == PREREQ_REQUIRED && $uid == 0) {
       return PREREQ_LOGIN;
-    }    
-   
+    }
+
     // get the user's groups
-    $user_groups = mnn_event_landing_page_get_user_groups($uid);   
-    
+    $user_groups = mnn_event_landing_page_get_user_groups($uid);
+
     // DOES THE USER MEET THE REQUIRED PREREQS
-    // must have have participanted in all of the required classes   
+    // must have have participanted in all of the required classes
     if (isset($prereqs_groups['all'])) {
       foreach ($prereqs_groups['all'] as $groups) {
         foreach ($groups as $key => $value) {
@@ -292,7 +312,7 @@ function mnn_event_landing_page_prereq_check($event_id) {
             if ($key == $u_key) {
               $prereq_ok = TRUE;
               break;
-            } 
+            }
           }
 
           //dpm($prereq_ok, '$prereq_ok');
@@ -302,11 +322,11 @@ function mnn_event_landing_page_prereq_check($event_id) {
         }
       }
     }
-    
+
     // DOES THE USER MEET THE INTERCHANGABLE REQUIREMENTS
     // has the contact participated in at least one of the events
 
-              
+
     if (isset($prereqs_groups['one'])) {
       $prereq_ok = FALSE;
       foreach ($prereqs_groups['one'] as $groups) {
@@ -314,8 +334,8 @@ function mnn_event_landing_page_prereq_check($event_id) {
           foreach ($user_groups as $u_key => $u_value) {
             if ($key == $u_key) {
               return EVENT_SIGNUP;
-            } 
-          }          
+            }
+          }
         }
       }
     }
@@ -329,14 +349,14 @@ function mnn_event_landing_page_prereq_check($event_id) {
 /**
  * Implements hook_node_view
  */
-function mnn_event_landing_page_page_alter(&$page) {  
+function mnn_event_landing_page_page_alter(&$page) {
   // Alter home page login if page has been redirected from event_landing_page
   // for login (destination is set to event_landing_page/[event_id]
   if(drupal_is_front_page() && (!empty($_REQUEST['destination']))) {
 
     $action=$_REQUEST['destination'];
     if (substr($action, 0, strpos($action, '/')) == 'event_landing_page' ) {
-      
+
       $prereq_login_message = variable_get('event_login_message');
       $page['content']['system_main']['main']['#markup'] = t($prereq_login_message);
 
@@ -344,8 +364,8 @@ function mnn_event_landing_page_page_alter(&$page) {
           . '<a href="/faq" title="Problems logging in?">'
           . 'Problems logging in?</a></li></ul></div>';
       $page['sidebar_second']['user_login']['links']['#markup'] =  $faq_markup;
-//dpm($page, '$page');            
-    
+//dpm($page, '$page');
+
     }
   }
 }
@@ -353,9 +373,9 @@ function mnn_event_landing_page_page_alter(&$page) {
 /**
  * returns the event_type_value/cert_rule_event_type
  * using the CiviCRM API v.3
- * 
+ *
  * @param varchar $event_type_label
- * @return integer 
+ * @return integer
  */
 function mnn_event_landing_page_get_event_type($event_type_label) {
 
@@ -368,29 +388,29 @@ function mnn_event_landing_page_get_event_type($event_type_label) {
     'label' =>  $event_type_label,
     'return' => 'value', // event_type_value or cert_rule_event_type
   );
-  $result = civicrm_api('OptionValue', 'getvalue', $params); 
+  $result = civicrm_api('OptionValue', 'getvalue', $params);
   //dpm($result, '$result');
-  
+
   return $result;
 }
 
 /**
  * returns the civicrm groups for the certificate/event type
  * @param integer $cert_rule_event_type
- * 
+ *
  * @return array $cert_rules
  */
 function mnn_event_landing_page_get_cert_event_type_groups($cert_rule_event_type) {
   //$cert_rules = entity_load('certification_rule');
   //dpm($cert_rules, '$cert_rules');
   $groups = array();
-  
+
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'certification_rule')
     ->propertyCondition('cert_rule_event_type', $cert_rule_event_type)
     ->addMetaData('account', user_load(1)); // Run the query as user 1.
   $cert_rule_entity = $query->execute();
-  
+
   //dpm($cert_rule_entity, '$cert_rules_ids');
 
   $rows = array();
@@ -399,12 +419,12 @@ function mnn_event_landing_page_get_cert_event_type_groups($cert_rule_event_type
     $cert_rules = entity_load('certification_rule', $cert_rules_ids);
   }
   //dpm($cert_rules, '$cert_rules');
-  
+
   foreach ($cert_rules as $rule) {
-    $group_id = $rule->cert_rule_group; 
-    $groups[$group_id] = 
+    $group_id = $rule->cert_rule_group;
+    $groups[$group_id] =
         isset($groups[$group_id]) ? $groups[$group_id] : array();
-    
+
     // check against the group name
     $params = array(
       'version' => 3,
@@ -414,19 +434,19 @@ function mnn_event_landing_page_get_cert_event_type_groups($cert_rule_event_type
       'return' => 'title',
     );
     $group_title = civicrm_api('Group', 'getvalue', $params);
-    $groups[$group_id][$group_title] = isset($groups[$group_id][$group_title]) ? 
-        $groups[$group_id][$group_title] : array();    
+    $groups[$group_id][$group_title] = isset($groups[$group_id][$group_title]) ?
+        $groups[$group_id][$group_title] : array();
   }
-  
+
   //dpm($groups, '$groups');
   return $groups;
 }
 
 /**
  * returns the user's groups
- * 
+ *
  * @param integer $uid
- * 
+ *
  * @return array $user_groups
  */
 function mnn_event_landing_page_get_user_groups($uid) {
@@ -435,7 +455,7 @@ function mnn_event_landing_page_get_user_groups($uid) {
   $params = array('version' => 3, 'sequential' => 1, 'uf_id' => $uid,);
   $contact = civicrm_api('UFMatch', 'get', $params);
   $contact_id = $contact['values'][0]['contact_id'];
-   
+
   $params = array(
     'version' => 3,
     'sequential' => 1,
@@ -444,28 +464,28 @@ function mnn_event_landing_page_get_user_groups($uid) {
   );
   $results = civicrm_api('GroupContact', 'get', $params);
    //dpm($results, '$results');
-  
+
    $user_groups = array();
-  
+
   foreach ($results['values'] as $group) {
     //dpm($group, '$group');
-    
+
       if (isset($group['group_id'])) {
 $group_id = $group['group_id'];
 
-$u_groups[$group_id] = isset($u_groups[$group_id]) ? 
+$u_groups[$group_id] = isset($u_groups[$group_id]) ?
     $u_groups[$group_id] : array();
 
 $group_title = $group['title'];
-$u_groups[$group_id][$group_title] = isset($u_groups[$group_id][$group_title]) ? 
-        $u_groups[$group_id][$group_title] : array();       
+$u_groups[$group_id][$group_title] = isset($u_groups[$group_id][$group_title]) ?
+        $u_groups[$group_id][$group_title] : array();
       }
 
   }
-  
-  
+
+
   //dpm($u_groups, '$user_groups');
-  
+
   return $u_groups;
-  
+
 }
