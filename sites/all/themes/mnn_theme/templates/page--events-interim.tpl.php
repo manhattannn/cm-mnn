@@ -1,7 +1,9 @@
 <!-- Header -->
 <?php include 'components/header.tpl.php';?>
 
-page--events--interim.tpl.php
+<p>
+  Please login to continue.
+</p>
 
 <?php
   $user_login_form = drupal_get_form('user_login');
