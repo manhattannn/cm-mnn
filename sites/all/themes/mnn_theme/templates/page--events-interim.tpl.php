@@ -5,8 +5,7 @@
   Please login to continue.
 </p>
 
-Event Title:
-<?php print $event_title; ?>
+<h1><?php print $event_title; ?></h1>
 
 <?php
   $user_login_form = drupal_get_form('user_login');
