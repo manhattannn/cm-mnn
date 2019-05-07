@@ -78,7 +78,7 @@ function mnn_event_landing_page_preprocess_page(&$vars) {
   $params = drupal_get_query_parameters();
   print $params['destination'];
 
-  if (in_array($vars['theme_hook_suggestions'], 'page__events_interim')) {
+  if (in_array('page__events_interim', $vars['theme_hook_suggestions'])) {
     print 'from the if';
     $event_id = arg(1);
 
