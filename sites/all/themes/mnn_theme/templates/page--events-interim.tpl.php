@@ -1,11 +1,11 @@
 <!-- Header -->
 <?php include 'components/header.tpl.php';?>
 
+<h1><?php print $event_title; ?></h1>
+
 <p>
   Please login to continue.
 </p>
-
-<h1><?php print $event_title; ?></h1>
 
 <?php
   $user_login_form = drupal_get_form('user_login');
