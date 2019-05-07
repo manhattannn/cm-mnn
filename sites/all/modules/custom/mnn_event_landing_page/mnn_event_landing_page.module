@@ -69,13 +69,13 @@ function mnn_event_landing_page_events_interim() {
  */
 function mnn_event_landing_page_preprocess_page(&$vars) {
   // @todo remove this when done
-  //$debug = $vars['theme_hook_suggestions'];
-  //print_r($debug);
+  $debug = $vars['theme_hook_suggestions'];
+  print_r($debug);
+
+  print arg(0);
+  print arg(1);
 
   if ($vars['theme_hook_suggestions'] == 'page__events_interim') {
-    print arg(0);
-    print arg(1);
-
     $event_id = arg(1);
 
     $vars['event_title'] = mnn_event_landing_page_get_raw_title($event_id);
