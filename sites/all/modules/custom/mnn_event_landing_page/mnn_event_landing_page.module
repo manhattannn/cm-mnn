@@ -69,21 +69,20 @@ function mnn_event_landing_page_events_interim() {
  */
 function mnn_event_landing_page_preprocess_page(&$vars) {
   // @todo remove this when done
-  $debug = $vars['theme_hook_suggestions'];
-  print_r($debug);
+  //$debug = $vars['theme_hook_suggestions'];
+  //print_r($debug);
 
   //print arg(0);
   //print arg(1);
 
-  $params = drupal_get_query_parameters();
-  print $params['destination'];
+  //$params = drupal_get_query_parameters();
+  //print $params['destination'];
 
   if (in_array('page__events_interim', $vars['theme_hook_suggestions'])) {
-    print 'from the if';
-    $event_id = arg(1);
+    $params = drupal_get_query_parameters();
+    $event_id = str_replace('event_landing_page/', '', $params['destination']);
 
     $vars['event_title'] = mnn_event_landing_page_get_raw_title($event_id);
-
   }
 }
 
