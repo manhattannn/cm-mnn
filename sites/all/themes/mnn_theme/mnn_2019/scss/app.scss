@@ -3,7 +3,8 @@ $PRIMARY: #0a7c07;
 $DARK: #0c0c0c;
 
 // basic
-.page-civicrm-event-register {
+.page-civicrm-event-register,
+.page-events-interim {
   // fonts
   @import url('https://fonts.googleapis.com/css?family=Rubik:400,500,700|Work+Sans');
   -webkit-font-smoothing: antialiased;
