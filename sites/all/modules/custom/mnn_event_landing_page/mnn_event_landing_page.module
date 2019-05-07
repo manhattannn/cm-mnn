@@ -65,6 +65,46 @@ function mnn_event_landing_page_events_interim() {
 }
 
 /**
+ * Implements template_preprocess_page().
+ */
+function mnn_event_landing_page_preprocess_page(&$vars) {
+  // @todo remove this when done
+  //$debug = $vars['theme_hook_suggestions'];
+  //print_r($debug);
+
+  if ($vars['theme_hook_suggestions'] == 'page__events_interim') {
+    $event_id = arg(1);
+    
+    $vars['event_title'] = mnn_event_landing_page_get_raw_title($event_id);
+
+  }
+}
+
+/**
+ * Gets the CiviCRM event title from teh event id
+ *
+ * @param type $event_id
+ * @return string
+ */
+function mnn_event_landing_page_get_raw_title($event_id) {
+  $title = FALSE;
+
+  if (civicrm_initialize()) {
+    require_once 'api/v3/Event.php';
+
+    $params = array('id' => $event_id,
+      'version' => 3,
+      'sequential' => 1,
+      'return' => 'title',
+    );
+    $event = civicrm_api('Event', 'get', $params);
+    $title = $event['values'][0]['title'];
+  }
+
+  return $title;
+}
+
+/**
  * Builds the admininstration settings form for class/event landing page.
  */
 function mnn_event_landing_page_admin_settings($form, &$form_state) {
