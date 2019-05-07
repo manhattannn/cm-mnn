@@ -1,5 +1,8 @@
 .page-civicrm-event-register,
 .page-events-interim {
+  p#skip-link {
+    margin: 0;
+  }
   .header-top {
     background-color: #0c0c0c;
     display: none;
