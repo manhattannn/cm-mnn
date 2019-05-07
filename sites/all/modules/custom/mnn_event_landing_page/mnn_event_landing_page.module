@@ -66,6 +66,8 @@ function mnn_event_landing_page_events_interim() {
 
 /**
  * Implements template_preprocess_page().
+ *
+ * Adds CiviCRM pg title to vars for Event interim pg
  */
 function mnn_event_landing_page_preprocess_page(&$vars) {
   if (in_array('page__events_interim', $vars['theme_hook_suggestions'])) {
