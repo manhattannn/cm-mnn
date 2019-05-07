@@ -67,7 +67,13 @@ function mnn_theme_css_alter(&$css) {
 
   // Unset civicrm css file for event register paths
   // @todo convert to array, and include event interim pg.
-  if ($path == 'civicrm/event/register') {
+  $excludes = [
+    'civicrm/event/register',
+    'events-interim',
+  ];
+
+  if (in_array($path, $excludes)) {
+  //if ($path == 'civicrm/event/register') {
     unset($css['sites/all/modules/contrib-stable/civicrm/css/civicrm.css']);
     unset($css[path_to_theme() . '/css/forms.css']);
     unset($css[path_to_theme() . '/css/formalize.css']);
