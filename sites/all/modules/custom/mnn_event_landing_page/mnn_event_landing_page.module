@@ -72,13 +72,14 @@ function mnn_event_landing_page_preprocess_page(&$vars) {
   $debug = $vars['theme_hook_suggestions'];
   print_r($debug);
 
-  print arg(0);
-  print arg(1);
+  //print arg(0);
+  //print arg(1);
 
   $params = drupal_get_query_parameters();
   print $params['destination'];
 
   if ($vars['theme_hook_suggestions'] == 'page__events_interim') {
+    print 'from the if';
     $event_id = arg(1);
 
     $vars['event_title'] = mnn_event_landing_page_get_raw_title($event_id);
