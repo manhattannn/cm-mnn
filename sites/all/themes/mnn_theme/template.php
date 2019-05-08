@@ -71,7 +71,7 @@ function mnn_theme_css_alter(&$css) {
   ];
 
   // Unset CiviCRM and other theme css files that we don't need + cause conflicts
-  if (in_array($path, $excludes)) {
+  if (in_array($path, $excludes) || arg(0) == 'event_landing_page') {
     unset($css['sites/all/modules/contrib-stable/civicrm/css/civicrm.css']);
     unset($css[path_to_theme() . '/css/forms.css']);
     unset($css[path_to_theme() . '/css/formalize.css']);
