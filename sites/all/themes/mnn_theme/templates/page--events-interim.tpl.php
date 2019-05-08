@@ -4,7 +4,7 @@
 <h1><?php print $event_title; ?></h1>
 
 <p>
-  Please login to continue.
+  Please login to register for this event.
 </p>
 
 <?php
