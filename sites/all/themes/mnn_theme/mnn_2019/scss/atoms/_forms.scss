@@ -122,6 +122,9 @@
   }
 
   // labels
+  div.label label {
+    display: inline;
+  }
   label, div.label {
     display: block;
     font-family: "Rubik",sans-serif;
@@ -357,6 +360,9 @@
 
   // Credit card icon select
   .crm-credit_card_type-icons {
+    a {
+      outline: none !important;
+    }
     a:after {
       content: "";
       width: 50px;
@@ -366,15 +372,35 @@
     }
     a.crm-credit_card_type-icon-visa:after {
       background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/visa.svg);
+      margin-right: 1rem;
     }
     a.crm-credit_card_type-icon-mastercard:after {
       background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/mastercard.svg);
+      margin-right: 1rem;
     }
     a.crm-credit_card_type-icon-amex:after {
       background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/amex.svg);
+      margin-right: 1rem;
     }
     a.crm-credit_card_type-icon-discover:after {
       background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/discover.svg);
+    }
+    a span {
+      width: 0;
+      height: 0;
+      display: inline-block;
+      overflow: hidden;
+    }
+  }
+
+  // Fix off spacing
+  .crm-section.billing_country_id-5-section,
+  .crm-section.billing_state_province_id-5-section,
+  .crm-section.billing_postal_code-5-section {
+    &:after {
+      content: "";
+      display: block;
+      height: .5px;
     }
   }
 }
