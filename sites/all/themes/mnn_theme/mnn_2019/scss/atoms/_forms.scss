@@ -403,4 +403,23 @@
       height: .5px;
     }
   }
+
+  // A bit more spacing above submit/continue
+  div#crm-submit-buttons {
+    margin-top: 1rem;
+
+    // Hacky hide ugly >> chars
+    input {
+      padding-left: 38px;
+    }
+    span.crm-button.crm-button-type-upload.crm-button_qf_Register_upload.crm-i-button:after {
+      content: "";
+      height: 2em;
+      width: 30px;
+      background-color: #0a7c07;
+      display: inline-block;
+      margin-left: -42px;
+      margin-bottom: -11px;
+    }
+  }
 }
