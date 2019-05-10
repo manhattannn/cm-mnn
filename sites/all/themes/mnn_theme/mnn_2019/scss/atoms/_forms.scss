@@ -310,4 +310,48 @@
       }
     }
   }
+
+  // Updates radio fields
+  div#editrow-custom_24 .content label {
+    display: inline-block;
+    margin: 0 20px 20px 10px;
+  }
+
+  // price radio fields
+  fieldset#priceset {
+    margin: 0 0 1rem;
+    label {
+      display: inline-block;
+      margin: 0 20px 20px 10px;
+    }
+    .label > label {
+      display: block;
+      margin: 0 !important;
+    }
+  }
+
+  // How did you hear checkboxes
+  div#editrow-custom_27 .content label {
+    display: block;
+    margin: 0 0 20px 0;
+    @media (min-width: 960px) {
+      display: inline-block;
+      margin: 0 20px 20px 10px;
+    }
+  }
+
+  // Merchant logo
+  div#block-block-17 {
+    max-width: none;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem;
+    @media (min-width: 960px) {
+      padding-left: 1.875rem;
+      padding-right: 1.875rem;
+    }
+    @media (min-width: 1210px){
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
 }
