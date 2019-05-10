@@ -122,7 +122,7 @@
   }
 
   // labels
-  label {
+  label, div.label {
     display: block;
     font-family: "Rubik",sans-serif;
     font-size: 0.8125rem;
@@ -352,6 +352,22 @@
     @media (min-width: 1210px){
       padding-left: 0;
       padding-right: 0;
+    }
+  }
+
+  // Credit card icon select
+  .crm-credit_card_type-icons {
+    a.crm-credit_card_type-icon-visa span:after {
+      background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/visa.svg);
+    }
+    a.crm-credit_card_type-icon-mastercard span:after {
+      background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/mastercard.svg);
+    }
+    a.crm-credit_card_type-icon-amex span:after {
+      background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/amex.svg);
+    }
+    a.crm-credit_card_type-icon-discover span:after {
+      background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/discover.svg);
     }
   }
 }
