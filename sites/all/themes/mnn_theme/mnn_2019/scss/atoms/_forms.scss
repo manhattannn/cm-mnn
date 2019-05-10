@@ -332,6 +332,10 @@
       margin: 0 !important;
     }
   }
+  // Extra space above checkboxes
+  div#editrow-custom_27 {
+    margin-top: 2rem;
+  }
 
   // How did you hear checkboxes
   div#editrow-custom_27 .content label {
@@ -420,6 +424,7 @@
       display: inline-block;
       margin-left: -42px;
       margin-bottom: -11px;
+      pointer-events: none;
     }
   }
 }
