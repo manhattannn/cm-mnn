@@ -42,6 +42,8 @@
   // Accordion
   .crm-accordion-wrapper {
     .crm-accordion-header {
+      cursor: pointer;
+
       font-family: Rubik,sans-serif;
       font-size: .8125rem;
       text-transform: uppercase;
