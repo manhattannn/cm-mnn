@@ -99,8 +99,7 @@
   .crm-section.crm-socialnetwork.help {
     h3.nobackground {
       font-size: 1.25rem;
-      margin-top: 0;
-      margin-bottom: .625rem;
+      margin-top: 1.25rem;
       font-family: Rubik,sans-serif;
       font-weight: 700;
       line-height: 1.2;
@@ -127,9 +126,19 @@
         margin-right: .5rem;
       }
       .label:last-of-type {
-        margin-top: -.25rem;
+        margin-top: .95rem;
         width: 63px;
         overflow: hidden;
+      }
+    }
+
+    // Description block
+    .description {
+      padding: 1.875rem 1.25rem;
+      background-color: #fff;
+      color: #0c0c0c;
+      @media (min-width: 960px) {
+        padding: 3.125rem;
       }
     }
   }
