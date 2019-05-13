@@ -34,6 +34,9 @@
     a {
       color: $PRIMARY;
       text-decoration: underline;
+      font-weight: 600;
+      word-wrap: break-word;
+
       &:focus {
         outline: 2px solid $PRIMARY;
       }
