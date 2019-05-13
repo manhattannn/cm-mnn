@@ -17,7 +17,7 @@
     }
   }
   // Restyle abbr
-  abbr.dtend {
+  abbr {
     text-decoration: none;
     border-bottom: none;
     font-weight: 600;
@@ -36,6 +36,100 @@
       text-decoration: underline;
       &:focus {
         outline: 2px solid $PRIMARY;
+      }
+    }
+  }
+  // Accordion
+  .crm-accordion-wrapper {
+    .crm-accordion-header {
+      font-family: Rubik,sans-serif;
+      font-size: .8125rem;
+      text-transform: uppercase;
+      line-height: 1.3125rem;
+      font-weight: 500;
+
+      &:after {
+        background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/icon-minus.svg);
+        content: '';
+        vertical-align: middle;
+        display: inline-block;
+        background-repeat: no-repeat;
+        background-size: 8px 8px;
+        width: 8px;
+        height: 8px;
+        margin: 0 0.3rem 0.3em;
+      }
+    }
+    &.collapsed {
+      .crm-accordion-header {
+        &:after {
+          background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/icon-plus.svg);
+          content: '';
+          vertical-align: middle;
+          display: inline-block;
+          background-repeat: no-repeat;
+          background-size: 8px 8px;
+          width: 8px;
+          height: 8px;
+          margin: 0 0.3rem 0.3em;
+        }
+      }
+    }
+    table.crm-info-panel {
+      margin: 0;
+    }
+  }
+  .action-link.section.event_info_link-section {
+    margin-bottom: 2rem;
+    a {
+      color: $PRIMARY;
+      text-decoration: underline;
+      font-weight: 600;
+      // hide character
+      overflow: hidden;
+      text-indent: -14px;
+      display: block;
+    }
+  }
+
+  // Social links
+  .action-link.section.iCal_links-section {
+    display: none;
+  }
+  .crm-section.crm-socialnetwork.help {
+    h3.nobackground {
+      font-size: 1.25rem;
+      margin-top: 0;
+      margin-bottom: .625rem;
+      font-family: Rubik,sans-serif;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+    }
+
+    .description a {
+      display: block;
+    }
+
+    .crm-fb-tweet-buttons {
+      display: flex;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+
+      .label:first-of-type {
+        width: 62px;
+        margin-right: .5rem;
+      }
+      .label:nth-of-type(3) {
+        width: 53px !important;
+        height: 30px;
+        overflow: hidden;
+        margin-right: .5rem;
+      }
+      .label:last-of-type {
+        margin-top: -.25rem;
+        width: 63px;
+        overflow: hidden;
       }
     }
   }
