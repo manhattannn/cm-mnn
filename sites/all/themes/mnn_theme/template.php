@@ -68,6 +68,7 @@ function mnn_theme_css_alter(&$css) {
 
   $excludes = [
     'civicrm/event/register',
+    'civicrm/event/info',
     'events-interim',
   ];
 
