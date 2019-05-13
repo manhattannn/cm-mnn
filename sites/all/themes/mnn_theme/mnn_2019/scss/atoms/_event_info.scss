@@ -1,0 +1,43 @@
+.page-civicrm-event-info {
+
+  // Intro text
+  .crm-section.event_summary-section {
+    font-weight: 600;
+    margin: 2rem 0;
+  }
+  // Summary block
+  .crm-section.event_description-section.summary {
+    padding: 1.875rem 1.25rem;
+    background-color: #fff;
+    color: #0c0c0c;
+    border-bottom: .625rem solid #0c0c0c;
+    margin-bottom: 1.875rem;
+    @media (min-width: 960px) {
+      padding: 3.125rem;
+    }
+  }
+  // Restyle abbr
+  abbr.dtend {
+    text-decoration: none;
+    border-bottom: none;
+    font-weight: 600;
+  }
+  // Spacing between sections
+  .crm-section > div.label {
+    margin-bottom: .25rem;
+    margin-top: 2rem;
+  }
+  .crm-section table {
+    margin: 0;
+  }
+  .crm-section {
+    a {
+      color: $PRIMARY;
+      text-decoration: underline;
+      &:focus {
+        outline: 2px solid $PRIMARY;
+      }
+    }
+  }
+
+}
