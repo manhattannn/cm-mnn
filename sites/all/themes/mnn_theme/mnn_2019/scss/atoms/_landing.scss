@@ -1,4 +1,11 @@
 .section-event-landing-page {
+  background-color: #eee;
+  font-family: WorkSans,sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: $DARK;
+
   .region.region-content {
     display: grid;
     grid-template-columns: 1fr repeat(12, minmax(auto, 5em)) 1fr;

@@ -5,7 +5,6 @@ body.not-logged-in.section-events-interim {
   font-size: 1rem;
   line-height: 1.5;
   color: $DARK;
-  font-family: WorkSans,sans-serif;
 
   // This page has no container so need to treat p and form as container, and can't use css grid so instead using padding, margin, ect.
   > p, > form {
