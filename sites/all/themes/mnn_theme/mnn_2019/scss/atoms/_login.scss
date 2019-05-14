@@ -1,4 +1,7 @@
 body.not-logged-in.section-events-interim {
+  background-color: #eee;
+
+  // This page has no container so need to treat p and form as container, and can't use css grid so instead using padding, margin, ect.
   > p, > form {
     padding: 0 1.25rem;
     @media (min-width: 960px) {
@@ -12,7 +15,14 @@ body.not-logged-in.section-events-interim {
   > p {
     padding-top: 2.5rem;
   }
-  input {
+  // Don't apply to skip link
+  > p.skip-link {
+    padding: 0;
+  }
+
+  // Username and password inputs
+  input[type='text'],
+  input[type='password'] {
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     border: 2px solid #ddd;
@@ -28,10 +38,13 @@ body.not-logged-in.section-events-interim {
     font: inherit;
 
     @media (min-width: 960px) {
-      min-width: 600px;
+      max-width: 600px;
     }
   }
   label {
+    // Override bold labels
+    font-weight: 400 !important;
+
     display: block;
     font-family: "Rubik Medium",sans-serif;
     font-size: 0.875rem;
@@ -40,7 +53,7 @@ body.not-logged-in.section-events-interim {
     margin-bottom: 0.625rem;
 
     // hiding * and adding it with base 64 svg
-    span.crm-marker {
+    span.form-required {
       color: transparent;
       margin-left: -8px;
 
@@ -59,6 +72,8 @@ body.not-logged-in.section-events-interim {
   }
 
   input[type="submit"] {
+    max-width: 125px;
+
     display: inline-block;
     border: 0;
     text-decoration: none !important;
@@ -70,7 +85,7 @@ body.not-logged-in.section-events-interim {
     background-color: #0a7c07;
     padding: 0.875rem 1.5625rem;
     text-align: center;
-    margin: 0;
+    margin: 1rem 0;
     font-weight: 500;
 
     &:focus {
