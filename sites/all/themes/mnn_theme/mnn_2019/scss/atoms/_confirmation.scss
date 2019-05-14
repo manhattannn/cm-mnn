@@ -55,7 +55,6 @@
   .header-dark {
     font-size: 1.25rem;
     margin-top: 0;
-    margin-bottom: .625rem;
     font-family: Rubik,sans-serif;
     font-weight: 700;
     line-height: 1.2;
@@ -177,7 +176,6 @@
     h3.nobackground {
       font-size: 1.25rem;
       margin-top: 0;
-      margin-bottom: .625rem;
       font-family: Rubik,sans-serif;
       font-weight: 700;
       line-height: 1.2;
@@ -204,10 +202,31 @@
         margin-right: .5rem;
       }
       .label:last-of-type {
-        margin-top: -.25rem;
+        margin-top: .95rem;
         width: 63px;
         overflow: hidden;
       }
     }
+  }
+
+  div#footer_text {
+    a {
+      color: #0a7c07;
+      text-decoration: underline;
+      font-weight: 400;
+
+      @media (max-width: 959px ) {
+        display: block;
+        color: transparent;
+        line-height: .85 !important;
+      }
+    }
+    &:focus {
+      outline: 2px solid $PRIMARY;
+    }
+  }
+
+  div#block-block-17 {
+    padding-top: 0;
   }
 }
