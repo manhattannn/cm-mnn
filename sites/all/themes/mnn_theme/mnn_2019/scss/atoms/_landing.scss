@@ -41,6 +41,22 @@
           padding: 3.125rem;
         }
       }
+      .event_landing {
+        p:nth-of-type(4) {
+          padding: 1.875rem 1.25rem;
+          background-color: #fff;
+          color: #0c0c0c;
+          border-bottom: .625rem solid #0c0c0c;
+          margin-bottom: 1.875rem;
+          @media (min-width: 960px) {
+            padding: 3.125rem;
+          }
+
+          strong {
+            font-weight: 400;
+          }
+        }
+      }
     }
   }
 }
