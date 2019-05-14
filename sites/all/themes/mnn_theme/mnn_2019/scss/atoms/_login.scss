@@ -44,6 +44,14 @@ body.not-logged-in.section-events-interim {
     @media (min-width: 960px) {
       max-width: 600px;
     }
+
+    &:focus {
+      outline: 2px solid #0a7c07;
+    }
+    &.error {
+      outline: 2px solid #f5222d;
+      border: none !important;
+    }
   }
   label {
     // Override bold labels
