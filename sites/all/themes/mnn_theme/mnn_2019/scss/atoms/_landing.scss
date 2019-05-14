@@ -1,4 +1,6 @@
 .section-event-landing-page {
+
+  // Basics
   background-color: #eee;
   font-family: WorkSans,sans-serif;
   font-weight: 400;
@@ -7,6 +9,8 @@
   color: $DARK;
 
   .region.region-content {
+
+    // Put content in grid
     display: grid;
     grid-template-columns: 1fr repeat(12, minmax(auto, 5em)) 1fr;
     grid-column-gap: 20px;
@@ -27,8 +31,16 @@
       a {
         color: #0a7c07;
         text-decoration: underline;
+        word-wrap: break-word;
+
+        &:focus {
+          outline: 2px solid $PRIMARY;
+        }
       }
 
+      // Note there's no wrappers on this page so using nth-of-type for styles, this is not ideal
+
+      // Warning about lack of creds
       h3:first-of-type {
         padding: 1.875rem 1.25rem;
         color: #0c0c0c;
@@ -41,6 +53,8 @@
           padding: 3.125rem;
         }
       }
+
+      // Info block
       .event_landing {
         p:nth-of-type(4) {
           padding: 1.875rem 1.25rem;
@@ -55,6 +69,11 @@
           strong {
             font-weight: 400;
           }
+        }
+
+        // Space before footer
+        p:last-of-type {
+          margin-bottom: 4rem;
         }
       }
     }
