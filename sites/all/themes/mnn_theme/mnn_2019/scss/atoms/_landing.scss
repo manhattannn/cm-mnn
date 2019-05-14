@@ -38,6 +38,16 @@
         }
       }
 
+      h1, h2 {
+        font-size: 1.25rem;
+        font-family: "Rubik",sans-serif;
+        font-weight: 700;
+        line-height: 1.2;
+        @media (min-width: 960px){
+          font-size: 2.25rem;
+        }
+      }
+
       // Note there's no wrappers on this page so using nth-of-type for styles, this is not ideal
 
       // Warning about lack of creds
