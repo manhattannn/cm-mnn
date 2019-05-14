@@ -1,0 +1,27 @@
+.section-event-landing-page {
+  .region.region-content {
+    display: grid;
+    grid-template-columns: 1fr repeat(12, minmax(auto, 5em)) 1fr;
+    grid-column-gap: 20px;
+    grid-row-gap: 20px;
+    background-color: #fff;
+
+    @media (min-width: 960px) {
+      grid-column-gap: 30px;
+      grid-row-gap: 30px;
+    }
+
+    div#block-system-main {
+      grid-column: 2/14;
+
+      img {
+        width: 100%;
+      }
+
+      a {
+        color: #0a7c07;
+        text-decoration: underline;
+      }
+    }
+  }
+}
