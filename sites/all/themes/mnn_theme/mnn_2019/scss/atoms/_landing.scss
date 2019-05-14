@@ -70,7 +70,10 @@
             font-weight: 400;
           }
         }
-
+        // Align list
+        ul {
+          padding: 0 0 0 15px;
+        }
         // Space before footer
         p:last-of-type {
           margin-bottom: 4rem;
