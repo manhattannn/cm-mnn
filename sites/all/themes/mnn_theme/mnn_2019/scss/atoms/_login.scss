@@ -3,7 +3,11 @@ body.not-logged-in.section-events-interim {
 
   // This page has no container so need to treat p and form as container, and can't use css grid so instead using padding, margin, ect.
   > p, > form {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1350px;
     padding: 0 1.25rem;
+
     @media (min-width: 960px) {
       padding-left: 1.875rem;
       padding-right: 1.875rem;
@@ -16,7 +20,7 @@ body.not-logged-in.section-events-interim {
     padding-top: 2.5rem;
   }
   // Don't apply to skip link
-  > p.skip-link {
+  > p#skip-link {
     padding: 0;
   }
 
@@ -71,6 +75,7 @@ body.not-logged-in.section-events-interim {
     }
   }
 
+  // Submit btn slightly different than forms.scss
   input[type="submit"] {
     max-width: 125px;
 
