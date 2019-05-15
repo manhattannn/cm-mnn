@@ -7,7 +7,7 @@ body.not-logged-in.section-events-interim {
   color: $DARK;
 
   // This page has no container so need to treat p and form as container, and can't use css grid so instead using padding, margin, ect.
-  > p, > form {
+  > p, > form, > h1 {
     margin-left: auto;
     margin-right: auto;
     max-width: 1350px;
@@ -22,7 +22,15 @@ body.not-logged-in.section-events-interim {
     padding-bottom: 2.5rem;
   }
   > p {
-    padding-top: 2.5rem;
+    //padding-top: 2.5rem;
+  }
+  > h1 {
+    font-family: Rubik,sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+    @media (min-width: 960px) {
+      font-size: 2.25rem;
+    }
   }
   // Don't apply to skip link
   > p#skip-link {
