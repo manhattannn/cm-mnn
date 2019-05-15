@@ -249,6 +249,20 @@
 
   // For events with confirmation screens
   .crm-event-confirm-form-block {
+    div.help {
+      background-color: #fff;
+      color: $DARK;
+      border-bottom: 0.625rem solid $DARK;
+    }
+    div#intro_text {
+      background-color: #0d0b0b00 !important;
+      border: none !important;
+      padding: 0 !important;
+      margin-top: 4rem;
+    }
+    .messages.status.section.continue_message-section p {
+      margin-top: 1rem;
+    }
     div#crm-submit-buttons {
       margin-bottom: 2rem;
 
@@ -259,7 +273,7 @@
         }
       }
       // Normal padding on these btns
-      input {
+      input.crm-form-submit {
         padding: .875rem 1.5625rem !important;
       }
     }
