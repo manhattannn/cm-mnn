@@ -229,4 +229,35 @@
   div#block-block-17 {
     padding-top: 0;
   }
+
+  // For events with confirmation screens
+  .crm-event-confirm-form-block {
+    div#crm-submit-buttons {
+      margin-bottom: 2rem;
+
+      // Back or Next buttons
+      span.crm-button:first-of-type {
+        @media (min-width: 960px ) {
+          margin-right: 1rem;
+        }
+
+        // Normal padding on these btns
+        input {
+          padding: .875rem 1.5625rem !important;
+        }
+      }
+    }
+
+    .crm-group.event_fees-group {
+      margin-bottom: 2rem;
+      overflow: scroll;
+
+      > table {
+        border-collapse: separate;
+        border-spacing: 20px 0;
+        margin-left: -20px;
+        min-width: 500px;
+      }
+    }
+  }
 }
