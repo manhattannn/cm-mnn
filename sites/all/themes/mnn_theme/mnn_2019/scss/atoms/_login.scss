@@ -122,4 +122,8 @@ body.not-logged-in.section-events-interim {
       cursor: pointer;
     }
   }
+  // Form spacing
+  .form-item.form-type-textfield.form-item-name {
+    margin-top: 2rem;
+  }
 }
