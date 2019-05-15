@@ -214,10 +214,14 @@
       color: #0a7c07;
       text-decoration: underline;
       font-weight: 400;
+    }
+    @media (max-width: 959px ) {
 
-      @media (max-width: 959px ) {
-        display: block;
+      strong {
         color: transparent;
+      }
+      a {
+        display: block;
         line-height: .85 !important;
       }
     }
@@ -230,6 +234,19 @@
     padding-top: 0;
   }
 
+  // Fees table
+  .crm-group.event_fees-group {
+    margin-bottom: 2rem;
+    overflow: scroll;
+
+    > table {
+      border-collapse: separate;
+      border-spacing: 20px 0;
+      margin-left: -20px;
+      min-width: 500px;
+    }
+  }
+
   // For events with confirmation screens
   .crm-event-confirm-form-block {
     div#crm-submit-buttons {
@@ -240,23 +257,10 @@
         @media (min-width: 960px ) {
           margin-right: 1rem;
         }
-
-        // Normal padding on these btns
-        input {
-          padding: .875rem 1.5625rem !important;
-        }
       }
-    }
-
-    .crm-group.event_fees-group {
-      margin-bottom: 2rem;
-      overflow: scroll;
-
-      > table {
-        border-collapse: separate;
-        border-spacing: 20px 0;
-        margin-left: -20px;
-        min-width: 500px;
+      // Normal padding on these btns
+      input {
+        padding: .875rem 1.5625rem !important;
       }
     }
   }
