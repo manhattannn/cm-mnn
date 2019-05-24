@@ -255,9 +255,11 @@
 
       .footer-locations {
         grid-column: span 2;
+        padding: 2.5rem 0.9375rem 5.625rem;
 
         @media (min-width: 960px) {
           grid-column: 7/-1;
+          padding: 3.75rem 3.75rem 5.625rem;
         }
 
         background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/bg-footer-locations.jpg);
@@ -265,7 +267,6 @@
         background-position: center center;
         background-position: top left;
         background-size: cover;
-        padding: 3.75rem 3.75rem 5.625rem;
         min-height: 23.625rem;
 
         position: relative;
