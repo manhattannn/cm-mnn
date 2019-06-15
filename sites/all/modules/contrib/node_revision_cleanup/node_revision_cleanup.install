@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * @file
+ * Install and uninstall functions for the Node Revision Cleanup module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function node_revision_cleanup_uninstall() {
+  module_load_include('module', 'node_revision_cleanup');
+  module_load_include('php', 'node_revision_cleanup', 'includes/NodeRevisionCleanupVariableCRUD');
+  // It may seem a bit odd to not know the name of all of the variables we've
+  // set in the module, but that's because the module uses the variables table
+  // to create numbered job lists for varying content types, if memcache isn't
+  // installed. If memcache is installed, it will expire any entries for this
+  // module automatically.
+  $content_types = node_type_get_types();
+  foreach ($content_types as $content_type_name) {
+    node_revision_cleanup_cruft($content_type_name->type);
+  }
+}
