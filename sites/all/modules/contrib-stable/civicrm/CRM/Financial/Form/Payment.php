@@ -3,7 +3,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 5                                                  |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2018                                |
+ | Copyright CiviCRM LLC (c) 2004-2019                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2018
+ * @copyright CiviCRM LLC (c) 2004-2019
  */
 class CRM_Financial_Form_Payment extends CRM_Core_Form {
 
@@ -38,7 +38,7 @@ class CRM_Financial_Form_Payment extends CRM_Core_Form {
   protected $_paymentProcessorID;
   protected $currency;
 
-  public $_values = array();
+  public $_values = [];
 
   /**
    * @var array
@@ -96,7 +96,7 @@ class CRM_Financial_Form_Payment extends CRM_Core_Form {
    *
    * @return string
    */
-  public function getCurrency($submittedValues = array()) {
+  public function getCurrency($submittedValues = []) {
     return $this->currency;
   }
 

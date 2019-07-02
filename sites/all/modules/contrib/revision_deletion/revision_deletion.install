@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * @file
+ * Install and uninstall functions for the Revision Deletion module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function revision_deletion_uninstall() {
+  // Deleting configuration variables.
+  variable_del('revision_delete_cron');
+  variable_del('revision_delete');
+  variable_del('revision_delete_frequency');
+  variable_del('revision_delete_age');
+  variable_del('revision_delete_list_override');
+  variable_del('revision_delete_list_override_before');
+  variable_del('revision_delete_list_show_notes');
+  variable_del('revision_delete_list_keep_original');
+  variable_del('revision_delete_list_keep_date_last');
+  variable_del('revision_delete_list_keep_current');
+}

@@ -3,7 +3,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 5                                                  |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2018                                |
+ | Copyright CiviCRM LLC (c) 2004-2019                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -28,7 +28,7 @@
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2018
+ * @copyright CiviCRM LLC (c) 2004-2019
  */
 
 /**
@@ -305,7 +305,6 @@ function drush_civicrm_install_validate() {
 
   return TRUE;
 }
-
 
 /**
  * Implementation of command 'civicrm-install'
@@ -718,7 +717,8 @@ function drush_civicrm_upgrade_db() {
 
     // new since CiviCRM 4.1
     if (is_callable(array(
-      $upgrade, 'setPrint'))) {
+      $upgrade, 'setPrint',
+    ))) {
       $upgrade->setPrint(TRUE);
     }
 
@@ -738,7 +738,6 @@ function drush_civicrm_upgrade_db() {
 function drush_civicrm_update_cfg_validate() {
   return _civicrm_init();
 }
-
 
 /**
  * Implementation of command 'civicrm-update-cfg'

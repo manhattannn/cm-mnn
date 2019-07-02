@@ -260,10 +260,17 @@ function mnn_internet_archive_internet_archive_process_remote($files){
     $pathinfo = pathinfo($file);
     $name = $pathinfo['filename'];
 
-    if ($pathinfo['extension'] != 'mpeg4')  {
+    //adding back originl code from before 10/28/2018 - Mark Libkuman 2/20/2019
+    if ($pathinfo['extension'] == 'mp4')  {
       continue;
     }
 
+    //ignoring thumb images
+    if ($pathinfo['extension'] == 'jpg' ||
+	$pathinfo['extension'] == 'JPG')  {
+      continue;
+    }
+    
     $parts = explode('_', $name);
     if ($parts[0] == 'mnn') {
       $project_id = $parts[1];
@@ -274,10 +281,8 @@ function mnn_internet_archive_internet_archive_process_remote($files){
       $episode_number = $parts[1];
     }
 
-    if (!strpos($episode_number, '.TC') > 0) {
-      continue;
-    }
-    $episode_number = str_replace('.TC', '', $episode_number);
+    //adding back originl code from before 10/28/2018 - Mark Libkuman 2/20/2019
+    $episode_number = str_replace('.HD', '', $episode_number);
     if (ctype_digit($project_id) && ctype_digit($episode_number)) {
       $project = node_load($project_id);
       $field = 'field_internet_archive_opt_in';
@@ -424,7 +429,7 @@ function mnn_internet_archive_file_status_value($file) {
     return $statuses['initial'];
   }
   //look up file name from internet archive table
-  $data = internet_archive_load_data($file);
+  $data = internet_archive_load_data($file,NULL);
   $local_status = $data['status'];
   $attempts = $data['attempts'];
   
@@ -447,6 +452,7 @@ function mnn_internet_archive_file_status_value($file) {
       //$return_status = 'failed';
       //changing return value so that we don't delete file
       $return_status = 'queued';
+
     }
     else if ($local_status == ARCHIVE_FAILED) {
       $return_status = 'queued';

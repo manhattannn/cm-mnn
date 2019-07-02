@@ -1,0 +1,13 @@
+name = Revision Deletion
+description = "Enables to delete aging node revisions by bulk."
+core = 7.x
+package = Content
+
+configure = admin/config/content/revision_deletion
+
+; Information added by Drupal.org packaging script on 2017-06-27
+version = "7.x-1.0"
+core = "7.x"
+project = "revision_deletion"
+datestamp = "1498604645"
+
