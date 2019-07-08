@@ -1,0 +1,433 @@
+.page-civicrm-event-register,
+.page-civicrm-event-info {
+
+  // grid
+  .region.region-content {
+    @media (min-width: 1210px) {
+      display: grid;
+      grid-template-columns: 1fr repeat(12,minmax(auto,5em)) 1fr;
+      grid-column-gap: 30px;
+      grid-row-gap: 30px;
+
+      div#block-system-main {
+        grid-column: 2/14;
+      }
+    }
+  }
+
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: $DARK;
+  font-family: "WorkSans",sans-serif;
+  background-color: #eee;
+
+  // hidden
+  div#printer-friendly,
+  .crm-i-button>.crm-i,
+  td.recaptcha_label,
+  div#civicrm-footer,
+  legend,
+  .crm-section>br,
+  div.select2-container,
+  span.crm-error {
+    display: none;
+  }
+
+  // over-ride
+  .form-item, .form-actions {
+    margin-bottom: 0 !important;
+  }
+  select.crm-form-select {
+    display: block !important;
+  }
+  span.crm-error.crm-error-label {
+    display: block !important;
+  }
+
+
+  // container {
+  #crm-container {
+    max-width: none;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem;
+    @media (min-width: 960px) {
+      padding-left: 1.875rem;
+      padding-right: 1.875rem;
+    }
+    @media (min-width: 1210px){
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  // intro
+  div#intro_text {
+    padding: 1.875rem 1.25rem;
+    background-color: #fff;
+    color: $DARK;
+    border-bottom: 0.625rem solid $DARK;
+
+    // putting margin HERE
+    margin-bottom: 1.875rem;
+
+    p {
+      margin-top: 0;
+      margin-bottom: 1.25rem;
+    }
+
+    a {
+      color: $PRIMARY;
+      text-decoration: underline;
+      &:focus {
+        outline: 2px solid $PRIMARY;
+      }
+    }
+    @media (min-width: 960px) {
+      padding: 3.125rem;
+    }
+  }
+
+  div.status, .ok {
+    color: $DARK;
+  }
+
+  // messages
+  div.messages {
+    padding: 20px;
+    background: white;
+    border: none;
+    margin-bottom: 2rem;
+
+    p {
+      margin-top: 0;
+      margin-bottom: 1.25rem;
+    }
+
+    a {
+      color: $PRIMARY;
+      text-decoration: underline;
+      &:focus {
+        outline: 2px solid $PRIMARY;
+      }
+    }
+    @media (min-width: 960px) {
+      padding: 20px 3.125rem;
+    }
+  }
+
+  // fieldset
+  fieldset {
+    padding: 0;
+    border: none;
+  }
+
+  // labels
+  div.label label {
+    display: inline;
+  }
+  label, div.label {
+    display: block;
+    font-family: "Rubik",sans-serif;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    line-height: 1.3125rem;
+    margin-bottom: 0.625rem;
+    font-weight: 500;
+
+    // putting bottom margin here because some imputs are grouped together
+    margin-top: 1rem;
+
+    // hiding * and adding it with base 64 svg
+    span.crm-marker {
+      color: transparent;
+      margin-left: -8px;
+
+      &:after {
+        background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/required.svg);
+        content: '';
+        vertical-align: super;
+        display: inline-block;
+        background-repeat: no-repeat;
+        background-size: 6px 6px;
+        width: 6px;
+        height: 6px;
+        margin: 0 0.3em;
+      }
+    }
+  }
+
+  // descriptions
+  span.description, .content.description {
+    font-size: .85em;
+    display: block;
+    margin-top: -0.5rem;
+
+    max-width: 600px;
+  }
+
+  // inputs
+  input[type='text'],
+  input[type='password'],
+  input[type='date'],
+  input[type='datetime'],
+  input[type='datetime-local'],
+  input[type='month'],
+  input[type='week'],
+  input[type='email'],
+  input[type='number'],
+  input[type='search'],
+  input[type='tel'],
+  input[type='time'],
+  input[type='url'],
+  textarea,
+  select {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    border: 2px solid #ddd;
+    padding: 0.9375rem;
+    font-family: "WorkSans Regular",sans-serif;
+    line-height: 1;
+    height: 3.125rem;
+    background-color: #fff;
+    color: $DARK;
+    border-radius: 0;
+    width: 100%;
+
+    font: inherit;
+    // putting bottom margin here because some imputs are grouped together
+    margin: 0 0 1rem;
+
+    &:focus {
+      outline: 2px solid #0a7c07;
+    }
+    @media (min-width: 960px) {
+      width: auto;
+    }
+    &.error {
+      outline: 2px solid #f5222d;
+      border: none !important;
+    }
+  }
+
+  input[type='text'],
+  input[type='password'] {
+    @media (min-width: 960px) {
+      min-width: 600px;
+    }
+  }
+
+  input#city-Primary,
+  input#postal_code-Primary {
+    @media (min-width: 960px) {
+      min-width: 300px;
+    }
+  }
+
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    font-family: "Rubik",sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    line-height: 1.3125rem;
+    line-height: 1;
+    background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/icon-plus.svg);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-position: calc(100% - 15px) 50%;
+    padding-right: 2.1875rem;
+    cursor: pointer;
+  }
+
+  input[type="submit"], a#checkavailability, a.button {
+    display: inline-block;
+    border: 0;
+    text-decoration: none !important;
+    font-family: "Rubik",sans-serif;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    line-height: 1.3125rem;
+    color: #fff !important;
+    background-color: #0a7c07;
+    padding: 0.875rem 1.5625rem;
+    text-align: center;
+    margin: 0;
+    font-weight: 500;
+
+    &:focus {
+      outline: 2px solid #0c0c0c;
+    }
+    &:hover {
+      text-decoration: underline !important;
+      cursor: pointer;
+    }
+  }
+
+  a#checkavailability {
+    margin-bottom: 1rem;
+    @media (min-width: 960px) {
+      margin-left: 1rem;
+      margin-bottom: unset;
+    }
+  }
+
+  span#msgbox {
+    color: $DARK;
+    padding: .95rem;
+    display: block;
+    max-width: 300px;
+  }
+
+  .crm-button {
+    background: none;
+    margin: 0;
+    padding: 0px;
+    text-decoration: none !important;
+    border: 0px;
+    border-radius:0px;
+  }
+
+  // error messages
+  div.messages.crm-error {
+    background-color: #fff1f0;
+    border: 1px solid #ffa39e;
+
+    //list
+    ul#errorList {
+      margin-top: .5rem;
+    }
+
+    // icon
+    i.crm-i.fa-exclamation-triangle.crm-i-red {
+      color: #f5222d;
+      font-size: 1rem;
+      display: block;
+      margin-bottom: .5rem;
+
+      &:after {
+        content: 'ERROR';
+        font-family: "Rubik",sans-serif;
+        margin-left: 1rem;
+        font-weight: 500;
+        color: $DARK;
+      }
+    }
+  }
+
+  // Updates radio fields
+  div#editrow-custom_24 .content label {
+    display: inline-block;
+    margin: 0 20px 20px 10px;
+  }
+
+  // price radio fields
+  fieldset#priceset {
+    margin: 0 0 1rem;
+    label {
+      display: inline-block;
+      margin: 0 20px 20px 10px;
+    }
+    .label > label {
+      display: block;
+      margin: 0 !important;
+    }
+  }
+  // Extra space above checkboxes
+  div#editrow-custom_27 {
+    margin-top: 2rem;
+  }
+
+  // How did you hear checkboxes
+  div#editrow-custom_27 .content label, .editrow_custom_57-section .content label {
+    display: block;
+    margin: 0 0 20px 0;
+    @media (min-width: 960px) {
+      display: inline-block;
+      margin: 0 20px 20px 10px;
+    }
+  }
+
+  // Merchant logo
+  div#block-block-17 {
+    max-width: none;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem;
+    @media (min-width: 960px) {
+      padding-left: 1.875rem;
+      padding-right: 1.875rem;
+    }
+    @media (min-width: 1210px){
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+
+  // Credit card icon select
+  .crm-credit_card_type-icons {
+    a {
+      outline: none !important;
+    }
+    a:after {
+      content: "";
+      width: 50px;
+      height: 40px;
+      background-size: 50px 40px;
+      display: inline-block;
+    }
+    a.crm-credit_card_type-icon-visa:after {
+      background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/visa.svg);
+      margin-right: 1rem;
+    }
+    a.crm-credit_card_type-icon-mastercard:after {
+      background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/mastercard.svg);
+      margin-right: 1rem;
+    }
+    a.crm-credit_card_type-icon-amex:after {
+      background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/amex.svg);
+      margin-right: 1rem;
+    }
+    a.crm-credit_card_type-icon-discover:after {
+      background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/discover.svg);
+    }
+    a span {
+      width: 0;
+      height: 0;
+      display: inline-block;
+      overflow: hidden;
+    }
+  }
+
+  // Fix off spacing
+  .crm-section.billing_country_id-5-section,
+  .crm-section.billing_state_province_id-5-section,
+  .crm-section.billing_postal_code-5-section {
+    &:after {
+      content: "";
+      display: block;
+      height: .5px;
+    }
+  }
+
+  // A bit more spacing above submit/continue
+  div#crm-submit-buttons {
+    margin-top: 1rem;
+
+    // Hacky hide ugly >> chars
+    input {
+      padding-left: 38px;
+    }
+    span.crm-button.crm-button-type-upload.crm-button_qf_Register_upload.crm-i-button:after {
+      content: "";
+      height: 2em;
+      width: 30px;
+      background-color: #0a7c07;
+      display: inline-block;
+      margin-left: -42px;
+      margin-bottom: -11px;
+      pointer-events: none;
+    }
+  }
+}

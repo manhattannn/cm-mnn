@@ -1,0 +1,30 @@
+// vars
+$PRIMARY: #0a7c07;
+$DARK: #0c0c0c;
+
+// basic
+.page-civicrm-event-register,
+.page-civicrm-event-info,
+.page-events-interim {
+  // fonts
+  @import url('https://fonts.googleapis.com/css?family=Rubik:400,500,700|Work+Sans');
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  // general
+  margin: 0;
+  * {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+}
+
+// Atoms
+@import "atoms/forms";
+@import "atoms/header";
+@import "atoms/banner";
+@import "atoms/footer";
+@import "atoms/confirmation";
+@import "atoms/event_info";
+@import "atoms/login";
+@import "atoms/landing";

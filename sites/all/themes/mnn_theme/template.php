@@ -27,7 +27,12 @@ function mnn_theme_links($variables) {
  * Implements template_preprocess_page().
  */
 function mnn_theme_preprocess_page(&$vars) {
- $vars['user_menu'] =  theme('links', array('links' => menu_navigation_links('user-menu'), 'attributes' => array('class '=> array('links', 'site-menu'))));
+  // @todo remove this when done
+  //$debug = $vars['theme_hook_suggestions'];
+  //print_r($debug);
+  //test
+
+  $vars['user_menu'] =  theme('links', array('links' => menu_navigation_links('user-menu'), 'attributes' => array('class '=> array('links', 'site-menu'))));
 }
 
 function mnn_theme_theme(&$existing, $type, $theme, $path) {
@@ -53,6 +58,28 @@ function mnn_theme_form_user_login_block_alter(&$form, &$form_state, $form_id) {
   // debug($form);
   $form['name']['#required'] = FALSE;
   $form['pass']['#required'] = FALSE;
+}
+
+/**
+ * Implements hook_css_alter().
+ */
+function mnn_theme_css_alter(&$css) {
+  $path = current_path();
+
+  $excludes = [
+    'civicrm/event/register',
+    'civicrm/event/info',
+    'events-interim',
+  ];
+
+  // Unset CiviCRM and other theme css files that we don't need + cause conflicts
+  if (in_array($path, $excludes) || arg(0) == 'event_landing_page') {
+    unset($css['sites/all/modules/contrib-stable/civicrm/css/civicrm.css']);
+    unset($css[path_to_theme() . '/css/forms.css']);
+    unset($css[path_to_theme() . '/css/formalize.css']);
+    unset($css[path_to_theme() . '/css/cm.css']);
+    unset($css[path_to_theme() . '/css/pages.css']);
+  }
 }
 
 /***********************
