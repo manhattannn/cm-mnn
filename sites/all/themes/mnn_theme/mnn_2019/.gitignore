@@ -1,0 +1,10 @@
+# General
+.DS_Store
+.idea
+
+# Gulp/node
+npm-debug.log
+node_modules
+
+# for sass
+.sass-cache

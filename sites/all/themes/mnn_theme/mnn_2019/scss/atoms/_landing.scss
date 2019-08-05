@@ -1,0 +1,94 @@
+.section-event-landing-page {
+
+  // Basics
+  background-color: #eee;
+  font-family: WorkSans,sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: $DARK;
+
+  .region.region-content {
+
+    // Put content in grid
+    display: grid;
+    grid-template-columns: 1fr repeat(12, minmax(auto, 5em)) 1fr;
+    grid-column-gap: 20px;
+    grid-row-gap: 20px;
+
+    @media (min-width: 960px) {
+      grid-column-gap: 30px;
+      grid-row-gap: 30px;
+    }
+
+    div#block-system-main {
+      grid-column: 2/14;
+
+      img {
+        width: 100%;
+      }
+
+      a {
+        color: #0a7c07;
+        text-decoration: underline;
+        word-wrap: break-word;
+
+        &:focus {
+          outline: 2px solid $PRIMARY;
+        }
+      }
+
+      h1, h2 {
+        font-size: 1.25rem;
+        font-family: "Rubik",sans-serif;
+        font-weight: 700;
+        line-height: 1.2;
+        @media (min-width: 960px){
+          font-size: 2.25rem;
+        }
+      }
+
+      // Note there's no wrappers on this page so using nth-of-type for styles, this is not ideal
+
+      // Warning about lack of creds
+      h3:first-of-type {
+        padding: 1.875rem 1.25rem;
+        color: #0c0c0c;
+        border-bottom: .625rem solid #ffa39e;
+        margin-bottom: 1.875rem;
+        font-weight: 400;
+        background-color: #fff1f0;
+
+        @media (min-width: 960px) {
+          padding: 3.125rem;
+        }
+      }
+
+      // Info block
+      .event_landing {
+        p:nth-of-type(4) {
+          padding: 1.875rem 1.25rem;
+          background-color: #fff;
+          color: #0c0c0c;
+          border-bottom: .625rem solid #0c0c0c;
+          margin-bottom: 1.875rem;
+          @media (min-width: 960px) {
+            padding: 3.125rem;
+          }
+
+          strong {
+            font-weight: 400;
+          }
+        }
+        // Align list
+        ul {
+          padding: 0 0 0 15px;
+        }
+        // Space before footer
+        p:last-of-type {
+          margin-bottom: 4rem;
+        }
+      }
+    }
+  }
+}
