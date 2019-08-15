@@ -1,0 +1,37 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function mnn_mailchimp_menu() {
+  $items = array();
+
+  $items['mailchimp/taxonomy/term/%taxonomy_term/rss'] = array(
+    'page callback' => 'mnn_mailchimp_rss',
+    'page arguments' => array(3),
+    'access arguments' => array('access content'),
+    'access callback' => TRUE,
+    'file' => 'mnn_mailchimp.pages.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function mnn_mailchimp_theme($existing, $type, $theme, $path) {
+	$theme = array();
+
+	$theme['mnn_mailchimp_rss'] = array(
+		'template' => 'mnn-mailchimp-rss',
+		'path' => $path . '/templates',
+    'variables' => array(
+      'data' => NULL,
+      'base_feed_url' => NULL,
+      'term_name' => NULL,
+    ),
+	);
+
+	return $theme;
+}

@@ -1,0 +1,3 @@
+name = MNN Mailchimp
+description = Custom RSS Feed for Mailchimp
+core = 7.x
