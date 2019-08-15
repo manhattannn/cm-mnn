@@ -39,7 +39,8 @@ function mnn_mailchimp_rss($term) {
           $field_collection = entity_load('field_collection_item', array($value['value']));
           $idx = $value['value'];
           $field_session_date = $field_collection[$idx]->field_session_date[LANGUAGE_NONE][0]['value'];
-          $pub_date = date('D, d M Y H:i:s T', strtotime($field_session_date));
+          // @TODO we're adding 2 months here, because the DB doesn't have future events
+          $pub_date = date('D, d M Y H:i:s T', strtotime('+2 months', strtotime($field_session_date)));
         }
       }
 
