@@ -8,7 +8,7 @@
 
     <?php foreach($data as $item): ?>
       <item>
-        <title><?php print $item['title']; ?></title>
+        <title><?php print $item['title']; ?> [ NID: <?php print $item['nid']; ?> ]</title>
         <link><?php print $item['link']; ?></link>
         <description><?php print $item['description']; ?></description>
         <pubDate><?php print $item['pub_date']; ?></pubDate>
