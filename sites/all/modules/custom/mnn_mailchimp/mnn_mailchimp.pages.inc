@@ -33,8 +33,15 @@ function mnn_mailchimp_rss($term) {
     $nodes = entity_load('node', $nids);
 
     foreach($nodes as $node) {
-      // @TODO fix pubDate
-      //$pub_date = date('D, d M Y H:i:s T', strtotime($node->field_date_of_first_session->value));
+      // Pubdate
+      if (isset($node->field_civicrm_multiday_session[LANGUAGE_NONE] )) {
+        foreach ($node->field_civicrm_multiday_session[LANGUAGE_NONE] as $key => $value) {
+          $field_collection = entity_load('field_collection_item', array($value['value']));
+          $idx = $value['value'];
+          $field_session_date = $field_collection[$idx]->field_session_date[LANGUAGE_NONE][0]['value'];
+          $pub_date = date('D, d M Y H:i:s T', strtotime($field_session_date));
+        }
+      }
 
       // Media content
       $image = FALSE;
@@ -48,8 +55,7 @@ function mnn_mailchimp_rss($term) {
         'link' => $base_url . '/civicrm/event/register?id=' . $node->field_civievent_id[LANGUAGE_NONE][0]['value'],
         'title' => $node->title,
         'description' => strip_tags($node->body[LANGUAGE_NONE][0]['summary']),
-        //'pub_date' => $pub_date,
-        'pub_date' => $node->field_date_of_first_session->value,
+        'pub_date' => $pub_date,
         'media_content' => $image,
       ];
     }
