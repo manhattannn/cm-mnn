@@ -15,6 +15,8 @@ OUR CUSTOM MIXINS
 ~SPRITES
 ***********/
 @import url(//fonts.googleapis.com/css?family=Roboto+Condensed:400,700);
+@import url("https://fonts.googleapis.com/css?family=Work+Sans&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Rubik&display=swap");
 .social-sprite, .social-facebook, .social-instagram, .social-linkedin, .social-rss, .social-twitter, .social-vimeo, .social-youtube, .youtube a, .vimeo a, .facebook a, .twitter a, .instagram a, .linkedin a {
   background: url('../images/social-scb3fe6f241.png') no-repeat;
 }
@@ -113,11 +115,107 @@ OUR CUSTOM MIXINS
   src: url("../fonts/glyphicons-halflings-regular.eot?#iefix") format("embedded-opentype"), url("../fonts/glyphicons-halflings-regular.woff") format("woff"), url("../fonts/glyphicons-halflings-regular.ttf") format("truetype"), url("../fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular") format("svg");
 }
 
+@font-face {
+  font-family: 'Rubik Black';
+  src: url("/sites/all/themes/mnn_theme/fonts/Rubik-Black.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Rubik Black Italic';
+  src: url("/sites/all/themes/mnn_theme/fonts/Rubik-BlackItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Rubik Bold';
+  src: url("/sites/all/themes/mnn_theme/fonts/Rubik-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Rubik Bold Italic';
+  src: url("/sites/all/themes/mnn_theme/fonts/Rubik-BoldItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Rubik Italic';
+  src: url("/sites/all/themes/mnn_theme/fonts/Rubik-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Rubik Light';
+  src: url("/sites/all/themes/mnn_theme/fonts/Rubik-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Rubik Light Italic';
+  src: url("/sites/all/themes/mnn_theme/fonts/Rubik-LightItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Rubik Medium';
+  src: url("/sites/all/themes/mnn_theme/fonts/Rubik-Medium.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Rubik Medium Italic';
+  src: url("/sites/all/themes/mnn_theme/fonts/Rubik-MediumItalic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'Rubik Regular';
+  src: url("/sites/all/themes/mnn_theme/fonts/Rubik-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'WorkSans Black';
+  src: url("/sites/all/themes/mnn_theme/fonts/WorkSans-Black.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'WorkSans Bold';
+  src: url("/sites/all/themes/mnn_theme/fonts/WorkSans-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'WorkSans Extra Bold';
+  src: url("/sites/all/themes/mnn_theme/fonts/WorkSans-ExtraBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'WorkSans Extra Light';
+  src: url("/sites/all/themes/mnn_theme/fonts/WorkSans-ExtraLight.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'WorkSans Light';
+  src: url("/sites/all/themes/mnn_theme/fonts/WorkSans-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'WorkSans Medium';
+  src: url("/sites/all/themes/mnn_theme/fonts/WorkSans-Medium.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'WorkSans Regular';
+  src: url("/sites/all/themes/mnn_theme/fonts/WorkSans-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'WorkSans SemiBold';
+  src: url("/sites/all/themes/mnn_theme/fonts/WorkSans-SemiBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'WorkSans Thin';
+  src: url("/sites/all/themes/mnn_theme/fonts/WorkSans-Thin.ttf") format("truetype");
+}
+
 /***********
 ~GENERIC
 ***********/
 body {
-  color: #949494;
+  color: #0c0c0c;
+  background-color: #eeeeee;
 }
 body a {
   color: #000;
