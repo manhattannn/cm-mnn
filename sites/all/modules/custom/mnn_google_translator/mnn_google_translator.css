@@ -1,7 +1,7 @@
-#block-google-translator-active-languages {
-  float: right;
-  width: 25%
-}
+/*#block-google-translator-active-languages {*/
+/*  float: right;*/
+/*  width: 25%*/
+/*}*/
 #block-google-translator-active-languages .goog-te-combo {
   display: block;
 }
