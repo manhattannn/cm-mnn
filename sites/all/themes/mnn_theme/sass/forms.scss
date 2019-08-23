@@ -5,6 +5,28 @@
 
 @import "base";
 
+input[type="text"],
+input[type="password"],
+input[type="date"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="month"], input[type="week"],
+input[type="email"], input[type="number"],
+input[type="search"], input[type="tel"],
+input[type="time"], input[type="url"], textarea, select {
+
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  border: 2px solid #ddd;
+  padding: 0.9375rem;
+  font-family: "WorkSans Regular", sans-serif;
+  line-height: 1;
+  height: 3.125rem;
+  background-color: #fff;
+  color: #0c0c0c;
+  border-radius: 0;
+  width: 100%;
+}
 /* IMporting some boostrap elements */
 
 [class^="icon-"], [class*=" icon-"] {
