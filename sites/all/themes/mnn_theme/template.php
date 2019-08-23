@@ -80,6 +80,7 @@ function mnn_theme_css_alter(&$css) {
     unset($css[path_to_theme() . '/css/cm.css']);
     unset($css[path_to_theme() . '/css/pages.css']);
   }
+  unset($css['sites/all/modules/contrib-dev/google_translator/theme/google_translator.css']);
 }
 
 /***********************
