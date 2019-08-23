@@ -14,3 +14,43 @@
   display: inline;
   margin-left: 4px;
 }
+/* Copyright 2019 Google Inc. All Rights Reserved. */
+.goog-te-banner-frame {
+  left:0px;
+  top:0px;
+  height:39px;
+  width:100%;
+  z-index:10000001;
+  position:fixed;
+  border:none;
+  border-bottom:1px solid #6b90da;
+  margin:0;
+  -moz-box-shadow:0 0 8px 1px #999999;
+  -webkit-box-shadow:0 0 8px 1px #999999;
+  box-shadow:0 0 8px 1px #999999;
+  _position:absolute
+}
+.goog-te-menu-frame {
+  z-index:10000002;
+  position:fixed;
+  border:none;
+  -moz-box-shadow:0 3px 8px 2px #999999;
+  -webkit-box-shadow:0 3px 8px 2px #999999;
+  box-shadow:0 3px 8px 2px #999999;
+  _position:absolute
+}
+.goog-te-ftab-frame {
+  z-index:10000000;
+  border:none;
+  margin:0
+}
+.goog-te-gadget {
+  font-family:arial;
+  font-size:11px;
+  color:#666;
+  white-space:nowrap
+}
+.goog-te-gadget img {
+  vertical-align:middle;
+  border:none
+}
