@@ -236,9 +236,10 @@ body img {
 }
 
 html, body, button, input, select, textarea {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1em;
-  line-height: 150%;
+  font-family: "WorkSans Regular",sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 h1, h2, h3, h4, h5 {
@@ -267,12 +268,6 @@ h5 {
   min-width: 300px;
 }
 
-.navigation {
-  float: left;
-  width: 100%;
-  padding: 15px 0;
-}
-
 @media (max-width: 400px) {
   ul.primary li, ul.secondary li {
     float: none;
@@ -297,6 +292,15 @@ h1 {
 
 .breadcrumb {
   margin: 0 0 10px 0;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  width: 1px;
+  height: 1px;
+  word-wrap: normal;
 }
 
 /***********
