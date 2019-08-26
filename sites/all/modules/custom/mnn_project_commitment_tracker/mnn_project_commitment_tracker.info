@@ -1,0 +1,9 @@
+name = mnn_project_commitment_tracker
+package = MNN Custom
+description = "Creates reports to track how many shows a project submits in a time period to ensure they are meeting their requirements as producers, shows with different repeat schedules (weekly, monthly, etc.) have different commitment numbers to meet"
+
+core = 7.x
+files[] = mnn_project_commitment_tracker.module
+
+
+
