@@ -226,11 +226,13 @@ function mnn_event_landing_page_get_title($event_id, &$title) {
  */
 function mnn_event_landing_page_user_login($event_id) {
   //
+if (stristr($_SERVER["REQUEST_URI"], "event")) {
   drupal_goto('events-interim', array(
     'query' => array(
       'destination' => MNN_EVENT_LANDING_PAGE_PATH.$event_id
     )
   ));
+}
 }
 
 /**

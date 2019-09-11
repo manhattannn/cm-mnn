@@ -656,7 +656,6 @@ function internet_archive_harvest_file_names_from_views() {
 
   //GET ALL THE FIELDS THAT THAT WILL PUSH DATA TO INTERNET ARCHIVE
   $archive_fields = internet_archive_fields();
-
   //GLOBAL SET IN internet_archive_fields()
   global $archive_fields_info;
   
@@ -668,19 +667,25 @@ function internet_archive_harvest_file_names_from_views() {
 
   //LOOP OVER EACH VIEW THAT CAN HARVEST ENTITY FIELDS THAT ARE CONFIGURED TO
   //PUSH DATA TO Archive.org
+
+//print "1";
+
   foreach ($views as $view_name => $info) {
+//watchdog('openflows-debug', '<pre>' . print_r($view_name) . '</pre>');
+//print "2";
     $harvest_results = views_get_view_result($view_name);
 
     if (count($harvest_results) > 0) {
+// print "3";
       //FIND THE FIELDS THAT HAVE OUR FILE INFO
       foreach ($archive_fields as $field_name => $field_info) {
 	
-	foreach ($harvest_results[0] as $key => $info) {
-	  if ("field_" . $field_name == $key) {
-	    $field_keys_by_type[$field_info['type']][$field_name] = $key;
-	    break;
-	  }
-	}
+      	foreach ($harvest_results[0] as $key => $info) {
+      	  if ("field_" . $field_name == $key) {
+      	    $field_keys_by_type[$field_info['type']][$field_name] = $key;
+      	    break;
+      	  }
+      	}
       }    
 
       //IF WE DONT FIND A FIELD KEY TO GRAB FILE INFO THEN THIS VIEW IS
