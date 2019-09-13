@@ -331,10 +331,10 @@ aside.sidebars {
   .sidebar {
     padding-bottom: 20px;
     h2 {
-      font-size: 14px;
-      text-transform: uppercase;
-      color: $greyer;
-      margin: 0;
+      //font-size: 14px;
+      //text-transform: uppercase;
+      //color: $greyer;
+      //margin: 0;
       clear: both;
     }
     @include breakpoint ($breakpoint-large-width) {
