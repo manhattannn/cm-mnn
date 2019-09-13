@@ -2,18 +2,7 @@
   <div role="region" class="header-top">
     <div class="region region-header-top">
       <nav role="navigation" aria-labelledby="block-headertop-menu" id="block-headertop" class="block block-menu navigation menu--header-top">
-        <h2 class="visually-hidden" id="block-headertop-menu">Header Top</h2>
-        <ul class="menu">
-          <li class="menu-item">
-            <a href="https://cm.mnn.org/watch/tv-schedule" class="link-live-schedule" target="_blank">Live Schedule</a>
-          </li>
-          <li class="menu-item">
-            <a href="https://cm.mnn.org/user" class="link-producer-login" target="_blank">Producer Login</a>
-          </li>
-          <li class="menu-item">
-            <a href="https://cm.mnn.org/search" class="link-search" target="_blank">Search</a>
-          </li>
-        </ul>
+        <?php print render($header_nav); ?>
       </nav>
       <div id="block-googletranslate" class="block block-mnn-block block-mnn-block-translate">
         <?php
@@ -107,7 +96,6 @@
 </div><!-- /#page -->
 <div class="wrapper footer">
   <div class="inside">
-    <?php print render($page['footer']); ?>
     <!-- footer top -->
     <div role="region" class="footer-top">
       <div class="region region-footer-top">
@@ -144,62 +132,11 @@
 
     </div>
     <!-- end footer top -->
-    <footer role="contentinfo" class="footer">
-      <div class="region region-footer">
-        <nav role="navigation" aria-labelledby="block-mainnavigation-2-menu" id="block-mainnavigation-2" class="footer-navigation block block-menu navigation menu--main">
-          <h2 class="visually-hidden" id="block-mainnavigation-2-menu">Main navigation</h2>
-          <ul class="menu">
-            <li class="menu-item menu-item--collapsed">
-              <a href="/watch" class="primary-item-watch" data-drupal-link-system-path="node/46">Watch</a>
-            </li>
-            <li class="menu-item menu-item--collapsed">
-              <a href="/create" data-drupal-link-system-path="node/47">Create</a>
-            </li>
-            <li class="menu-item menu-item--collapsed">
-              <a href="/learn" data-drupal-link-system-path="node/1650">Learn</a>
-            </li>
-            <li class="menu-item menu-item--collapsed">
-              <a href="/blog" data-drupal-link-system-path="node/39">Blog</a>
-            </li>
-            <li class="menu-item menu-item--collapsed">
-              <a href="/watch/programs" title="MNN's Program pages" data-drupal-link-system-path="node/1629">Programs</a>
-            </li>
-            <li class="menu-item menu-item--collapsed">
-              <a href="/locations" data-drupal-link-system-path="node/1628">Locations</a>
-            </li>
-            <li class="menu-item menu-item--collapsed">
-              <a href="/about" data-drupal-link-system-path="node/1993">About</a>
-            </li>
-          </ul>
-        </nav>
-        <nav role="navigation" aria-labelledby="block-quicklinks-menu" id="block-quicklinks" class="footer-quick-links block block-menu navigation menu--quick-links">
-          <h2 id="block-quicklinks-menu">Quick Links</h2>
-          <ul class="menu">
-            <li class="menu-item">
-              <a href="/watch/tv-schedule" data-drupal-link-system-path="node/1627">TV Schedule</a>
-            </li>
-            <li class="menu-item">
-              <a href="/learn/orientation" data-drupal-link-system-path="node/50">Orientation</a>
-            </li>
-            <li class="menu-item">
-              <a href="/create/producer-resources-video-tutorials" data-drupal-link-system-path="node/1641">Producer Resources</a>
-            </li>
-          </ul>
-        </nav>
-        <div id="block-locations" class="footer-locations block block-block-content block-block-content1ec35d76-1015-48fe-afe5-e1231eb2ef80">
-          <div class="clearfix text-formatted field field--name-body field--type-text-with-summary field--label-hidden field__item"><h2><a href="/locations">Locations</a></h2>
-            <h3><a href="/59th-street-studios">59th Street Studios</a></h3>
-            <p><a title="Get Directions from Google Maps" href="https://goo.gl/maps/i8hUWGyuPD72" target="_blank">537 West 59th Street<br>
-                New York, NY 10019</a></p>
-            <h3><a href="/mnn-el-barrio-firehouse-community-media-center-0">El Barrio Firehouse</a></h3>
-            <p><a title="Get Directions from Google Maps" href="https://goo.gl/maps/ZnXtnMrkrWz" target="_blank">175 E 104th Street<br>
-                New York, NY 10029</a></p>
-          </div>
-
-        </div>
-
-      </div>
-
-    </footer>
+<!--    <footer role="contentinfo" class="footer">-->
+<!--      <div class="region region-footer">-->
+    <?php print render($page['footer']); ?>
+<!--      </div>-->
+<!---->
+<!--    </footer>-->
   </div>
 </div>
