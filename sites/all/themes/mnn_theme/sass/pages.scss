@@ -110,7 +110,8 @@ ul.menu {
   background-position: center center;
   background-size: contain;
 }
-.menu--header-top ul.menu li a.link-producer-login::before {
+.menu--header-top ul.menu li a.link-producer-login::before,
+.menu--header-top ul.menu li a.link-producer-schedule::before {
   background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/icon-lock.svg);
   background-repeat: no-repeat;
   background-position: center center;
