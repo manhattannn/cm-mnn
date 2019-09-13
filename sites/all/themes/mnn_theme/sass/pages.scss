@@ -913,7 +913,24 @@ table td[class*=col-],table th[class*=col-]{position:static;float:none;display:t
   color: #101010;
 }
 
+.msgwrapper {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  h2 {
+    color: #f3f0f0;
+  }
 
+  a {
+    color: #f3f0f0;
+    &:active, &:visited, &:hover {
+      color: #f3f0f0;
+    }
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
 // social links
 .menu--social-links {
   margin-bottom: 1.25rem;
