@@ -1150,3 +1150,17 @@ table td[class*=col-],table th[class*=col-]{position:static;float:none;display:t
 }
 // end subscribe
 // end footer
+
+article.view-mode-ful, #crm-main-content-wrapper /*.crm-section, #crm-main-content-wrapper table*/  {
+  margin-bottom: 1rem;
+  background-color: #fff;
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #fff;
+}
+
+#crm-main-content-wrapper div.action-link.section {
+  display: flex;
+  justify-content: flex-end;
+
+}
