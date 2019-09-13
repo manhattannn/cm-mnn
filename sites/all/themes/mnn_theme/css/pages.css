@@ -269,7 +269,8 @@ ul.menu {
   background-size: contain;
 }
 
-.menu--header-top ul.menu li a.link-producer-login::before {
+.menu--header-top ul.menu li a.link-producer-login::before,
+.menu--header-top ul.menu li a.link-producer-schedule::before {
   background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/icon-lock.svg);
   background-repeat: no-repeat;
   background-position: center center;
@@ -1849,6 +1850,24 @@ table td[class*=col-], table th[class*=col-] {
   color: #101010;
 }
 
+.msgwrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.msgwrapper h2 {
+  color: #f3f0f0;
+}
+.msgwrapper a {
+  color: #f3f0f0;
+}
+.msgwrapper a:active, .msgwrapper a:visited, .msgwrapper a:hover {
+  color: #f3f0f0;
+}
+.msgwrapper a:hover {
+  text-decoration: underline;
+}
+
 .menu--social-links {
   margin-bottom: 1.25rem;
 }
@@ -2054,4 +2073,17 @@ table td[class*=col-], table th[class*=col-] {
 .footer-subscribe form input.button:focus {
   outline: 2px solid #fff;
   text-decoration: underline;
+}
+
+article.view-mode-ful, #crm-main-content-wrapper {
+  margin-bottom: 1rem;
+  background-color: #fff;
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #fff;
+}
+
+#crm-main-content-wrapper div.action-link.section {
+  display: flex;
+  justify-content: flex-end;
 }
