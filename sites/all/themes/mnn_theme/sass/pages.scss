@@ -101,24 +101,28 @@ ul.menu {
   font-size: 0.875rem;
   text-transform: uppercase;
   line-height: 1.3125rem;
+  a:hover {
+    text-decoration: underline;
+    border-bottom: 0;
+  }
 }
 
 
 .menu--header-top ul.menu li a.link-live-schedule::before {
-  background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/icon-calendar.svg);
+  background-image: url(/sites/all/themes/mnn_theme/images/icons/icon-calendar.svg);
   background-repeat: no-repeat;
   background-position: center center;
   background-size: contain;
 }
 .menu--header-top ul.menu li a.link-producer-login::before,
 .menu--header-top ul.menu li a.link-producer-schedule::before {
-  background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/icon-lock.svg);
+  background-image: url(/sites/all/themes/mnn_theme/images/icons/icon-lock.svg);
   background-repeat: no-repeat;
   background-position: center center;
   background-size: contain;
 }
 .menu--header-top ul.menu li a.link-upload-media::before {
-  background-image: url(/sites/all/themes/mnn_theme/mnn_2019/images/icon-upload.svg);
+  background-image: url(/sites/all/themes/mnn_theme/images/icons/icon-upload.svg);
   background-repeat: no-repeat;
   background-position: center center;
   background-size: contain;
