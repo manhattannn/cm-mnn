@@ -177,6 +177,33 @@ li a.active {
   list-style-image: none;
 }
 
+ul.staff-links {
+  list-style: none outside;
+  text-align: left;
+  font-size: 1.125rem;
+}
+ul.staff-links li {
+  display: inline;
+  list-style-type: none;
+  margin: 0 0 0 10px;
+}
+ul.staff-links li a::after {
+  content: '\2219';
+  display: inline-block;
+  position: relative;
+  left: 0.5rem;
+  height: 0.5rem;
+  width: 0.5rem;
+}
+ul.staff-links li:first-child a::before {
+  content: '\2219';
+  display: inline-block;
+  position: relative;
+  right: 0.5rem;
+  height: 0.5rem;
+  width: 0.5rem;
+}
+
 @media (max-width: 550px) {
   .region-navigation {
     height: 85px;

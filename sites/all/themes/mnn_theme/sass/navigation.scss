@@ -84,6 +84,43 @@ li a.active {
   }
 }
 
+ul.staff-links {
+  list-style: none outside;
+  text-align: left;
+  font-size: 1.125rem;
+ li {
+   display: inline;
+   list-style-type: none;
+   margin: 0 0 0 10px;
+
+    a::after {
+      content: '\2219';
+      display: inline-block;
+      position: relative;
+     // top: -0.0625rem;
+      left: 0.5rem;
+    //  background-image: url(/sites/all/themes/mnn_theme/images/icons/icon-plus.svg);
+    //  background-repeat: no-repeat;
+    //  background-position: center center;
+      height: 0.5rem;
+      width: 0.5rem;
+     }
+   &:first-child {
+     a::before {
+       content: '\2219';
+       display: inline-block;
+       position: relative;
+       // top: -0.0625rem;
+       right: 0.5rem;
+       //  background-image: url(/sites/all/themes/mnn_theme/images/icons/icon-plus.svg);
+       //  background-repeat: no-repeat;
+       //  background-position: center center;
+       height: 0.5rem;
+       width: 0.5rem;
+     }
+   }
+  }
+}
 
 
 .region-navigation {
