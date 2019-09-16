@@ -1760,7 +1760,7 @@ table td[class*=col-], table th[class*=col-] {
     background-position: top left;
     background-size: cover;
     padding: 3.75rem 3.75rem 5.625rem;
-    min-height: 23.625rem;
+    min-height: 20rem;
   }
 }
 @media (min-width: 1210px) {
