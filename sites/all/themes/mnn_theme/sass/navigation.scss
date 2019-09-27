@@ -193,7 +193,9 @@ ul.primary {
 .block-superfishmain {
   width: auto;
 }
-
+.block-superfishmain.contextual-links-region {
+  position: unset;
+}
 .block-superfishmain .sf-accordion-toggle.sf-style-none > a.sf-expanded span {
   background-image: url(/sites/all/themes/mnn_theme/images/icons/icon-nav-close.svg);
   background-repeat: no-repeat;
@@ -226,7 +228,7 @@ ul.primary {
   background-color: #fff;
   padding: 1.25rem;
   position: absolute;
-  left: -1.25rem !important;
+  left: -40px !important;
   top: 100% !important;
   width: calc(100% + 40px);
   font-family: "Rubik Medium", sans-serif;
