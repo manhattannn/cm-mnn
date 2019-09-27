@@ -235,6 +235,18 @@ body img {
   display: block;
 }
 
+/*
+ * style external links
+ * If this is too much we could use a class
+ */
+body a[target="_blank"]:after {
+  font-family: 'Glyphicons Halflings';
+  content: " \e164";
+  font-size: 0.75rem;
+  display: inline-block;
+  padding-left: 6px;
+}
+
 html, body, button, input, select, textarea {
   font-family: "WorkSans Regular",sans-serif;
   font-weight: 400;

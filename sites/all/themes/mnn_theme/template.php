@@ -39,7 +39,7 @@ function mnn_theme_preprocess_page(&$vars) {
   //print_r($debug);
   //test
 
-  $vars['user_menu'] =  theme('links', array('links' => menu_navigation_links('user-menu'), 'attributes' => array('class '=> array('links', 'site-menu'))));
+  //$vars['user_menu'] =  theme('links', array('links' => menu_navigation_links('user-menu'), 'attributes' => array('class '=> array('links', 'site-menu'))));
 
   $header_menu_tree = menu_tree_all_data('menu-header-menu');
   $vars['header_nav'] = menu_tree_output($header_menu_tree);
