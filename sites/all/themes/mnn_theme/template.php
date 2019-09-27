@@ -53,6 +53,8 @@ function mnn_theme_preprocess_page(&$vars) {
 
 /*
  * Implements template_preprocess_region()
+ * we use this to manage the visibility of a block by role
+ * when we are placing the block manually
  */
 function mnn_theme_preprocess_region(&$vars) {
   if (strpos($vars['region'], 'footer') === 0) {
@@ -189,3 +191,4 @@ function mnn_theme_preprocess_menu_link(&$variables) {
 //    }
   }
 }
+
