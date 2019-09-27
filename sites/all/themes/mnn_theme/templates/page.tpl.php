@@ -14,7 +14,7 @@
       </div>
     </div>
   </div>
-  <div class="wrapper header">
+  <div class="wrapper">
     <!-- new header -->
     <header role="banner" class="header" id="header">
       <div class="header__region region region-header">
