@@ -120,8 +120,8 @@ function mnn_multiday_event_get_small_dates($entity){
     }
     
     
-    $value .= $timerange . ', ' . implode(' & ', array_keys($info['days'])) .
-      ', '. $month_day;
+    $value .= $month_day . ' | ' . implode(' & ', array_keys($info['days'])) .
+      ' | '. $timerange;
   }
   return $value;
 }
