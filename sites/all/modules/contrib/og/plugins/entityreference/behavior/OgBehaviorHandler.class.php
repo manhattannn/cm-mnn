@@ -280,6 +280,10 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
       $instance['field_mode'] = $field_mode;
       $valid_ids = entityreference_get_selection_handler($field, $instance, $entity_type, $entity)->validateReferencableEntities($ids);
 
+      // patch fixes issue with invalid reference nodes
+      global $hacked_valid_ids;
+      $valid_ids = $hacked_valid_ids;
+
       if ($invalid_entities = array_diff($ids, $valid_ids)) {
         foreach ($invalid_entities as $id) {
           $new_errors[$field_mode][] = array(
