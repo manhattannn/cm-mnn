@@ -186,9 +186,14 @@ function mnn_theme_preprocess_menu_link(&$variables) {
   if ($variables["element"]["#original_link"]["menu_name"] == 'menu-header-menu') {
     $linkclass = 'link-' . str_replace(' ', '-', drupal_strtolower($variables["element"]["#title"]));
     $variables['element']['#localized_options']['attributes']['class'][] = $linkclass;
+
 //    if ($variables["element"]["#title"] == "Live Schedule") {
 //      $variables['element']['#localized_options']['attributes']['class'][] = "link-live-schedule";
 //    }
+    $menupath = $variables['element']['#href'];
+    If ($menupath == 'user' && user_is_logged_in()) {
+      $variables['element']['#title'] = 'My dashboard';
+    }
   }
 }
 
