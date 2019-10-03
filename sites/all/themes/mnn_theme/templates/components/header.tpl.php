@@ -8,7 +8,7 @@
           <a href="https://cm.mnn.org/watch/tv-schedule" class="link-live-schedule" target="_blank">Live Schedule</a>
         </li>
         <li class="menu-item">
-          <a href="https://cm.mnn.org/" class="link-producer-login" target="_blank">Producer Login</a>
+          <a href="https://cm.mnn.org/user" class="link-producer-login" target="_blank">Producer Login</a>
         </li>
         <li class="menu-item">
           <a href="https://cm.mnn.org/search" class="link-search" target="_blank">Search</a>

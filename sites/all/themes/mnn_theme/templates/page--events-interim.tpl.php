@@ -4,7 +4,10 @@
 <h1><?php print $event_title; ?></h1>
 
 <p>
-  Please login to register for this event.
+  You need to login to register for this class. If you haven't yet attended Orientation, you must do so before taking a class. You can see upcoming Orientations <a href="https://www.mnn.org/get-know-mnn-orientations" target="_blank">here.</a>
+</p>
+<p>
+If you have attended orientation and don't yet have a user account, please <a href="https://www.mnn.org/contact" target="_blank">contact us.</a>
 </p>
 
 <?php
