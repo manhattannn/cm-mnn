@@ -248,7 +248,7 @@ function internet_archive_send($config, $file_info) {
   $index = 0;
   $bucket_exists = FALSE;
   $start = strtotime('now');
-  $max_run_time = 60 * 10;
+  $max_run_time = 60 * 100;
     
   // There is a delay on archive.org regarding bucket creation.. so we check
   // every x seconds
