@@ -116,10 +116,12 @@ function cm_crew_connect_role_positions($mapping) {
   $roles_result = db_query($sql);
 
   while($role = $roles_result->fetchObject()) {
+
     if (!cm_crew_connect_user_has_role(array($role->name))) {
       continue;
+  
     }
-
+  
     if (isset($mapping[$role->name])) {
       foreach($mapping[$role->name] as $position) {
 	if (!$is_first) {
@@ -133,6 +135,7 @@ function cm_crew_connect_role_positions($mapping) {
       }
     }
   }
+  dsm($positions);
   return $positions;
 }
 

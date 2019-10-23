@@ -99,7 +99,9 @@ function cm_crew_connect_search_page() {
   $users = cm_crew_connect_other_crew_producers();
   $mapping = cm_crew_connect_role_position_mapping();
   $positions = cm_crew_connect_role_positions($mapping);
-  
+//   dsm($users,"users");
+//   dsm($mapping, "mapping");
+//   dsm($positions, "positions");
   $ret = views_embed_view('crew_connect_search', 'page', $users, $positions);
 
   cm_crew_connect_override_messages();

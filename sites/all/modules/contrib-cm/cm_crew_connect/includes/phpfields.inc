@@ -66,7 +66,7 @@ function cm_crew_connect_add_request_field($row) {
 // http://cm-testing.mnn.openflows.com/node/779714/delete?destination=admin/cm_crew_connect/search
 function cm_crew_connect_delete_request_field($row, $view) {
 
-  If ($view->name == 'crew_connect_search' 
+  if ($view->name == 'crew_connect_search' 
       && $view->current_display == 'page_1') {
 
       if ($row->nid_1) {
@@ -135,9 +135,10 @@ function cm_crew_connect_applicant_name($row) {
       $applicant_name = cm_crew_connect_get_display_name($application->uid);
       return $applicant_name;
     }
+  return 'none';
   }
 
-  return '';
+
 }
 
 

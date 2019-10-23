@@ -36,11 +36,11 @@ function mnn_theme_preprocess_page(&$vars) {
 }
 
 function mnn_theme_theme(&$existing, $type, $theme, $path) {
-//   $hooks['user_login_block'] = array(
-//     'template' => 'templates/user-login-block',
-//     'render element' => 'form',
-//   );
-//   return $hooks;
+   $hooks['user_login_block'] = array(
+     'template' => 'templates/user-login-block',
+     'render element' => 'form',
+   );
+   return $hooks;
  }
 function mnn_theme_preprocess_user_login_block(&$vars) {
   $vars['name'] = render($vars['form']['name']);

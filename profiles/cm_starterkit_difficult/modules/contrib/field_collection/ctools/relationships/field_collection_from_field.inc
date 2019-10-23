@@ -29,6 +29,7 @@ function field_collection_field_collection_from_field_get_child($plugin, $parent
  */
 function field_collection_field_collection_from_field_get_children($plugin, $parent) {
 
+  $plugins = array();
   $instances_info = field_info_instances();
   if (isset($instances_info['field_collection_item'])) {
     $field_collection_items = $instances_info['field_collection_item'];
@@ -42,10 +43,10 @@ function field_collection_field_collection_from_field_get_children($plugin, $par
         $child_plugin['title'] = t(
           '!label field collection (!field_name) from !entity_type (!bundle)',
           array(
-          '!label' => $instance['label'],
-          '!field_name' => $instance['field_name'],
-          '!entity_type' => $instance['entity_type'],
-          '!bundle' => $instance['bundle']
+            '!label' => $instance['label'],
+            '!field_name' => $instance['field_name'],
+            '!entity_type' => $instance['entity_type'],
+            '!bundle' => $instance['bundle'],
           )
         );
         $restrictions = array('type' => array($instance['bundle']));
@@ -77,7 +78,7 @@ function field_collection_field_collection_from_field_context($context, $conf) {
   if (isset($entity->{$plugin_info['field_name']})) {
 
     $items = field_get_items($plugin_info['entity_type'], $entity, $plugin_info['field_name']);
-    if (isset($items[$delta]['value'])) {
+    if (!empty($items) && isset($items[$delta]['value'])) {
       $field_collection_item = field_collection_item_load($items[$delta]['value']);
     }
 
