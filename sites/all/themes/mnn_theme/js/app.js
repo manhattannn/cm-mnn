@@ -21,7 +21,7 @@
   $(window).resize(function(){
 
     timer = setTimeout(function(){
-      
+
         $('#superfish-1-accordion > li > a.menuparent').on('click', function(event) {
 
             // Making sure the buttons does not exist already.
