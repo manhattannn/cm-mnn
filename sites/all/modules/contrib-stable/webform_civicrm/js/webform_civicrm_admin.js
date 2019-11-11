@@ -17,13 +17,13 @@ var wfCiviAdmin = (function ($, D) {
     var context = $(id);
     switch (op) {
       case 'all':
-        $('input:enabled:checkbox', context).prop('checked', true);
+        $('input:enabled:checkbox', context).not('.dynamic-custom-checkbox input').prop('checked', true);
         $('select:enabled[multiple] option, select:enabled option[value="create_civicrm_webform_element"]', context).each(function() {
           $(this).prop('selected', true);
         });
         break;
       case 'none':
-        $('input:enabled:checkbox', context).prop('checked', false);
+        $('input:enabled:checkbox', context).not('.dynamic-custom-checkbox input').prop('checked', false);
         $('select:enabled:not([multiple])', context).each(function() {
           if ($(this).val() === 'create_civicrm_webform_element') {
             $('option', this).each(function() {
@@ -37,7 +37,7 @@ var wfCiviAdmin = (function ($, D) {
         $('select:enabled[multiple] option', context).prop('selected', false);
         break;
       case 'reset':
-        $('input:enabled:checkbox', context).each(function() {
+        $('input:enabled:checkbox', context).not('.dynamic-custom-checkbox input').each(function() {
           $(this).prop('checked', $(this).prop('defaultChecked'));
         });
         $('select:enabled option', context).each(function() {
@@ -63,13 +63,13 @@ var wfCiviAdmin = (function ($, D) {
     for (i in events) {
       var splitstr = events[i].split('-');
       if (events.length === 1) {
-        info['eventid'] = splitstr[0];
+        info.eventid = splitstr[0];
       }
       if (i == 0) {
-        info['eventtype'] = splitstr[1];
+        info.eventtype = splitstr[1];
       }
-      else if (info['eventtype'] !== splitstr[1]) {
-        info['eventtype'] = '0';
+      else if (info.eventtype !== splitstr[1]) {
+        info.eventtype = '0';
       }
     }
 
@@ -107,21 +107,21 @@ var wfCiviAdmin = (function ($, D) {
       $('option', this).not('[value="0"],[value="create_civicrm_webform_element"]').remove();
       for (var i in D.settings.webform_civicrm.rTypes) {
         var t = D.settings.webform_civicrm.rTypes[i];
-        var reciprocal = (t['label_a_b'] != t['label_b_a'] && t['label_b_a'] || t['type_a'] != t['type_b']);
-        if ( (t['type_a'] == contact_a['type'] || !t['type_a'])
-          && (t['type_b'] == contact_b['type'] || !t['type_b'])
-          && ($.inArray(t['sub_type_a'], contact_a['sub_type']) > -1 || !t['sub_type_a'])
-          && ($.inArray(t['sub_type_b'], contact_b['sub_type']) > -1 || !t['sub_type_b'])
+        var reciprocal = (t.label_a_b != t.label_b_a && t.label_b_a || t.type_a != t.type_b);
+        if ( (t.type_a == contact_a.type || !t.type_a) &&
+          (t.type_b == contact_b.type || !t.type_b) &&
+          ($.inArray(t.sub_type_a, contact_a.sub_type) > -1 || !t.sub_type_a) &&
+          ($.inArray(t.sub_type_b, contact_b.sub_type) > -1 || !t.sub_type_b)
         ) {
-          $(this).append('<option value="'+t['id']+(reciprocal ? '_a">' : '_r">')+t['label_a_b']+'</option>');
+          $(this).append('<option value="' + t.id + (reciprocal ? '_a">' : '_r">') + t.label_a_b + '</option>');
         }
-        if (reciprocal
-          && (t['type_a'] == contact_b['type'] || !t['type_a'])
-          && (t['type_b'] == contact_a['type'] || !t['type_b'])
-          && ($.inArray(t['sub_type_a'], contact_b['sub_type']) > -1 || !t['sub_type_a'])
-          && ($.inArray(t['sub_type_b'], contact_a['sub_type']) > -1 || !t['sub_type_b'])
+        if (reciprocal &&
+          (t.type_a == contact_b.type || !t.type_a) &&
+          (t.type_b == contact_a.type || !t.type_b) &&
+          ($.inArray(t.sub_type_a, contact_b.sub_type) > -1 || !t.sub_type_a) &&
+          ($.inArray(t.sub_type_b, contact_a.sub_type) > -1 || !t.sub_type_b)
         ) {
-          $(this).append('<option value="'+t['id']+'_b">'+t['label_b_a']+'</option>');
+          $(this).append('<option value="' + t.id + '_b">' + t.label_b_a + '</option>');
         }
       }
       $(this).val(selected_option).change();
@@ -165,15 +165,15 @@ var wfCiviAdmin = (function ($, D) {
         }
       });
       types[c] = {
-            type: $('#edit-'+c+'-contact-type').val(),
+        type: $('#edit-' + c + '-contact-type').val(),
         sub_type: sub_type
       };
     }
-    return types
+    return types;
   }
 
   // Trim a string and strip html
-  function CheckLength(str) {
+  function checkLength(str) {
     str = D.checkPlain(str);
     if (str.length > 40) {
       str = str.substr(0, 38) + '...';
@@ -192,7 +192,7 @@ var wfCiviAdmin = (function ($, D) {
 
   // Return the label of contact #c
   function getContactLabel(c) {
-    return CheckLength($('input[name=' + c + '_webform_label]', '#wf-crm-configure-form').val());
+    return checkLength($('input[name=' + c + '_webform_label]', '#wf-crm-configure-form').val());
   }
 
   function showHideParticipantOptions(speed) {
@@ -272,7 +272,7 @@ var wfCiviAdmin = (function ($, D) {
       });
       $('fieldset#edit-st-message', context).once('wf-civi').drupalSetSummary(function (context) {
         if ($('[name="toggle_message"]', context).is(':checked')) {
-          return CheckLength($('#edit-message', context).val());
+          return checkLength($('#edit-message', context).val());
         }
         else {
           return Drupal.t('- None -');
@@ -280,7 +280,7 @@ var wfCiviAdmin = (function ($, D) {
       });
       $('fieldset#edit-prefix', context).once('wf-civi').drupalSetSummary(function (context) {
         var label = $('[name="prefix_known"]', context).val() || $('[name="prefix_unknown"]', context).val();
-        return CheckLength(label) || Drupal.t('- None -');
+        return checkLength(label) || Drupal.t('- None -');
       });
       $('#edit-participant, #edit-contribution', context).once('wf-civi').drupalSetSummary(function (context) {
         return $('select:first option:selected', context).text();
@@ -351,7 +351,7 @@ var wfCiviAdmin = (function ($, D) {
       // Show/hide 'Not you?' message settings
       if ($('#edit-toggle-message').not(':checked')) {
         $('#edit-st-message .form-item-message').hide();
-      };
+      }
       $('#edit-toggle-message', context).once('wf-civi').change(function() {
         if ($(this).is(':checked')) {
           $('#edit-message').prop('disabled', false);
@@ -362,6 +362,29 @@ var wfCiviAdmin = (function ($, D) {
           $('#edit-st-message .form-item-message').hide('fast');
         }
       }).change();
+
+      //
+      function handleDynamicCustom() {
+        var $fieldset = $(this).closest('fieldset'),
+          checked = $(this).is(':checked');
+        if (checked) {
+          pub.selectReset('all', $fieldset);
+        }
+        $('input, select', $fieldset).not(this).prop('disabled', checked).each(function() {
+          var name = $(this).attr('name');
+          // Hidden element ensures value gets posted back when checkbox is disabled
+          if (checked) {
+            $fieldset.append('<input type="hidden" name="' + name + '" value="create_civicrm_webform_element"/>');
+          } else {
+            $('input[type=hidden][name="'+name+'"]', $fieldset).remove();
+          }
+        });
+        if (!checked) {
+          pub.selectReset('reset', $fieldset);
+        }
+        $('.web-civi-js-select', $fieldset).css('visibility', checked ? 'hidden' : '');
+      }
+      $('.dynamic-custom-checkbox input', context).once('wf-civi-dynamic').each(handleDynamicCustom).change(handleDynamicCustom);
 
       $('select[id*=contact-type], select[id*=contact-sub-type]', context).once('wf-civi-relationship').change(function() {
         relationshipOptions();
@@ -421,7 +444,7 @@ var wfCiviAdmin = (function ($, D) {
             var cl = clas[c].split('-');
             if (cl[1] == 'icon') {
               if (cl[0] == 'contact') {
-                name = 'name="' + (i + 1) + '_contact_type"'
+                name = 'name="' + (i + 1) + '_contact_type"';
               }
               $('#wf-crm-configure-form .vertical-tab-button a').eq(i).prepend('<span class="civi-icon '+cl[2]+'" '+name+'> </span>');
             }
@@ -470,7 +493,7 @@ var wfCiviAdmin = (function ($, D) {
 
       // Membership constraints
       $('select[name$=_membership_num_terms]', context).once('crm-mem-date').change(function(e, type) {
-        var $dateWrappers = $(this).parent().siblings('[class$="-date"]');
+        var $dateWrappers = $(this).parent().siblings('[class$="-date"]').not('[class$="-status-override-end-date"]');
         if ($(this).val() == '0') {
           $dateWrappers.show();
           if (type !== 'init') {
@@ -481,6 +504,14 @@ var wfCiviAdmin = (function ($, D) {
           $dateWrappers.hide().find('input').prop('checked', false);
         }
       }).trigger('change', 'init');
+      $('select[name$=_membership_status_id]', context).once('crm-mem-date').change(function(e) {
+        $target = $(this).parent().siblings('[class$="membership-status-override-end-date"]');
+        if ($(this).val() == '0') {
+          $target.hide().find('input').prop('checked', false);
+        } else {
+          $target.show();
+        }
+      }).change();
 
       function billingMessages() {
         var $pageSelect = $('[name=civicrm_1_contribution_1_contribution_contribution_page_id]');
@@ -501,7 +532,7 @@ var wfCiviAdmin = (function ($, D) {
         }
         else {
           $('.wf-crm-billing-email-alert').remove();
-          billingEmailMsg && billingEmailMsg.close && billingEmailMsg.close();
+          if (billingEmailMsg && billingEmailMsg.close) billingEmailMsg.close();
         }
         // Info about paid events/memberships
         $('.wf-crm-paid-entities-info').remove();

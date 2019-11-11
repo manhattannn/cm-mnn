@@ -76,7 +76,6 @@ class CRM_Core_PrevNextCache_Redis implements CRM_Core_PrevNextCache_Interface {
       $this->redis->hSet($dataKey, $entity_id, $data);
     }
 
-    $dao->free();
     return TRUE;
   }
 
@@ -250,7 +249,15 @@ class CRM_Core_PrevNextCache_Redis implements CRM_Core_PrevNextCache_Interface {
     foreach ($this->redis->zRange($allKey, -1, -1, TRUE) as $lastElem => $lastScore) {
       $maxScore = $lastScore;
     }
-    return array($allKey, $dataKey, $selKey, $maxScore);
+    return [$allKey, $dataKey, $selKey, $maxScore];
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function cleanup() {
+    // Redis already handles cleaning up stale keys.
+    return;
   }
 
 }

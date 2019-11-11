@@ -62,7 +62,6 @@ class CRM_Utils_ReCAPTCHA {
     return self::$_singleton;
   }
 
-
   /**
    * Check if reCaptcha settings is avilable to add on form.
    */
@@ -98,11 +97,10 @@ class CRM_Utils_ReCAPTCHA {
       require_once 'packages/recaptcha/recaptchalib.php';
     }
 
-    // See if we are using SSL
-    if (CRM_Utils_System::isSSL()) {
-      $useSSL = TRUE;
-    }
-    $html = recaptcha_get_html($config->recaptchaPublicKey, $error, $useSSL);
+    // Load the Recaptcha api.js over HTTPS
+    $useHTTPS = TRUE;
+
+    $html = recaptcha_get_html($config->recaptchaPublicKey, $error, $useHTTPS);
 
     $form->assign('recaptchaHTML', $html);
     $form->assign('recaptchaOptions', $config->recaptchaOptions);
@@ -119,6 +117,19 @@ class CRM_Utils_ReCAPTCHA {
         'g-recaptcha-response',
         ts('Please go back and complete the CAPTCHA at the bottom of this form.')
       );
+    }
+  }
+
+  /**
+   * Enable ReCAPTCHA on Contribution form
+   *
+   * @param CRM_Core_Form $form
+   */
+  public static function enableCaptchaOnForm(&$form) {
+    $captcha = CRM_Utils_ReCAPTCHA::singleton();
+    if ($captcha->hasSettingsAvailable()) {
+      $captcha->add($form);
+      $form->assign('isCaptcha', TRUE);
     }
   }
 

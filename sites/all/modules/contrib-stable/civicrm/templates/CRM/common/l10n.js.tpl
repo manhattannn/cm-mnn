@@ -30,6 +30,8 @@
   CRM.config.userFramework = {$config->userFramework|@json_encode};
   CRM.config.resourceBase = {$config->userFrameworkResourceURL|@json_encode};
   CRM.config.lcMessages = {$config->lcMessages|@json_encode};
+  CRM.config.locale = {$locale|@json_encode};
+  CRM.config.cid = {$cid|@json_encode};
   $.datepicker._defaults.dateFormat = CRM.config.dateInputFormat = {$config->dateInputFormat|@json_encode};
   CRM.config.timeIs24Hr = {if $config->timeInputFormat eq 2}true{else}false{/if};
   CRM.config.ajaxPopupsEnabled = {$ajaxPopupsEnabled|@json_encode};
@@ -40,7 +42,7 @@
   CRM.config.entityRef = $.extend({ldelim}{rdelim}, {$entityRef|@json_encode}, CRM.config.entityRef || {ldelim}{rdelim});
 
   // Initialize CRM.url and CRM.formatMoney
-  CRM.url({ldelim}back: '{crmURL p="*path*" q="*query*" h=0 fb=1}', front: '{crmURL p="*path*" q="*query*" h=0 fe=1}'{rdelim});
+  CRM.url({ldelim}back: '{crmURL p="civicrm-placeholder-url-path" q="civicrm-placeholder-url-query=1" h=0 fb=1}', front: '{crmURL p="civicrm-placeholder-url-path" q="civicrm-placeholder-url-query=1" h=0 fe=1}'{rdelim});
   CRM.formatMoney('init', false, {$moneyFormat});
 
   // Localize select2
@@ -112,12 +114,12 @@
 
   // use civicrm notifications when there are errors
   params.invalidHandler = function(form, validator) {
+    // If there is no container for display then red text will still show next to the invalid fields
+    // but there will be no overall message. Currently the container is only available on backoffice pages.
     if ($('#crm-notification-container').length) {
       $.each(validator.errorList, function(k, error) {
         $(error.element).crmError(error.message);
       });
-    } else {
-      alert({/literal}"{ts escape='js'}Please review and correct the highlighted fields before continuing.{/ts}"{literal});
     }
   };
 
@@ -126,5 +128,11 @@
     params: {},
     functions: []
   };
+
+  // Load polyfill
+  if (!('Promise' in window)) {
+    CRM.loadScript(CRM.config.resourceBase + 'bower_components/es6-promise/es6-promise.auto.min.js');
+  }
+
 })(jQuery);
 {/literal}

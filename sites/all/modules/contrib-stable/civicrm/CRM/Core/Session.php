@@ -32,8 +32,9 @@ class CRM_Core_Session {
 
   /**
    * Cache of all the session names that we manage.
+   * @var array
    */
-  static $_managedNames = NULL;
+  public static $_managedNames = NULL;
 
   /**
    * Key is used to allow the application to have multiple top
@@ -68,9 +69,6 @@ class CRM_Core_Session {
    * Constructor.
    *
    * The CMS takes care of initiating the php session handler session_start().
-   *
-   * When using CiviCRM standalone (w/o a CMS), we start the session
-   * in index.php and then pass it off to here.
    *
    * All crm code should always use the session using
    * CRM_Core_Session. we prefix stuff to avoid collisions with the CMS and also
@@ -120,7 +118,7 @@ class CRM_Core_Session {
           if (!(isset($GLOBALS['lazy_session']) && $GLOBALS['lazy_session'] == TRUE)) {
             drupal_session_start();
           }
-          $_SESSION = array();
+          $_SESSION = [];
         }
         else {
           session_start();
@@ -136,7 +134,7 @@ class CRM_Core_Session {
     if (!isset($this->_session[$this->_key]) ||
       !is_array($this->_session[$this->_key])
     ) {
-      $this->_session[$this->_key] = array();
+      $this->_session[$this->_key] = [];
     }
   }
 
@@ -150,11 +148,11 @@ class CRM_Core_Session {
       $this->initialize();
 
       // to make certain we clear it, first initialize it to empty
-      $this->_session[$this->_key] = array();
+      $this->_session[$this->_key] = [];
       unset($this->_session[$this->_key]);
     }
     else {
-      $this->_session = array();
+      $this->_session = [];
     }
 
   }
@@ -175,7 +173,7 @@ class CRM_Core_Session {
     }
 
     if (empty($this->_session[$this->_key][$prefix])) {
-      $this->_session[$this->_key][$prefix] = array();
+      $this->_session[$this->_key][$prefix] = [];
     }
   }
 
@@ -465,7 +463,7 @@ class CRM_Core_Session {
    *                 defaults to 10 seconds for most messages, 5 if it has a title but no body,
    *                 or 0 for errors or messages containing links
    */
-  public static function setStatus($text, $title = '', $type = 'alert', $options = array()) {
+  public static function setStatus($text, $title = '', $type = 'alert', $options = []) {
     // make sure session is initialized, CRM-8120
     $session = self::singleton();
     $session->initialize();
@@ -475,10 +473,10 @@ class CRM_Core_Session {
     $title = CRM_Utils_String::purifyHTML($title);
 
     // default options
-    $options += array('unique' => TRUE);
+    $options += ['unique' => TRUE];
 
     if (!isset(self::$_singleton->_session[self::$_singleton->_key]['status'])) {
-      self::$_singleton->_session[self::$_singleton->_key]['status'] = array();
+      self::$_singleton->_session[self::$_singleton->_key]['status'] = [];
     }
     if ($text || $title) {
       if ($options['unique']) {
@@ -489,12 +487,12 @@ class CRM_Core_Session {
         }
       }
       unset($options['unique']);
-      self::$_singleton->_session[self::$_singleton->_key]['status'][] = array(
+      self::$_singleton->_session[self::$_singleton->_key]['status'][] = [
         'text' => $text,
         'title' => $title,
         'type' => $type,
         'options' => $options ? $options : NULL,
-      );
+      ];
     }
   }
 
@@ -505,7 +503,7 @@ class CRM_Core_Session {
    */
   public static function registerAndRetrieveSessionObjects($names) {
     if (!is_array($names)) {
-      $names = array($names);
+      $names = [$names];
     }
 
     if (!self::$_managedNames) {
@@ -538,7 +536,7 @@ class CRM_Core_Session {
   /**
    * Retrieve contact id of the logged in user.
    *
-   * @return int|NULL
+   * @return int|null
    *   contact ID of logged in user
    */
   public static function getLoggedInContactID() {
@@ -561,7 +559,7 @@ class CRM_Core_Session {
     if (!$userContactID) {
       return '';
     }
-    return civicrm_api3('Contact', 'getvalue', array('id' => $userContactID, 'return' => 'display_name'));
+    return civicrm_api3('Contact', 'getvalue', ['id' => $userContactID, 'return' => 'display_name']);
   }
 
   /**

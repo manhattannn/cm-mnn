@@ -1,0 +1,22 @@
+Issue: MNN Mantis - https://mantis.mnn.org/view.php?id=4256 and 
+https://mantis.mnn.org/view.php?id=4323
+Patch: openflows patch - og-7.x-2.8-10-referenced-group-invalid-19.10.03.patch
+Patch fixes: OG throws error: "The referenced group is invalid" when attempting 
+to save a reservations with a selected project
+Applied against 2.8, 2.9, and 2.10
+
+diff --git a/sites/all/modules/contrib/og/plugins/entityreference/behavior/OgBehaviorHandler.class.php b/sites/all/modules/contrib/og/plugins/entityreference/behavior/OgBehaviorHandler.class.php
+index d17a8e262..c6cf183d7 100644
+--- a/sites/all/modules/contrib/og/plugins/entityreference/behavior/OgBehaviorHandler.class.php
++++ b/sites/all/modules/contrib/og/plugins/entityreference/behavior/OgBehaviorHandler.class.php
+@@ -280,6 +280,10 @@ class OgBehaviorHandler extends EntityReference_BehaviorHandler_Abstract {
+       $instance['field_mode'] = $field_mode;
+       $valid_ids = entityreference_get_selection_handler($field, $instance, $entity_type, $entity)->validateReferencableEntities($ids);
+ 
++      // patch fixes issue with invalid reference nodes
++      global $hacked_valid_ids;
++      $valid_ids = $hacked_valid_ids;
++
+       if ($invalid_entities = array_diff($ids, $valid_ids)) {
+         foreach ($invalid_entities as $id) {
+           $new_errors[$field_mode][] = array(

@@ -30,18 +30,16 @@
   {if $action neq 8 and $action  neq 32768 }
   {* Include form buttons on top for new and edit modes. *}
   <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="top"}</div>
-
-    {* added onload javascript for source contact*}
-    {include file="CRM/Activity/Form/ActivityJs.tpl" tokenContext="case_activity"}
-
   {/if}
 
   {if $action eq 8 or $action eq 32768 }
   <div class="messages status no-popup">
     <i class="crm-i fa-info-circle"></i> &nbsp;
     {if $action eq 8}
+      {* activityTypeName means label here not name, but it's ok because label is desired here (dev/core#1116-ok-label) *}
       {ts 1=$activityTypeName}Click Delete to move this &quot;%1&quot; activity to the Trash.{/ts}
     {else}
+      {* activityTypeName means label here not name, but it's ok because label is desired here (dev/core#1116-ok-label) *}
       {ts 1=$activityTypeName}Click Restore to retrieve this &quot;%1&quot; activity from the Trash.{/ts}
     {/if}
   </div><br />
@@ -113,6 +111,7 @@
 
                 <tr class="crm-case-activity-form-block-activityTypeName">
                   <td class="label">{ts}Activity Type{/ts}</td>
+                  {* activityTypeName means label here not name, but it's ok because label is desired here (dev/core#1116-ok-label) *}
                   <td class="view-value bold">{$activityTypeName|escape}</td>
                 </tr>
                 <tr class="crm-case-activity-form-block-source_contact_id">
@@ -161,7 +160,7 @@
               </tr>
               {/if}
               <tr>
-                <td colspan="2"><div id="customData"></div></td>
+                <td colspan="2">{include file="CRM/common/customDataBlock.tpl"}</td>
               </tr>
               {if NOT $activityTypeFile}
                 <tr class="crm-case-activity-form-block-details">
@@ -268,29 +267,19 @@
 <div class="crm-submit-buttons">{include file="CRM/common/formButtons.tpl" location="bottom"}</div>
 
   {if $action eq 1 or $action eq 2}
-    {*include custom data js file*}
-    {include file="CRM/common/customData.tpl"}
     {literal}
     <script type="text/javascript">
-    CRM.$(function($) {
-      var doNotNotifyAssigneeFor = {/literal}{$doNotNotifyAssigneeFor|@json_encode}{literal};
-      $('#activity_type_id').change(function() {
-        if ($.inArray($(this).val(), doNotNotifyAssigneeFor) != -1) {
-          $('#notify_assignee_msg').hide();
-        }
-        else {
-          $('#notify_assignee_msg').show();
-        }
+      CRM.$(function($) {
+        var doNotNotifyAssigneeFor = {/literal}{$doNotNotifyAssigneeFor|@json_encode}{literal};
+        $('#activity_type_id').change(function() {
+          if ($.inArray($(this).val(), doNotNotifyAssigneeFor) != -1) {
+            $('#notify_assignee_msg').hide();
+          }
+          else {
+            $('#notify_assignee_msg').show();
+          }
+        });
       });
-
-      {/literal}
-      {if $customDataSubType}
-        CRM.buildCustomData( '{$customDataType}', {$customDataSubType} );
-        {else}
-        CRM.buildCustomData( '{$customDataType}' );
-      {/if}
-      {literal}
-    });
     </script>
     {/literal}
   {/if}

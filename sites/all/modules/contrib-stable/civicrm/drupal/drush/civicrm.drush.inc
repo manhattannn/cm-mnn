@@ -306,7 +306,6 @@ function drush_civicrm_install_validate() {
   return TRUE;
 }
 
-
 /**
  * Implementation of command 'civicrm-install'
  */
@@ -718,7 +717,8 @@ function drush_civicrm_upgrade_db() {
 
     // new since CiviCRM 4.1
     if (is_callable(array(
-      $upgrade, 'setPrint'))) {
+      $upgrade, 'setPrint',
+    ))) {
       $upgrade->setPrint(TRUE);
     }
 
@@ -738,7 +738,6 @@ function drush_civicrm_upgrade_db() {
 function drush_civicrm_update_cfg_validate() {
   return _civicrm_init();
 }
-
 
 /**
  * Implementation of command 'civicrm-update-cfg'
@@ -1455,6 +1454,13 @@ function _civicrm_init($fail = TRUE, $load_config = TRUE) {
   // return if already initialized
   if ($init) {
     return $init;
+  }
+
+  if (!version_compare(phpversion(), CIVICRM_DRUPAL_PHP_MINIMUM, '>=')) {
+    return drush_set_error('CIVICRM_PHP_MINIMUM', dt('CiviCRM requires PHP @required+. Drush is running PHP @current.', [
+      '@current' => phpversion(),
+      '@required' => CIVICRM_DRUPAL_PHP_MINIMUM,
+    ]));
   }
 
   global $cmsPath;

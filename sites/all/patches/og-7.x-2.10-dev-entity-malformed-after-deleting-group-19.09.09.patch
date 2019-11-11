@@ -1,0 +1,176 @@
+Issue: https://www.drupal.org/project/og/issues/2900273#comment-13097565
+Patch: https://www.drupal.org/files/issues/2019-05-07/og-entity-malformed-exception-after-deleting-group-2900273-14.patch
+Patch fixes an issue: when a group has members, and the group node is deleted by site admin using a views which has a delete link, the user data is not removed from the "og_membership" table and the user is not able to join to a new group.
+Applied against
+diff --git a/og.module b/og.module
+index c6e51e1a..eea9eabb 100755
+--- a/og.module
++++ b/og.module
+@@ -1830,6 +1830,10 @@ function og_is_group($entity_type, $entity) {
+   if (is_numeric($entity)) {
+     $entity = entity_load_single($entity_type, $entity);
+   }
++  if (!is_object($entity)) {
++    // The entity does not exist.
++    return FALSE;
++  }
+   list(,, $bundle) = entity_extract_ids($entity_type, $entity);
+   if (!field_info_instance($entity_type, OG_GROUP_FIELD, $bundle)) {
+     return variable_get("og_is_group__{$entity_type}__{$bundle}", FALSE);
+diff --git a/og.test b/og.test
+index ee2e38a1..e2f3678f 100644
+--- a/og.test
++++ b/og.test
+@@ -2083,6 +2083,82 @@ class OgDeleteOrphansTestCase extends DrupalWebTestCase {
+ 
+     $this->assertEqual($gid, $second_group->nid, 'The group content moved to another group.');
+   }
++
++  /**
++   * Tests editing content that belongs to a deleted group.
++   *
++   * Tests if content belonging to multiple groups can be edited without issues
++   * after deleting one of the groups.
++   */
++  public function testEditGroupContentAfterDeletingGroup() {
++    $account = $this->drupalCreateUser(array('edit own ' . $this->node_type . ' content'));
++    $this->drupalLogin($account);
++
++    // Create two groups.
++    $first_group = $this->drupalCreateNode(array('type' => $this->group_type));
++    $second_group = $this->drupalCreateNode(array('type' => $this->group_type));
++
++    // Create group content, assign it to both groups.
++    $group_content = $this->drupalCreateNode(array(
++      'type' => $this->node_type,
++      'title' => 'Lorem ipsum',
++      'uid' => $account->uid,
++    ));
++    og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $group_content));
++    og_group('node', $second_group, array('entity_type' => 'node', 'entity' => $group_content));
++
++    // Try to edit the group content node, using the UI.
++    $this->drupalPost('node/' . $group_content->nid . '/edit', array(), 'Save');
++    $this->assertText($this->node_type . ' Lorem ipsum has been updated.');
++
++    // Delete the first group.
++    node_delete($first_group->nid);
++
++    // Try again to edit the group content node.
++    $this->drupalPost('node/' . $group_content->nid . '/edit', array(), 'Save');
++    $this->assertText($this->node_type . ' Lorem ipsum has been updated.');
++  }
++
++  /**
++   * Tests calling node_access() on content that belongs to a deleted group.
++   *
++   * Tests if node_access() can be called for content that has a reference to a
++   * no longer existing group when OG is configured to use the delete queue.
++   */
++  public function testGroupContentNodeAccessAfterDeletingGroupAndWhenUsingQueue() {
++    // Configure OG to use queue for deleting pending content.
++    variable_set('og_use_queue', TRUE);
++
++    $account = $this->drupalCreateUser(array('access content', 'edit own ' . $this->node_type . ' content'));
++    $this->drupalLogin($account);
++
++    // Create two groups.
++    $first_group = $this->drupalCreateNode(array('type' => $this->group_type));
++    $second_group = $this->drupalCreateNode(array('type' => $this->group_type));
++
++    // Create group content, assign it to both groups.
++    $group_content = $this->drupalCreateNode(array(
++      'type' => $this->node_type,
++      'title' => 'Lorem ipsum',
++      'uid' => $account->uid,
++    ));
++    og_group('node', $first_group, array('entity_type' => 'node', 'entity' => $group_content));
++    og_group('node', $second_group, array('entity_type' => 'node', 'entity' => $group_content));
++
++    // Display a list of my nodes, that uses node_access() to check if links may
++    // be displayed.
++    $this->drupalGet('og_test/my_content');
++    $this->assertText('Lorem ipsum');
++
++    // Delete the first group.
++    node_delete($first_group->nid);
++
++    // Display a list of my nodes again, to ensure nothing changed.
++    $this->drupalGet('og_test/my_content');
++    $this->assertNoText('EntityMalformedException');
++    $this->assertText('Lorem ipsum');
++  }
++
+ }
+ 
+ /**
+diff --git a/tests/og_test.module b/tests/og_test.module
+index 8c3f5c70..e46b8187 100644
+--- a/tests/og_test.module
++++ b/tests/og_test.module
+@@ -5,6 +5,19 @@
+  * Test module for OG.
+  */
+ 
++/**
++ * Implements hook_menu().
++ */
++function og_test_menu() {
++  return array(
++    'og_test/my_content' => array(
++      'page callback' => 'og_test_my_content',
++      'access arguments' => array('access content'),
++      'type' => MENU_CALLBACK,
++    ),
++  );
++}
++
+ /**
+  * Implements hook_node_presave().
+  */
+@@ -64,6 +77,45 @@ function og_test_entity_delete($entity, $type) {
+   );
+ }
+ 
++/**
++ * Page callback for displaying nodes for the current user.
++ */
++function og_test_my_content() {
++  global $user;
++
++  $nodes = node_load_multiple(array(), array('uid' => $user->uid));
++
++  $table = array(
++    '#theme' => 'table',
++    '#header' => array(
++      t('Title'),
++      t('Operations'),
++    ),
++    '#rows' => array(),
++  );
++
++  foreach ($nodes as $node) {
++    $operations = array();
++
++    if (node_access('view', $node)) {
++      $operations['view'] = l(t('view'), 'node/' . $node->nid);
++    }
++    if (node_access('update', $node)) {
++      $operations['update'] = l(t('edit'), 'node/' . $node->nid . '/edit');
++    }
++    if (node_access('delete', $node)) {
++      $operations['delete'] = l(t('delete'), 'node/' . $node->nid . '/delete');
++    }
++
++    $table['#rows'][$node->nid] = array(
++      check_plain($node->title),
++      implode(' | ', $operations),
++    );
++  }
++
++  return $table;
++}
++
+ /**
+  * Implements hook_form_alter().
+  *

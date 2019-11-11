@@ -41,7 +41,7 @@ class CRM_Contact_Page_CustomSearch extends CRM_Core_Page {
    *
    * @var array
    */
-  static $_links = NULL;
+  public static $_links = NULL;
 
   /**
    * @return array
@@ -56,11 +56,9 @@ AND    g.name = 'custom_search'
 AND    v.is_active = 1
 ORDER By  v.weight
 ";
-    $dao = CRM_Core_DAO::executeQuery($sql,
-      CRM_Core_DAO::$_nullArray
-    );
+    $dao = CRM_Core_DAO::executeQuery($sql);
 
-    $rows = array();
+    $rows = [];
     while ($dao->fetch()) {
       if (trim($dao->description)) {
         $rows[$dao->value] = $dao->description;

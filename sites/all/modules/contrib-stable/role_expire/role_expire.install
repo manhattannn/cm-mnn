@@ -46,10 +46,10 @@ function role_expire_schema() {
         'description' => t('The role_id.')
       ),
       'duration' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
+        'type' => 'text',
+        'size' => 'small',
         'not null' => TRUE,
-        'description' => t('The default duration for the role.')
+        'description' => t('A strtotime-compatible default duration string.')
       ),
     ),
     'primary key' => array('rid'),
@@ -68,14 +68,24 @@ function role_expire_install() {
  * Implementation of hook_uninstall().
  */
 function role_expire_uninstall() {
+  variable_del('role_expire_default_roles');
+}
 
+/**
+ * Issue #2341269: delete orphaned records from 'role_expire' and 'role_expire_length' tables.
+ */
+function role_expire_update_7100(&$sandbox) {
+  $roles = user_roles();
+  $rids = array_keys($roles);
+
+  db_query("DELETE FROM {role_expire} WHERE rid NOT IN (:rids)", array(':rids' => $rids));
+  db_query("DELETE FROM {role_expire_length} WHERE rid NOT IN (:rids)", array(':rids' => $rids));
 }
 
 /**
  * Update schema for default role_expire_length table. Convert integer days to text "# days".
  */
 function role_expire_update_7101() {
-
   // Fetch out all the current durations.
   $result = db_query('SELECT rid,duration FROM {role_expire_length}');
   $durations = array();
@@ -84,16 +94,13 @@ function role_expire_update_7101() {
   }
 
   // Convert the original duration column from type int to type text
-  db_change_field(
-          'role_expire_length',
-          'duration',
-          'duration',
-          array(
-              'type' => 'text',
-              'size' => 'small',
-              'description' => t('A strtotime-compatible duration string'),
-          )
+  $field = array(
+    'type' => 'text',
+    'size' => 'small',
+    'not null' => TRUE,
+    'description' => t('A strtotime-compatible default duration string.')
   );
+  db_change_field('role_expire_length', 'duration', 'duration', $field);
 
   // Append "days" since that's all it could've been before this revision.
   foreach ($durations as $rid => $duration) {

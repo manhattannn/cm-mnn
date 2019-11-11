@@ -40,6 +40,11 @@ class wf_crm_admin_component {
     }
     list(, $i, $ent, $n, $table, $name) = $pieces;
     $this->field = wf_crm_aval(wf_crm_get_fields(), $table . '_' . $name);
+    // Is this a crm custom group fieldset?
+    if (isCustomGroupFieldset($fid)) {
+      $this->form['form_key']['#disabled'] = TRUE;
+      $this->form['form_key']['#value'] = $fid;
+    }
     // Is this a crm field or fieldset?
     if (!$this->field && $table != 'fieldset') {
       return;
@@ -103,6 +108,11 @@ class wf_crm_admin_component {
       $this->moneyOptions();
     }
 
+    // Fields from webform_autocomplete module
+    elseif ($this->component['type'] === 'autocomplete') {
+      $this->form['options']['#access'] = FALSE;
+    }
+
     // Simplify form for hidden fields
     elseif (($name === 'contact_id' || $name === 'external_identifier') && $this->component['type'] === 'hidden') {
       $this->form['value']['#value'] = '';
@@ -151,12 +161,8 @@ class wf_crm_admin_component {
     }
     // Allow widget to be altered, unless it's a contact or file
     elseif ($this->field && !in_array($this->field['type'], array('civicrm_contact', 'file')) && empty($_GET['type'])) {
-      $widgets = array();
-      foreach (webform_components() as $k => $v) {
-        if ($k !== 'civicrm_contact' && $k !== 'pagebreak' && $k !== 'markup' && empty($v['features']['group'])) {
-          $widgets[$k] = $v['label'];
-        }
-      }
+      $unusable_widgets = array('civicrm_contact', 'pagebreak', 'markup', 'layout_box', 'fieldset');
+      $widgets = array_diff_key(webform_component_options(), array_flip($unusable_widgets));
       if ($this->form['type']['#value'] == 'textfield' && $table === 'address') {
         if ($name === 'state_province_id' || $name === 'county_id') {
           $widgets['textfield'] = t('Textfield / AJAX Select');
@@ -440,7 +446,7 @@ class wf_crm_admin_component {
    * @param array $rows
    * @param stdClass $node
    */
-  static function preprocessComponentsForm(&$form, &$rows, $node) {
+  public static function preprocessComponentsForm(&$form, &$rows, $node) {
     // Prepare for CiviCRM processing
     $enabled = $data = array();
     if (!empty($node->webform_civicrm)) {
@@ -495,7 +501,7 @@ class wf_crm_admin_component {
           $field = wf_crm_aval($fields, $table . '_' . $name, array('type' => 'fieldset'));
           // Don't allow CiviCRM fields to be cloned
           $row['data'][7]['data'] = '';
-          if ($component['type'] == 'fieldset') {
+          if ($component['type'] == 'fieldset' && $ent == 'contact') {
             $title = t('Contact !num', array('!num' => $c));
             $type = t('Fieldset for !contact', array('!contact' => wf_crm_contact_label($c, $data)));
             $row['data'][7]['data'] = l(t('Clone Contact'), "node/{$node->nid}/webform/components/$cid/clone", array(
@@ -507,8 +513,11 @@ class wf_crm_admin_component {
             $field_type = ($table == 'contact' || $table == 'other') ? $field['name'] : $sets[$table]['label'];
             $title = t('!type Field for !contact', array('!contact' => wf_crm_contact_label($c, $data), '!type' => $field_type));
           }
-          else {
+          elseif ($component['type'] != 'fieldset') {
             $title = t('Field for !type', array('!type' => $sets[$table]['label']));
+          }
+          else {
+            $title = $type = t('Fieldset for !type !num', array('!type' => $sets[$ent]['label'], '!num' => $c));
           }
           if ($table === 'address' && $component['type'] === 'textfield') {
             if ($name === 'state_province_id' || $name === 'county_id') {
@@ -516,7 +525,7 @@ class wf_crm_admin_component {
             }
           }
           if ($component['type'] == 'civicrm_contact' || $component['type'] == 'fieldset') {
-            $class .= ' ' . $node->webform_civicrm['data']['contact'][$c]['contact'][1]['contact_type'];
+            $class .= ' ' . ($ent == 'contact' ? $node->webform_civicrm['data']['contact'][$c]['contact'][1]['contact_type'] : $ent);
           }
           if ($component['type'] == 'select') {
             $type .= ' (' . (empty($component['extra']['civicrm_live_options']) ? t('static') : t('live')) . ')';
@@ -533,7 +542,14 @@ class wf_crm_admin_component {
               $row['data'][3]['data'] = t('Auto - From Filters');
             }
             elseif ($component['extra']['default'] == 'relationship' && $component['extra']['default_relationship']) {
-              $row['data'][3]['data'] = t('Relationship to !contact', array('!contact' => wf_crm_contact_label(1, $data)));
+              $relationship_labels = array();
+              $relationship_types = wf_crm_get_relationship_types();
+              foreach ($component['extra']['default_relationship'] as $default_relationship) {
+                list($rid, $rtype) = explode('_', $default_relationship);
+                $label_type = $rtype == 'b' ? 'b_a' : 'a_b';
+                $relationship_labels[] = $relationship_types[$rid]["label_$label_type"] . ' ' . wf_crm_contact_label($component['extra']['default_relationship_to'], $data);
+              }
+              $row['data'][3]['data'] = implode(' ' . ts('or') . ' ', $relationship_labels);
             }
           }
           elseif (isset($component['value']) && strlen($component['value']) && ($field['type'] == 'select' || !empty($field['expose_list']))) {
@@ -577,7 +593,7 @@ class wf_crm_admin_component {
    * Ensure billing fields are not on same page as event/member amounts
    * @param stdClass $node
    */
-  static function checkBillingPagination($node) {
+  public static function checkBillingPagination($node) {
     civicrm_initialize();
     $enabled = wf_crm_enabled_fields($node);
     $field_ids = array(
@@ -681,8 +697,12 @@ function wf_crm_cs_validate($form, &$form_state) {
  */
 function wf_crm_money_validate($form, &$form_state) {
   $vals = $form_state['values'];
-  if (!empty($vals['value']) && !is_numeric($vals['value'])) {
-    form_error($form['value'], t('This is a CiviCRM currency field. @field must be a number.', array('@field' => $form['value']['#title'])));
+  if (!empty($vals['value']) && !is_numeric($vals['value']) && $vals['type'] != 'formula') {
+    //Check if default value is a token string.
+    $isTokenString = token_replace($vals['value'], array(), array('clear' => true));
+    if (!empty($isTokenString)) {
+      form_error($form['value'], t('This is a CiviCRM currency field. @field must be a number.', array('@field' => $form['value']['#title'])));
+    }
   }
   foreach (array('items', 'options') as $field) {
     if (!empty($vals['extra'][$field])) {
@@ -747,4 +767,12 @@ function wf_crm_components_form_validate($form, &$form_state) {
       }
     }
   }
+}
+
+function isCustomGroupFieldset($fid) {
+  $pieces = wf_crm_explode_key($fid);
+  if ($pieces[0] == 'civicrm' && strpos($pieces[4], 'cg') !== FALSE && $pieces[5] == 'fieldset') {
+    return true;
+  }
+  return false;
 }

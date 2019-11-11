@@ -25,7 +25,6 @@
  +--------------------------------------------------------------------+
  */
 
-use Civi\ActionSchedule\RecipientBuilder;
 
 /**
  * Class CRM_Member_ActionMapping
@@ -50,7 +49,7 @@ class CRM_Member_ActionMapping extends \Civi\ActionSchedule\Mapping {
    * @param \Civi\ActionSchedule\Event\MappingRegisterEvent $registrations
    */
   public static function onRegisterActionMappings(\Civi\ActionSchedule\Event\MappingRegisterEvent $registrations) {
-    $registrations->register(CRM_Member_ActionMapping::create(array(
+    $registrations->register(CRM_Member_ActionMapping::create([
       'id' => CRM_Member_ActionMapping::MEMBERSHIP_TYPE_MAPPING_ID,
       'entity' => 'civicrm_membership',
       'entity_label' => ts('Membership'),
@@ -58,7 +57,7 @@ class CRM_Member_ActionMapping extends \Civi\ActionSchedule\Mapping {
       'entity_value_label' => ts('Membership Type'),
       'entity_status' => 'auto_renew_options',
       'entity_status_label' => ts('Auto Renew Options'),
-    )));
+    ]));
   }
 
   /**
@@ -68,11 +67,11 @@ class CRM_Member_ActionMapping extends \Civi\ActionSchedule\Mapping {
    *   Array(string $fieldName => string $fieldLabel).
    */
   public function getDateFields() {
-    return array(
+    return [
       'join_date' => ts('Membership Join Date'),
       'start_date' => ts('Membership Start Date'),
       'end_date' => ts('Membership End Date'),
-    );
+    ];
   }
 
   /**
@@ -146,11 +145,6 @@ class CRM_Member_ActionMapping extends \Civi\ActionSchedule\Mapping {
     $query->where("e.status_id IN (#memberStatus)")
       ->param('memberStatus', \CRM_Member_PseudoConstant::membershipStatus(NULL, "(is_current_member = 1 OR name = 'Expired')", 'id'));
 
-    // Why is this only for civicrm_membership?
-    if ($schedule->start_action_date && $schedule->is_repeat == FALSE) {
-      $query['casUseReferenceDate'] = TRUE;
-    }
-
     return $query;
   }
 
@@ -171,6 +165,23 @@ class CRM_Member_ActionMapping extends \Civi\ActionSchedule\Mapping {
       ->join(NULL, $joins)
       ->param('#editPerm', CRM_Contact_BAO_Relationship::EDIT)
       ->where('!( e.owner_membership_id IS NOT NULL AND rela.id IS NULL and relb.id IS NULL )');
+  }
+
+  /**
+   * Determine whether a schedule based on this mapping should
+   * reset the reminder state if the trigger date changes.
+   *
+   * @return bool
+   *
+   * @param \CRM_Core_DAO_ActionSchedule $schedule
+   */
+  public function resetOnTriggerDateChange($schedule) {
+    if ($schedule->absolute_date !== NULL) {
+      return FALSE;
+    }
+    else {
+      return TRUE;
+    }
   }
 
 }
