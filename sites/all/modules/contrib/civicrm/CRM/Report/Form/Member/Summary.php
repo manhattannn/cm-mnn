@@ -64,7 +64,7 @@ class CRM_Report_Form_Member_Summary extends CRM_Report_Form {
   public function __construct() {
     $this->_columns = [
       'civicrm_membership' => [
-        'dao' => 'CRM_Member_DAO_MembershipType',
+        'dao' => 'CRM_Member_DAO_Membership',
         'grouping' => 'member-fields',
         'fields' => [
           'membership_type_id' => [
@@ -165,7 +165,7 @@ class CRM_Report_Form_Member_Summary extends CRM_Report_Form {
           'contribution_status_id' => [
             'title' => ts('Contribution Status'),
             'operatorType' => CRM_Report_Form::OP_MULTISELECT,
-            'options' => CRM_Contribute_PseudoConstant::contributionStatus(),
+            'options' => CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'label'),
           ],
         ],
         'grouping' => 'member-fields',

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitdb2000479593e65ef23454e56d74a73f
+class ComposerStaticInit53562b2e016aa20a7e0e3e29e4c391cd
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -16,9 +16,14 @@ class ComposerStaticInitdb2000479593e65ef23454e56d74a73f
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '9e4824c5afbdc1482b6025ce3d4dfde8' => __DIR__ . '/..' . '/league/csv/src/functions_include.php',
         'def43f6c87e4f8dfd0c9e1b1bab14fe8' => __DIR__ . '/..' . '/symfony/polyfill-iconv/bootstrap.php',
+        'bad842bce63596a608e2623519fb382c' => __DIR__ . '/..' . '/xkerman/restricted-unserialize/src/function.php',
     );
 
     public static $prefixLengthsPsr4 = array (
+        'x' => 
+        array (
+            'xKerman\\Restricted\\' => 19,
+        ),
         'c' => 
         array (
             'cweagans\\Composer\\' => 18,
@@ -83,6 +88,10 @@ class ComposerStaticInitdb2000479593e65ef23454e56d74a73f
     );
 
     public static $prefixDirsPsr4 = array (
+        'xKerman\\Restricted\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/xkerman/restricted-unserialize/src',
+        ),
         'cweagans\\Composer\\' => 
         array (
             0 => __DIR__ . '/..' . '/cweagans/composer-patches/src',
@@ -468,11 +477,11 @@ class ComposerStaticInitdb2000479593e65ef23454e56d74a73f
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitdb2000479593e65ef23454e56d74a73f::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitdb2000479593e65ef23454e56d74a73f::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitdb2000479593e65ef23454e56d74a73f::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitdb2000479593e65ef23454e56d74a73f::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitdb2000479593e65ef23454e56d74a73f::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit53562b2e016aa20a7e0e3e29e4c391cd::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit53562b2e016aa20a7e0e3e29e4c391cd::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit53562b2e016aa20a7e0e3e29e4c391cd::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit53562b2e016aa20a7e0e3e29e4c391cd::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit53562b2e016aa20a7e0e3e29e4c391cd::$classMap;
 
         }, null, ClassLoader::class);
     }
