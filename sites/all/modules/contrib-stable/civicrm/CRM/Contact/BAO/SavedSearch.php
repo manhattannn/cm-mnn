@@ -104,8 +104,8 @@ class CRM_Contact_BAO_SavedSearch extends CRM_Contact_DAO_SavedSearch {
     $fv = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_SavedSearch', $id, 'form_values');
     $result = NULL;
     if ($fv) {
-      // make sure u unserialize - since it's stored in serialized form
-      $result = unserialize($fv);
+      // make sure u CRM_Utils_String::unserialize - since it's stored in serialized form
+      $result = CRM_Utils_String::unserialize($fv);
     }
 
     $specialFields = ['contact_type', 'group', 'contact_tags', 'member_membership_type_id', 'member_status_id'];
@@ -328,7 +328,7 @@ LEFT JOIN civicrm_email ON (contact_a.id = civicrm_email.contact_id AND civicrm_
    * Given a saved search compute the clause and the tables and store it for future use.
    */
   public function buildClause() {
-    $fv = unserialize($this->form_values);
+    $fv = CRM_Utils_String::unserialize($this->form_values);
 
     if ($this->mapping_id) {
       $params = CRM_Core_BAO_Mapping::formattedFields($fv);
@@ -443,13 +443,6 @@ LEFT JOIN civicrm_email ON (contact_a.id = civicrm_email.contact_id AND civicrm_
       'case_to_relative',
       'participant_relative',
       'log_date_relative',
-      'pledge_payment_date_relative',
-      'pledge_start_date_relative',
-      'pledge_end_date_relative',
-      'pledge_create_date_relative',
-      'member_join_date_relative',
-      'member_start_date_relative',
-      'member_end_date_relative',
       'birth_date_relative',
       'deceased_date_relative',
       'mailing_date_relative',

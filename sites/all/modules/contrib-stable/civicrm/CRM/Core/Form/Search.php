@@ -125,14 +125,31 @@ class CRM_Core_Form_Search extends CRM_Core_Form {
   }
 
   /**
+   * Prepare for search by loading options from the url, handling force searches, retrieving form values.
+   *
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
+   */
+  public function preProcess() {
+    $this->loadStandardSearchOptionsFromUrl();
+    if ($this->_force) {
+      $this->handleForcedSearch();
+    }
+    $this->_formValues = $this->getFormValues();
+  }
+
+  /**
    * This virtual function is used to set the default values of various form elements.
    *
    * @return array|NULL
    *   reference to the array of default values
-   * @throws \Exception
+   * @throws \CRM_Core_Exception
    */
   public function setDefaultValues() {
-    $defaults = (array) $this->_formValues;
+    // Use the form values stored to the form. Ideally 'formValues'
+    // would remain 'pure' & another array would be wrangled.
+    // We don't do that - so we want the version of formValues stored early on.
+    $defaults = (array) $this->get('formValues');
     foreach (array_keys($this->getSearchFieldMetadata()) as $entity) {
       $defaults = array_merge($this->getEntityDefaults($entity), $defaults);
     }
@@ -145,12 +162,8 @@ class CRM_Core_Form_Search extends CRM_Core_Form {
    * @throws \Exception
    */
   protected function setFormValues() {
-    if (!empty($_POST) && !$this->_force) {
-      $this->_formValues = $this->controller->exportValues($this->_name);
-    }
-    elseif ($this->_force) {
-      $this->_formValues = $this->setDefaultValues();
-    }
+    $this->_formValues = $this->getFormValues();
+    $this->set('formValues', $this->_formValues);
     $this->convertTextStringsToUseLikeOperator();
   }
 
@@ -337,7 +350,7 @@ class CRM_Core_Form_Search extends CRM_Core_Form {
     $this->addElement('checkbox', 'toggleSelect', NULL, NULL, ['class' => 'select-rows']);
     if (!empty($rows)) {
       foreach ($rows as $row) {
-        if (CRM_Utils_Array::value('checkbox', $row)) {
+        if (!empty($row['checkbox'])) {
           $this->addElement('checkbox', $row['checkbox'], NULL, NULL, ['class' => 'select-row']);
         }
       }
@@ -475,6 +488,47 @@ class CRM_Core_Form_Search extends CRM_Core_Form {
         $this->_formValues = CRM_Contact_BAO_SavedSearch::getFormValues($this->_ssID);
       }
     }
+  }
+
+  /**
+   * Get the form values.
+   *
+   * @todo consolidate with loadFormValues()
+   *
+   * @return array
+   *
+   * @throws \CRM_Core_Exception
+   */
+  protected function getFormValues() {
+    if (!empty($_POST) && !$this->_force) {
+      return $this->controller->exportValues($this->_name);
+    }
+    if ($this->_force) {
+      return $this->setDefaultValues();
+    }
+    return (array) $this->get('formValues');
+  }
+
+  /**
+   * Set the metadata for the form.
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  protected function setSearchMetadata() {}
+
+  /**
+   * Handle force=1 in the url.
+   *
+   * Search field metadata is normally added in buildForm but we are bypassing that in this flow
+   * (I've always found the flow kinda confusing & perhaps that is the problem but this mitigates)
+   *
+   * @throws \CiviCRM_API3_Exception
+   */
+  protected function handleForcedSearch() {
+    $this->setSearchMetadata();
+    $this->addContactSearchFields();
+    $this->postProcess();
+    $this->set('force', 0);
   }
 
 }
