@@ -1,0 +1,188 @@
+<?php
+
+/**
+ * @file
+ * reservations_printable_checklist functions
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function reservations_printable_checklist_menu() {
+
+  $items['node/%node/checklist'] = array(
+    'title' => 'Checklist',
+    'description' => 'Takes a node object and returns a printable checklist',
+    'page arguments' => array(1),
+    'page callback' => 'reservations_printable_checklist',
+    'access callback' => 'reservations_printable_checklist_content_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  // Standard Administration settings.
+  $items['admin/config/reservations/checklist'] = array(
+    'title' => 'Printable Checklist',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('reservations_printable_checklist_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer reservations'),
+    'description' => 'Configure settings for Reservations Printable Checklist.',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function reservations_printable_checklist_permission() {
+  return array(
+   'view reservations checklist' => array(
+      'title' => '<em class="placeholder">Reservations</em>: View Checklist',
+      'description' => t('Allows users to access the Printable Checklist tab added to Reservation nodes.'))
+  );
+}
+
+/**
+ * controls which users see the Printable Checklist tab and the checklist
+ */
+function reservations_printable_checklist_content_access($node) {
+  return (user_access('view reservations checklist') && $node->type == 'reservations_reservation');
+}
+
+/**
+ * Implements hook_theme().
+ */
+function reservations_printable_checklist_theme() {
+
+  return array(
+    'reservations_printable_checklist' => array(
+      'template' => 'reservations-printable-checklist',
+      'variables' => array('node' => NULL),
+    ),
+  );
+}
+
+/**
+ * Builds the admininstration settings form.
+ */
+function reservations_printable_checklist_admin_settings($form, &$form_state) {
+
+  $form['reservations_checklist_header'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Checklist header'),
+    '#rows' => 10,
+    // TODO: this doesn't seem to work...
+    '#cols' => 5,
+    '#default_value' => variable_get('reservations_checklist_header', ''),
+    '#description' => t('Header portion of printable checklist.  Allows HTML.'),
+  );
+
+  $form['reservations_checklist_boilerplate'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Checklist boilerplate'),
+    '#rows' => 10,
+    // TODO: this doesn't seem to work...
+    '#cols' => 5,
+    '#default_value' => variable_get('reservations_checklist_boilerplate', ''),
+    '#description' => t('Legalese that makes the checklist legally binding.'),
+  );
+
+  $form['reservations_checklist_footer'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Checklist footer'),
+    '#rows' => 10,
+    // TODO: this doesn't seem to work...
+    '#cols' => 5,
+    '#default_value' => variable_get('reservations_checklist_footer', ''),
+    '#description' => t('Footer portion of printable checklist. Normally includes signature lines. HTML allowed.'),
+  );
+
+  if (module_exists('token')) {
+    $form['token_help'] = array(
+      '#title' => t('Replacement patterns'),
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+
+    // TODO Please change this theme call to use an associative array for the $variables parameter.
+    $form['token_help']['help'] = array(
+      '#value' => theme('token_help', 'node'),
+    );
+  }
+
+  return system_settings_form($form);
+}
+
+/**
+ * Returns checklist with only the settings in reservations-printable-checklist.tpl
+ */
+function reservations_printable_checklist($node) {
+  print theme('reservations_printable_checklist', array('node' => $node));
+}
+
+
+/**
+ * Variables sent to reservations-printable-checklist.tpl
+ */
+function reservations_preprocess_reservations_printable_checklist(&$variables) {
+
+  $node = $variables['node'];
+  setlocale(LC_MONETARY, 'en_US');
+
+  $user     = user_load($node->uid);
+  $username = $user->name;
+  $email    = $user->mail;
+  if (module_exists('civicrm')) {
+
+    civicrm_initialize(TRUE);
+    global $civicrm_root;
+
+    require_once $civicrm_root . '/CRM/Core/BAO/UFMatch.php';
+    $userID = CRM_Core_BAO_UFMatch::getContactId( $user->uid );
+
+    $cg = array('contact_id' => $userID);
+
+    //Altering module to use v3 of the civicrm API
+    $params = array(
+		    'version' => 3,
+		    'sequential' => 1,
+		    'contact_id' => $userID,
+		    );
+    $result = civicrm_api('Contact', 'get', $params);
+    if ($result && isset($result['values']) && $result['values']) {
+      $ob = $result['values'][0];
+      //update username
+      $username = $ob['display_name'];
+      $phone = $ob['phone'];
+    }
+    //END altering
+  }
+
+  $items = $node->reservations_reservation_items;
+dsm($node->og_node1['und'][0]['target_id']);
+
+  $projectnode = node_load($node->og_node1['und'][0]['target_id']);
+  dsm($projectnode);
+  $langcode = $node->language;
+  // Convert to site timezone.
+  $start_date       = reservations_create_local_date_object($node->field_reservations_date[$langcode][0]['value']);
+  $end_date         = reservations_create_local_date_object($node->field_reservations_date[$langcode][0]['value2']);
+
+  $hours = round((intval(date_format($end_date, "U")) - intval(date_format($start_date, "U"))) / 3600, 2);
+
+  $variables['start_date'] = format_date($start_date->format('U'));
+  $variables['end_date'] = format_date($end_date->format('U'));
+  $variables['hours'] = $hours;
+  $variables['username'] = $username;
+  $variables['email'] = $email;
+  $variables['phone'] = $phone;
+  $variables['project_name'] = $projectnode->title;
+  $variables['items'] = $items;
+
+}
+
+

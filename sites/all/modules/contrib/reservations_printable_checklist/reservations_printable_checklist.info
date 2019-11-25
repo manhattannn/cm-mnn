@@ -1,0 +1,19 @@
+name = Reservations Printable Checklist
+package = Reservations
+description = "Adds a printable checklist option to Reservation nodes."
+
+core = 7.x
+
+dependencies[] = reservations
+
+configure = admin/config/reservations/checklist
+
+files[] = reservations_printable_checklist.module
+
+
+; Information added by drupal.org packaging script on 2013-10-09
+version = "7.x-1.0-dev"
+core = "7.x"
+project = "reservations"
+datestamp = "1381332469"
+
