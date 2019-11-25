@@ -35,7 +35,7 @@ stylesheets[all][] = system.menus.css
 
 ; Then we add our own stylesheets.
 stylesheets[all][] = css/normalize.css
-stylesheets[all][] = css/formalize.css
+;stylesheets[all][] = css/formalize.css
 stylesheets[all][] = css/wireframes.css
 stylesheets[all][] = css/layouts/responsive-sidebars.css
 stylesheets[all][] = css/page-backgrounds.css
@@ -55,9 +55,10 @@ stylesheets[all][] = css/social_foundicons.css
 stylesheets[all][] = css/social_foundicons_ie7.css
 stylesheets[all][] = css/responsive-nav.css
 stylesheets[all][] = css/cm.css
+stylesheets[all][] = css/hero.css
 
 ; Add CSS for CiviCRM Events
-stylesheets[all][] = mnn_2019/css/app.min.css
+;stylesheets[all][] = mnn_2019/css/app.min.css
 
 ; Built-in conditional stylesheet support has been removed from Zen 7.x-5.x.
 ; Instead, Zen now adds conditional-comment-included classes to the html
@@ -73,11 +74,12 @@ stylesheets[all][] = mnn_2019/css/app.min.css
 
 ; Optionally add some JavaScripts to your theme.
 
-#scripts[] = js/jquery.formalize.min.js
-#scripts[] = js/select2.min.js
-#scripts[] = js/jquery.selectorquery.min.js
-#scripts[] = js/script.js
-#scripts[] = js/jquery.html5placeholders.js
+scripts['footer'] = js/app.js
+;scripts[] = js/jquery.formalize.min.js
+;scripts[] = js/select2.min.js
+;scripts[] = js/jquery.selectorquery.min.js
+;scripts[] = js/script.js
+;scripts[] = js/jquery.html5placeholders.js
 
 ; This section lists the regions defined in Zen's default page.tpl.php and
 ; maintenance-page.tpl.php files. The name in brackets is the machine name of
