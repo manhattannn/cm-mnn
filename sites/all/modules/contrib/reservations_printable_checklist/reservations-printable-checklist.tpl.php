@@ -54,7 +54,8 @@ $logourl = theme_get_setting('logo_path', '');
  dsm($item);   
     if ($item['placeholder_title']) {
       $ttitle = htmlspecialchars($item['placeholder_title']);
-      $ttitle = str_replace("(Reservation)", "",$ttitle);
+//      $ttitle = str_replace("(Reservation)", "",$ttitle);
+      $ttitle = preg_replace('/\(.+\)/', '', $ttitle);
     }
     else {
       $ttitle = '<b>SPECIFIC ITEM NOT SELECTED FROM BUCKET</b>';
