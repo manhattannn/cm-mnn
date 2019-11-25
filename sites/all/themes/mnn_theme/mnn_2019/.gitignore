@@ -1,8 +1,7 @@
 # General
 .DS_Store
 .idea
-package-lock.json
-package.json
+
 # Gulp/node
 npm-debug.log
 node_modules
