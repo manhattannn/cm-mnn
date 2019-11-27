@@ -79,7 +79,7 @@ $logourl = theme_get_setting('logo_path', '');
     ?>
             <tr class="<?php print $even_odd; ?>">
               <td>
-                <div><?php print $ttitle."<br>".$inv_number; ?></div>
+                <div>&#9634; &nbsp;<?php print $ttitle."<br>".$inv_number; ?></div>
                 <?php
     if (count($item_node->taxonomy) > 0) {
 
