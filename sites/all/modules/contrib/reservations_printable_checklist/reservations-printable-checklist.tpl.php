@@ -26,13 +26,17 @@ $logourl = theme_get_setting('logo_path', '');
           print variable_get('reservations_checklist_header','');
         }
         ?>
-        <strong>From:</strong>  <?php print $start_date . '<br />'; ?>
-        <strong>To:</strong>  <?php print $end_date . '<br />'; ?>
-        <strong>Name:</strong>  <?php print $username ?><br />
-        <strong>Email:</strong>  <?php print $email ?><br />
-        <strong>Phone:</strong>  <?php print $phone ?><br />
-        <strong>Project: </strong> <?php print $project_name ?><br />
-
+      <table id="info" width="100%">
+      <td width="50%" valign="top">
+        <strong>Start time: </strong>  <?php print $start_date . '<br />'; ?>
+        <strong>End time: </strong>  <?php print $end_date . '<p>'; ?>
+        <strong>Project: </strong> <?php print $project_name ?>
+      </td><td valign="top">          
+        <strong>Name: </strong>  <?php print $displayname ?><br />
+        <strong>Username: </strong>  <?php print $username ?><br />     
+        <strong>Email: </strong>  <?php print $email ?><br />
+        <strong>Phone :</strong>  <?php print $phone ?><br />
+      </td></table>
      </div>
         <table id="cost">
           <thead>
@@ -51,7 +55,7 @@ $logourl = theme_get_setting('logo_path', '');
 
     //$type            = reservations_load_content_type_settings($item->type);
     //$type            = reservations_load_item_settings($item, $item->type);
- dsm($item);   
+// dsm($item);   
     if ($item['placeholder_title']) {
       $ttitle = htmlspecialchars($item['placeholder_title']);
 //      $ttitle = str_replace("(Reservation)", "",$ttitle);

@@ -136,6 +136,7 @@ function reservations_preprocess_reservations_printable_checklist(&$variables) {
   $user     = user_load($node->uid);
   $username = $user->name;
   $email    = $user->mail;
+//  dsm($user);
   if (module_exists('civicrm')) {
 
     civicrm_initialize(TRUE);
@@ -155,8 +156,8 @@ function reservations_preprocess_reservations_printable_checklist(&$variables) {
     $result = civicrm_api('Contact', 'get', $params);
     if ($result && isset($result['values']) && $result['values']) {
       $ob = $result['values'][0];
-      //update username
-      $username = $ob['display_name'];
+      //
+      $displayname = $ob['display_name'];
       $phone = $ob['phone'];
     }
     //END altering
@@ -178,6 +179,7 @@ dsm($node->og_node1['und'][0]['target_id']);
   $variables['end_date'] = format_date($end_date->format('U'));
   $variables['hours'] = $hours;
   $variables['username'] = $username;
+  $variables['displayname'] = $displayname;  
   $variables['email'] = $email;
   $variables['phone'] = $phone;
   $variables['project_name'] = $projectnode->title;

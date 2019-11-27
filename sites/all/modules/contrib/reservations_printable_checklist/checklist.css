@@ -25,8 +25,9 @@ body {
     
       #cost td ,
       #cost th {
-        padding: 5px;
+        padding: 15px;
         vertical-align: top;
+               font-size: 1.8em;
         }
     
       #cost .even td ,
@@ -39,10 +40,43 @@ body {
         }
       
       #cost ul.accessories {
-        font-size: 0.8em;
+        font-size: 1.8em;
         margin-bottom: 0;
         margin-top: 0;
         }
+
+
+    #info {
+      border-collapse: collapse;
+      width: 100%;
+      }
+    
+      #info td ,
+      #info th {
+        padding: 5px;
+        vertical-align: top;
+       font-size: 1.2em;
+       line-height: 1.5em;        
+        }
+    
+      #info .even td ,
+      #info .even th {
+       background: #ddd;
+
+
+        }
+  
+      #info th {
+        text-align: left;
+        }
+      
+      #info ul.accessories {
+        font-size: 1.6em;
+        margin-bottom: 0;
+        margin-top: 0;
+        }
+ 
+
     
     #boilerplate ,
     #footer {
