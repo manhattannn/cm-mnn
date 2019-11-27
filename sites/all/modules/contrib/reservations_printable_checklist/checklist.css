@@ -25,9 +25,9 @@ body {
     
       #cost td ,
       #cost th {
-        padding: 15px;
+        padding: 16px;
         vertical-align: top;
-               font-size: 1.8em;
+               font-size: 22;
         }
     
       #cost .even td ,
@@ -55,8 +55,8 @@ body {
       #info th {
         padding: 5px;
         vertical-align: top;
-       font-size: 1.2em;
-       line-height: 1.5em;        
+       font-size: 20px;
+       line-height: 28px;        
         }
     
       #info .even td ,

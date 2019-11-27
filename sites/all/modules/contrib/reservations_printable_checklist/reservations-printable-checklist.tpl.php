@@ -41,7 +41,12 @@ $logourl = theme_get_setting('logo_path', '');
         <table id="cost">
           <thead>
             <tr>
-              <th>Item</th>
+              <th><?php if(count($items) == 1) {
+                           print "Item:";
+                        }else{
+                          print "Items:";
+                        } ?>    
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -79,7 +84,7 @@ $logourl = theme_get_setting('logo_path', '');
     ?>
             <tr class="<?php print $even_odd; ?>">
               <td>
-                <div>&#9634; &nbsp;<?php print $ttitle."<br>".$inv_number; ?></div>
+                <div>&#9634; &nbsp;<?php print $ttitle; ?></div>
                 <?php
     if (count($item_node->taxonomy) > 0) {
 
