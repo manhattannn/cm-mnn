@@ -22,3 +22,14 @@ sites/*/private
 sites/all/civi-extensions/cache/*
 sites/all/civi-extensions/cache/.*
 sites/all/civi-extensions/cache/*/*
+
+### sass files ###
+*.sass-cache*
+.sass-cache
+*.css.map
+*.sass.map
+*.scss.map
+#
+### NPM / Node modules ###
+**/node_modules/*
+
