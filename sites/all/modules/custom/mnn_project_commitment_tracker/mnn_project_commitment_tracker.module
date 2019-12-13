@@ -1,6 +1,23 @@
 <?php
 
-function mnn_project_commitment_tracker_view_headers_report($results) {
+function mnn_project_commitment_tracker_view_headers_report($view) { 
+dsm($view);
+  $view2 = views_get_view('producer_show_upload_report');
+  $view2->set_display('attachment_1');
+//  $view->set_arguments(array($tid));
+  $view2->display_handler->options['filters']=$view->filter;
+  // change the amount of items to show
+//  $exposed_input = $view->exposed_input;
+  $view2->exposed_input = $view->exposed_input;
+//  $view->exposed_input['contact_sub_type'] = array("Media_Radio_TV_Newspaper_"); 
+  // change the amount of items to show
+  $view2->set_items_per_page(0);
+  $view2->pre_execute();
+  $view2->execute();
+dsm($view2);
+ $results = $view2->result;
+
+
   //initialize counters
 //  dsm($results);
   $total = 0;
