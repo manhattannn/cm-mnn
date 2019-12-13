@@ -1,8 +1,25 @@
 <?php
 
-function mnn_project_commitment_tracker_view_headers_report($results) {
+function mnn_project_commitment_tracker_view_headers_report($view) { 
+dsm($view);
+  $view2 = views_get_view('producer_show_upload_report');
+  $view2->set_display('attachment_1');
+//  $view->set_arguments(array($tid));
+  $view2->display_handler->options['filters']=$view->filter;
+  // change the amount of items to show
+//  $exposed_input = $view->exposed_input;
+  $view2->exposed_input = $view->exposed_input;
+//  $view->exposed_input['contact_sub_type'] = array("Media_Radio_TV_Newspaper_"); 
+  // change the amount of items to show
+  $view2->set_items_per_page(0);
+  $view2->pre_execute();
+  $view2->execute();
+dsm($view2);
+ $results = $view2->result;
+
+
   //initialize counters
-  //dsm($results);
+//  dsm($results);
   $total = 0;
   $total_ok = 0;
   $weekly_total = 0;
@@ -15,7 +32,7 @@ function mnn_project_commitment_tracker_view_headers_report($results) {
   foreach ($results as $result) {
     $total++;
   
-    if ( $result->node_og_membership__field_data_field_interval2_field_interva == "775") {
+    if ( $result->field_field_interval[0]['raw']['tid'] == "775") {
   //monthly = 775
       $monthly_total++;
       if ($result->node_title >= 2) {
@@ -23,7 +40,7 @@ function mnn_project_commitment_tracker_view_headers_report($results) {
         $total_ok++;
       } 
     }
-    if ( $result->node_og_membership__field_data_field_interval2_field_interva == "781") {
+    if ( $result->field_field_interval[0]['raw']['tid']  == "781") {
   //weekly = 781
       $weekly_total++;
       if ($result->node_title >= 8) {
@@ -31,7 +48,7 @@ function mnn_project_commitment_tracker_view_headers_report($results) {
         $total_ok++;
       }
     }
-    if ( $result->node_og_membership__field_data_field_interval2_field_interva == "774") {
+    if ( $result->field_field_interval[0]['raw']['tid']  == "774") {
   // every two weeks = 774
       $biweekly_total++;
       if ($result->node_title >= 6) {
@@ -42,20 +59,20 @@ function mnn_project_commitment_tracker_view_headers_report($results) {
   
   }
   $total_percent_complete = round($total_ok / ($total / 100),2);
-  print $total_percent_complete." % of all shows have met their requirement [ ".$total_ok." of ". $total. " ]";
-  print "<br><br>";
+//  print $total_percent_complete." % of all shows have met their requirement [ ".$total_ok." of ". $total. " ]";
+//  print "<br><br>";
 
   $weekly_percent_complete = round($weekly_ok / ($weekly_total / 100),2);
-  print $weekly_percent_complete." % of WEEKLY shows have met their requirement [ ".$weekly_ok." of ". $weekly_total. " ]";
-  print "<br><br>";
+//  print $weekly_percent_complete." % of WEEKLY shows have met their requirement [ ".$weekly_ok." of ". $weekly_total. " ]";
+//  print "<br><br>";
 
   $biweekly_percent_complete = round($biweekly_ok / ($biweekly_total / 100),2);
-  print $biweekly_percent_complete." % of BIWEEKLY shows have met their requirement [ ".$biweekly_ok." of ". $biweekly_total. " ]";
-  print "<br><br>";
+//  print $biweekly_percent_complete." % of BIWEEKLY shows have met their requirement [ ".$biweekly_ok." of ". $biweekly_total. " ]";
+//  print "<br><br>";
 
   $monthly_percent_complete = round($monthly_ok / ($monthly_total / 100),2);
-  print $monthly_percent_complete." % of MONTHLY shows have met their requirement [ ".$monthly_ok." of ". $monthly_total. " ]";
-  print "<br><br>";
+//  print $monthly_percent_complete." % of MONTHLY shows have met their requirement [ ".$monthly_ok." of ". $monthly_total. " ]";
+//  print "<br><br>";
     $header = array();
     $rows = array();
     $rows[0] = array();
@@ -63,26 +80,26 @@ function mnn_project_commitment_tracker_view_headers_report($results) {
         $rows[2] = array();
           $rows[3] = array();
     $header[] = "";
-    $header[] = "ALL";
-    $header[] = "Monthly";
-    $header[] = "Biweekly";
-    $header[] = "Weekly";
-    $rows[0][] = "Total";
-    $rows[0][] = $total;
-      $rows[0][] = $monthly_total;
-        $rows[0][] = $biweekly_total;
-          $rows[0][] = $weekly_total;
-     $rows[1][] = "Completed Total";
-    $rows[1][] = $total_ok;
-      $rows[1][] = $monthly_ok;
-        $rows[1][] = $biweekly_ok;
-          $rows[1][] = $weekly_ok; 
-       $rows[2][] = "Not Completed Total";
-    $rows[2][] = ($total - $total_ok);
-      $rows[2][] = ($monthly_total-$monthly_ok);
-        $rows[2][] = ($biweekly_total-$biweekly_ok);
-          $rows[2][] = ($weekly_total-$weekly_ok);       
-      $output = theme('table', array('header' => $header, 'rows' => $rows));
+    $header[] = "COMPLETE";
+    $header[] = "NOT COMPLETE";
+    $header[] = "TOTAL";
+    $rows[0][] = "Monthly: (".$monthly_percent_complete."%)";
+    $rows[0][] = $monthly_ok;
+      $rows[0][] = ($monthly_total-$monthly_ok);
+        $rows[0][] = $monthly_total;
+     $rows[1][] = "Biweekly: (".$biweekly_percent_complete."%)";
+    $rows[1][] = $biweekly_ok;
+      $rows[1][] = ($biweekly_total-$biweekly_ok);
+        $rows[1][] = $biweekly_total;
+       $rows[2][] = "Weekly: (".$weekly_percent_complete."%)";
+    $rows[2][] = $weekly_ok;
+      $rows[2][] = ($weekly_total-$weekly_ok);
+        $rows[2][] = $weekly_total;  
+       $rows[3][] = "All: (".$total_percent_complete."%)";
+    $rows[3][] = $total_ok;
+      $rows[3][] = ($total - $total_ok);
+        $rows[3][] = $total;      
+    $output = theme('table', array('header' => $header, 'rows' => $rows));
     print $output;
 
 }

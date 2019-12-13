@@ -1,0 +1,35 @@
+# Ignore .htaccess
+/.htaccess*
+/#.htaccess*
+/.htpasswd*
+/.gitignore
+/check.php*
+/test2.php*
+/.well-known
+
+# Ignore everything in default directory
+sites/default/*
+sites/default/.*
+
+# Ignore configuration files that may contain sensitive information.
+sites/*/*settings*.php
+
+# Ignore paths that contain user-generated content.
+sites/*/files
+sites/*/private
+
+# Ignore caches
+sites/all/civi-extensions/cache/*
+sites/all/civi-extensions/cache/.*
+sites/all/civi-extensions/cache/*/*
+
+### sass files ###
+*.sass-cache*
+.sass-cache
+*.css.map
+*.sass.map
+*.scss.map
+#
+### NPM / Node modules ###
+**/node_modules/*
+
