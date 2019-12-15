@@ -135,7 +135,6 @@ function cm_crew_connect_role_positions($mapping) {
       }
     }
   }
-  dsm($positions);
   return $positions;
 }
 
