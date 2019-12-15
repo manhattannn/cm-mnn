@@ -1,0 +1,12 @@
+name = MNN Producer Menu
+package = MNN Custom
+description = "Creates custom menu pages and items for Producers"
+version = 7.x-1.0
+project = mnn_producer_menu
+project_url = https://github.com/cm-advanced/mnn_producer_menu
+
+core = 7.x
+files[] = mnn_producer_menu.module
+
+
+
