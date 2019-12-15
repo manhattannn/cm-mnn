@@ -78,8 +78,6 @@ function field_collection_field_collection_from_field_context($context, $conf) {
   if (isset($entity->{$plugin_info['field_name']})) {
 
     $items = field_get_items($plugin_info['entity_type'], $entity, $plugin_info['field_name']);
-<<<<<<< HEAD
-=======
 
     // Use negative delta to get item from the end.
     if ($delta < 0) {
@@ -89,7 +87,6 @@ function field_collection_field_collection_from_field_context($context, $conf) {
       $delta = count($items) + $delta;
     }
 
->>>>>>> origin/stage
     if (!empty($items) && isset($items[$delta]['value'])) {
       $field_collection_item = field_collection_item_load($items[$delta]['value']);
     }

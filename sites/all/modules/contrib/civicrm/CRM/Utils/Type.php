@@ -233,11 +233,7 @@ class CRM_Utils_Type {
    *
    * @return mixed
    *   The data, escaped if necessary.
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Utils/Type.php
-   * @throws \Exception
-=======
    * @throws CRM_Core_Exception
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Utils/Type.php
    */
   public static function escape($data, $type, $abort = TRUE) {
     switch ($type) {

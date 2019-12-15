@@ -324,109 +324,6 @@ function _civicrm_api3_payment_create_spec(&$params) {
         'type' => 'Text',
       ],
     ],
-    'is_send_contribution_notification' => [
-      'title' => ts('Send out notifications based on contribution status change?'),
-      'description' => ts('Most commonly this equates to emails relating to the contribution, event, etcwhen a payment completes a contribution'),
-      'type' => CRM_Utils_Type::T_BOOLEAN,
-      'api.default' => TRUE,
-    ],
-    'payment_instrument_id' => [
-      'name' => 'payment_instrument_id',
-      'type' => CRM_Utils_Type::T_INT,
-      'title' => ts('Payment Method'),
-      'description' => ts('FK to payment_instrument option group values'),
-      'where' => 'civicrm_financial_trxn.payment_instrument_id',
-      'table_name' => 'civicrm_financial_trxn',
-      'entity' => 'FinancialTrxn',
-      'bao' => 'CRM_Financial_DAO_FinancialTrxn',
-      'localizable' => 0,
-      'html' => [
-        'type' => 'Select',
-      ],
-      'pseudoconstant' => [
-        'optionGroupName' => 'payment_instrument',
-        'optionEditPath' => 'civicrm/admin/options/payment_instrument',
-      ],
-    ],
-    'card_type_id' => [
-      'name' => 'card_type_id',
-      'type' => CRM_Utils_Type::T_INT,
-      'title' => ts('Card Type ID'),
-      'description' => ts('FK to accept_creditcard option group values'),
-      'where' => 'civicrm_financial_trxn.card_type_id',
-      'table_name' => 'civicrm_financial_trxn',
-      'entity' => 'FinancialTrxn',
-      'bao' => 'CRM_Financial_DAO_FinancialTrxn',
-      'localizable' => 0,
-      'html' => [
-        'type' => 'Select',
-      ],
-      'pseudoconstant' => [
-        'optionGroupName' => 'accept_creditcard',
-        'optionEditPath' => 'civicrm/admin/options/accept_creditcard',
-      ],
-    ],
-    'trxn_result_code' => [
-      'name' => 'trxn_result_code',
-      'type' => CRM_Utils_Type::T_STRING,
-      'title' => ts('Transaction Result Code'),
-      'description' => ts('processor result code'),
-      'maxlength' => 255,
-      'size' => CRM_Utils_Type::HUGE,
-      'where' => 'civicrm_financial_trxn.trxn_result_code',
-      'table_name' => 'civicrm_financial_trxn',
-      'entity' => 'FinancialTrxn',
-      'bao' => 'CRM_Financial_DAO_FinancialTrxn',
-      'localizable' => 0,
-    ],
-    'trxn_id' => [
-      'name' => 'trxn_id',
-      'type' => CRM_Utils_Type::T_STRING,
-      'title' => ts('Transaction ID'),
-      'description' => ts('Transaction id supplied by external processor. This may not be unique.'),
-      'maxlength' => 255,
-      'size' => 10,
-      'where' => 'civicrm_financial_trxn.trxn_id',
-      'table_name' => 'civicrm_financial_trxn',
-      'entity' => 'FinancialTrxn',
-      'bao' => 'CRM_Financial_DAO_FinancialTrxn',
-      'localizable' => 0,
-      'html' => [
-        'type' => 'Text',
-      ],
-    ],
-    'check_number' => [
-      'name' => 'check_number',
-      'type' => CRM_Utils_Type::T_STRING,
-      'title' => ts('Check Number'),
-      'description' => ts('Check number'),
-      'maxlength' => 255,
-      'size' => 6,
-      'where' => 'civicrm_financial_trxn.check_number',
-      'table_name' => 'civicrm_financial_trxn',
-      'entity' => 'FinancialTrxn',
-      'bao' => 'CRM_Financial_DAO_FinancialTrxn',
-      'localizable' => 0,
-      'html' => [
-        'type' => 'Text',
-      ],
-    ],
-    'pan_truncation' => [
-      'name' => 'pan_truncation',
-      'type' => CRM_Utils_Type::T_STRING,
-      'title' => ts('Pan Truncation'),
-      'description' => ts('Last 4 digits of credit card'),
-      'maxlength' => 4,
-      'size' => 4,
-      'where' => 'civicrm_financial_trxn.pan_truncation',
-      'table_name' => 'civicrm_financial_trxn',
-      'entity' => 'FinancialTrxn',
-      'bao' => 'CRM_Financial_DAO_FinancialTrxn',
-      'localizable' => 0,
-      'html' => [
-        'type' => 'Text',
-      ],
-    ],
   ];
 }
 
@@ -454,11 +351,7 @@ function _civicrm_api3_payment_get_spec(&$params) {
       'api.aliases' => ['contribution_id'],
     ],
     'trxn_id' => [
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/api/v3/Payment.php
-      'title' => 'Transaction ID',
-=======
       'title' => ts('Transaction ID'),
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/api/v3/Payment.php
       'type' => CRM_Utils_Type::T_STRING,
     ],
     'trxn_date' => [
@@ -561,13 +454,10 @@ function _civicrm_api3_payment_sendconfirmation_spec(&$params) {
     'title' => ts('From email; an email string or the id of a valid email'),
     'type' => CRM_Utils_Type::T_STRING,
   ];
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/api/v3/Payment.php
-=======
   $params['is_send_contribution_notification'] = [
     'title' => ts('Send any event or contribution confirmations triggered by this payment'),
     'description' => ts('If this payment completes a contribution it may mean receipts will go out according to busines logic if thie is set to TRUE'),
     'type' => CRM_Utils_Type::T_BOOLEAN,
     'api.default' => 0,
   ];
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/api/v3/Payment.php
 }

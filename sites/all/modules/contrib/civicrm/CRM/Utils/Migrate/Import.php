@@ -379,27 +379,6 @@ AND        v.name = %1
    * Returns an option group's ID, given its name.
    *
    * @param $groupName
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Utils/Migrate/Import.php
-   * @param $idMap
-   *
-   * @return int|null
-   */
-  private function getOptionGroupIDFromName($groupName, &$idMap) {
-    if (empty($groupName)) {
-      return NULL;
-    }
-
-    if (!isset($idMap['option_group'][$groupName])) {
-      $idMap['option_group'][$groupName] = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_OptionGroup', $groupName, 'id', 'name');
-    }
-
-    return $idMap['option_group'][$groupName];
-  }
-
-  /**
-   * @param $xml
-=======
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Utils/Migrate/Import.php
    * @param $idMap
    *
    * @return int|null

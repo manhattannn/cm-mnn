@@ -84,12 +84,6 @@ AND    {$this->_componentClause}";
    * Build the form object.
    */
   public function buildQuickForm() {
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contribute/Form/Task/Status.php
-    $status = CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'label');
-    unset($status[2]);
-    unset($status[5]);
-    unset($status[6]);
-=======
     $status = CRM_Contribute_BAO_Contribution_Utils::getContributionStatuses(
       'contribution', $this->_contributionIds[0]
     );
@@ -100,7 +94,6 @@ AND    {$this->_componentClause}";
     foreach (['Pending', 'In Progress', 'Overdue'] as $suppress) {
       unset($status[CRM_Utils_Array::key($suppress, $byName)]);
     }
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contribute/Form/Task/Status.php
     $this->add('select', 'contribution_status_id',
       ts('Contribution Status'),
       $status,

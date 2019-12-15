@@ -952,13 +952,8 @@ class CRM_Contribute_BAO_Contribution extends CRM_Contribute_DAO_Contribution {
    * @return int
    */
   public static function getToFinancialAccount($contribution, $params) {
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contribute/BAO/Contribution.php
-    if (!empty($params['payment_processor'])) {
-      return CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($contribution['payment_processor'], NULL, 'civicrm_payment_processor');
-=======
     if (!empty($params['payment_processor_id'])) {
       return CRM_Contribute_PseudoConstant::getRelationalFinancialAccount($params['payment_processor_id'], NULL, 'civicrm_payment_processor');
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contribute/BAO/Contribution.php
     }
     if (!empty($params['payment_instrument_id'])) {
       return CRM_Financial_BAO_FinancialTypeAccount::getInstrumentFinancialAccount($contribution['payment_instrument_id']);
@@ -1317,27 +1312,6 @@ class CRM_Contribute_BAO_Contribution extends CRM_Contribute_DAO_Contribution {
       return FALSE;
     }
     return self::isContributionStatusNegative($currentContributionStatusID);
-  }
-
-  /**
-   * It is possible to override the membership id that is updated from the payment processor.
-   *
-   * Historically Paypal does this & it still does if it determines data is messed up - see
-   * https://lab.civicrm.org/dev/membership/issues/13
-   *
-   * Read the comment block on repeattransaction for more information
-   * about how things should  work.
-   *
-   * @param int $contributionID
-   * @param array $input
-   *
-   * @throws \CiviCRM_API3_Exception
-   */
-  protected static function handleMembershipIDOverride($contributionID, $input) {
-    if (!empty($input['membership_id'])) {
-      Civi::log()->debug('The related membership id has been overridden - this may impact data - see  https://github.com/civicrm/civicrm-core/pull/15053');
-      civicrm_api3('MembershipPayment', 'create', ['contribution_id' => $contributionID, 'membership_id' => $input['membership_id']]);
-    }
   }
 
   /**

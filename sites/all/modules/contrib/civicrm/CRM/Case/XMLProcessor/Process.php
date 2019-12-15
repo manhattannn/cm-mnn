@@ -105,11 +105,7 @@ class CRM_Case_XMLProcessor_Process extends CRM_Case_XMLProcessor {
       foreach ($xml->CaseRoles as $caseRoleXML) {
         foreach ($caseRoleXML->RelationshipType as $relationshipTypeXML) {
           if ((int ) $relationshipTypeXML->creator == 1) {
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Case/XMLProcessor/Process.php
-            if (!$this->createRelationships($this->locateNameOrLabel($relationshipTypeXML),
-=======
             if (!$this->createRelationships($relationshipTypeXML,
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Case/XMLProcessor/Process.php
               $params
             )
             ) {
@@ -846,34 +842,6 @@ AND        a.is_deleted = 0
 
   /**
    * At some point name and label got mixed up for case roles.
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Case/XMLProcessor/Process.php
-   * Check for higher priority tag <machineName> first which represents name, then fall back to the <name> tag which somehow became label.
-   * We do this to avoid requiring people to update their xml files which can be stored in external files.
-   *
-   * Note this is different than doing something like comparing the <name> tag against name in the database and then falling back to comparing label in the database, which is subject to an edge case where you would get the wrong one (where the label of one relationship type is the same as the name of another). Here there are two tags with explicit single meanings.
-   *
-   * @param SimpleXMLElement $xml
-   *
-   * @return string
-   */
-  public function locateNameOrLabel($xml) {
-    /* While it's unlikely, it's possible somebody is using '0' as their machineName, so we should let them.
-     * Specifically if machineName is:
-     * missing - use name
-     * null - use name
-     * blank - use name
-     * the string '0' - use machineName
-     * the number 0 - use machineName (but can't really have number 0 in simplexml unless cast to number)
-     * the word 'null' - use machineName and best not to think about it
-     */
-    if (isset($xml->machineName)) {
-      $machineName = (string) $xml->machineName;
-      if ($machineName !== '') {
-        return $machineName;
-      }
-    }
-    return (string) $xml->name;
-=======
    * Check against known machine name values, and then if no match check
    * against labels.
    * This is subject to some edge cases, but we catch those with a system
@@ -935,7 +903,6 @@ AND        a.is_deleted = 0
     // Just go with what we were passed in, even though it doesn't seem
     // to match *anything*. This was what it did before.
     return [FALSE, $lookupString];
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Case/XMLProcessor/Process.php
   }
 
 }

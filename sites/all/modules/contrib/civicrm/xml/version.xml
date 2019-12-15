@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="iso-8859-1" ?>
 <version>
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/xml/version.xml
-  <version_no>5.19.2</version_no>
-=======
   <version_no>5.20.0</version_no>
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/xml/version.xml
 </version>

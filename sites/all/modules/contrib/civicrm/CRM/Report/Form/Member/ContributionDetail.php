@@ -221,11 +221,7 @@ class CRM_Report_Form_Member_ContributionDetail extends CRM_Report_Form {
           'contribution_status_id' => [
             'title' => ts('Contribution Status'),
             'operatorType' => CRM_Report_Form::OP_MULTISELECT,
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Report/Form/Member/ContributionDetail.php
-            'options' => CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'label'),
-=======
             'options' => CRM_Contribute_BAO_Contribution::buildOptions('contribution_status_id', 'search'),
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Report/Form/Member/ContributionDetail.php
             'default' => [1],
           ],
           'total_amount' => ['title' => ts('Contribution Amount')],

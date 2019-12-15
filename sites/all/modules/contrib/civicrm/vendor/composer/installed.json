@@ -2475,8 +2475,6 @@
         "homepage": "https://github.com/totten/ca_config"
     },
     {
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/vendor/composer/installed.json
-=======
         "name": "tplaner/when",
         "version": "3.0.0+php53",
         "version_normalized": "3.0.0.0",
@@ -2518,7 +2516,6 @@
         ]
     },
     {
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/vendor/composer/installed.json
         "name": "xkerman/restricted-unserialize",
         "version": "1.1.12",
         "version_normalized": "1.1.12.0",

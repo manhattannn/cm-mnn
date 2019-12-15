@@ -2123,15 +2123,7 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
       );
     }
     elseif ($fieldName === 'contribution_status_id') {
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Core/BAO/UFGroup.php
-      $contributionStatuses = CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'label');
-      $statusName = CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'name');
-      foreach (['In Progress', 'Overdue', 'Refunded'] as $suppress) {
-        unset($contributionStatuses[CRM_Utils_Array::key($suppress, $statusName)]);
-      }
-=======
       $contributionStatuses = CRM_Contribute_BAO_Contribution_Utils::getContributionStatuses();
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Core/BAO/UFGroup.php
 
       $form->add('select', $name, $title,
         [

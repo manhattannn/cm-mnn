@@ -86,19 +86,6 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
 
     parent::preProcess();
 
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contribute/Form/Search.php
-    //membership ID
-    $memberShipId = CRM_Utils_Request::retrieve('memberId', 'Positive', $this);
-    if (isset($memberShipId)) {
-      $this->_formValues['contribution_membership_id'] = $memberShipId;
-    }
-    $participantId = CRM_Utils_Request::retrieve('participantId', 'Positive', $this);
-    if (isset($participantId)) {
-      $this->_formValues['contribution_participant_id'] = $participantId;
-    }
-
-=======
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contribute/Form/Search.php
     $sortID = NULL;
     if ($this->get(CRM_Utils_Sort::SORT_ID)) {
       $sortID = CRM_Utils_Sort::sortIDValue($this->get(CRM_Utils_Sort::SORT_ID),
@@ -344,7 +331,6 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
       }
 
       if ($group && is_array($group)) {
-        // @todo - stop changing formValues - respect submitted form values, change a working array.
         unset($this->_formValues['group']);
         foreach ($group as $groupID) {
           // @todo - stop changing formValues - respect submitted form values, change a working array.
@@ -476,10 +462,6 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
     if ($contribPageId) {
       $this->_formValues['contribution_page_id'] = $contribPageId;
     }
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contribute/Form/Search.php
-
-=======
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contribute/Form/Search.php
   }
 
   /**

@@ -68,8 +68,6 @@ class CRM_Upgrade_Incremental_SmartGroups {
       'pledge_create_date' => 'pledge_create',
       'pledge_end_date' => 'pledge_end',
       'pledge_start_date' => 'pledge_start',
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Upgrade/Incremental/SmartGroups.php
-=======
       'case_start_date' => 'case_from',
       'case_end_date' => 'case_to',
       'mailing_job_start_date' => 'mailing_date',
@@ -78,7 +76,6 @@ class CRM_Upgrade_Incremental_SmartGroups {
       'event' => 'event',
       'created_date' => 'log',
       'modified_date' => 'log',
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Upgrade/Incremental/SmartGroups.php
     ];
 
     foreach ($fields as $field) {

@@ -1134,42 +1134,8 @@ INNER JOIN  civicrm_membership membership2 ON membership1.membership_type_id = m
 
       // Collect existing fields from both 'main' and 'other' contacts first
       // This allows us to match up location/types when building the table rows
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Dedupe/Merger.php
-      foreach ($mergeTargets as $moniker => $cid) {
-        $searchParams = [
-          'contact_id' => $cid,
-          // CRM-17556 Order by field-specific criteria
-          'options' => [
-            'sort' => $blockInfo['sortString'],
-          ],
-        ];
-        $values = civicrm_api3($blockName, 'get', $searchParams);
-        if ($values['count']) {
-          $cnt = 0;
-          foreach ($values['values'] as $value) {
-            $locations[$moniker][$blockName][$cnt] = $value;
-            // Fix address display
-            if ($blockName == 'address') {
-              // For performance avoid geocoding while merging https://issues.civicrm.org/jira/browse/CRM-21786
-              // we can expect existing geocode values to be retained.
-              $value['skip_geocode'] = TRUE;
-              CRM_Core_BAO_Address::fixAddress($value);
-              unset($value['skip_geocode']);
-              $locations[$moniker][$blockName][$cnt]['display'] = CRM_Utils_Address::format($value);
-            }
-            // Fix email display
-            elseif ($blockName == 'email') {
-              $locations[$moniker][$blockName][$cnt]['display'] = CRM_Utils_Mail::format($value);
-            }
-
-            $cnt++;
-          }
-        }
-      }
-=======
       $locations['main'][$blockName] = self::buildLocationBlockForContact($mainId, $blockInfo, $blockName);
       $locations['other'][$blockName] = self::buildLocationBlockForContact($otherId, $blockInfo, $blockName);
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Dedupe/Merger.php
 
       // Now, build the table rows appropriately, based off the information on
       // the 'other' contact

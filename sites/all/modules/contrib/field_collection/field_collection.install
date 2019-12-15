@@ -374,11 +374,7 @@ function field_collection_update_7008() {
         ->fieldLanguageCondition($f_name, LANGUAGE_NONE);
       $query_result = $query->execute();
       if (isset($query_result['field_collection_item'])) {
-<<<<<<< HEAD
-        $results = $results + $query_result['field_collection_item'];
-=======
         $results += $query_result['field_collection_item'];
->>>>>>> origin/stage
       }
     }
   }
@@ -400,8 +396,6 @@ function field_collection_update_7008() {
       $count = count($orphans);
       entity_delete_multiple('field_collection_item', $orphans);
       drupal_set_message("Deleted $count orphaned field collection items.");
-<<<<<<< HEAD
-=======
     }
   }
 }
@@ -543,7 +537,6 @@ function field_collection_update_7009(&$sandbox) {
       db_delete('field_collection_item_revision')
         ->condition('revision_id', $each_modern_revision->revision_id)
         ->execute();
->>>>>>> origin/stage
     }
 
     $sandbox['current_field_collection_item']++;

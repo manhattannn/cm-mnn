@@ -1602,53 +1602,6 @@ class CRM_Contact_BAO_Query {
     }
 
     self::filterCountryFromValuesIfStateExists($formValues);
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contact/BAO/Query.php
-    // We shouldn't have to whitelist fields to not hack but here we are, for now.
-    $nonLegacyDateFields = [
-      'participant_register_date_relative',
-      'receive_date_relative',
-      'pledge_end_date_relative',
-      'pledge_create_date_relative',
-      'pledge_start_date_relative',
-      'pledge_payment_scheduled_date_relative',
-      'membership_join_date_relative',
-      'membership_start_date_relative',
-      'membership_end_date_relative',
-    ];
-    // Handle relative dates first
-    foreach (array_keys($formValues) as $id) {
-      if (
-        !in_array($id, $nonLegacyDateFields) && (
-        preg_match('/_date_relative$/', $id) ||
-        $id == 'event_relative' ||
-        $id == 'case_from_relative' ||
-        $id == 'case_to_relative')
-      ) {
-        if ($id == 'event_relative') {
-          $fromRange = 'event_start_date_low';
-          $toRange = 'event_end_date_high';
-        }
-        elseif ($id == 'case_from_relative') {
-          $fromRange = 'case_from_start_date_low';
-          $toRange = 'case_from_start_date_high';
-        }
-        elseif ($id == 'case_to_relative') {
-          $fromRange = 'case_to_end_date_low';
-          $toRange = 'case_to_end_date_high';
-        }
-        else {
-          $dateComponent = explode('_date_relative', $id);
-          $fromRange = "{$dateComponent[0]}_date_low";
-          $toRange = "{$dateComponent[0]}_date_high";
-        }
-
-        if (array_key_exists($fromRange, $formValues) && array_key_exists($toRange, $formValues)) {
-          CRM_Contact_BAO_Query::fixDateValues($formValues[$id], $formValues[$fromRange], $formValues[$toRange]);
-        }
-      }
-    }
-=======
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contact/BAO/Query.php
 
     foreach ($formValues as $id => $values) {
       if (self::isAlreadyProcessedForQueryFormat($values)) {
@@ -7083,15 +7036,11 @@ AND   displayRelType.is_active = 1
    */
   public function getFieldSpec($fieldName) {
     if (isset($this->_fields[$fieldName])) {
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contact/BAO/Query.php
-      return $this->_fields[$fieldName];
-=======
       $fieldSpec = $this->_fields[$fieldName];
       if (!empty($fieldSpec['is_pseudofield_for'])) {
         $fieldSpec = array_merge($this->_fields[$fieldSpec['is_pseudofield_for']], $this->_fields[$fieldName]);
       }
       return $fieldSpec;
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contact/BAO/Query.php
     }
     $lowFieldName = str_replace('_low', '', $fieldName);
     if (isset($this->_fields[$lowFieldName])) {
@@ -7186,10 +7135,7 @@ AND   displayRelType.is_active = 1
    * @param $values
    *
    * @return bool
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contact/BAO/Query.php
-=======
    * @throws \CRM_Core_Exception
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contact/BAO/Query.php
    */
   public function buildDateRangeQuery($values) {
     if ($this->isADateRangeField($values[0])) {

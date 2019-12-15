@@ -1641,16 +1641,10 @@ LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
       $relatedContacts = array_keys(CRM_Utils_Array::value('relatedContacts', $details, []));
       $mainRelatedContactId = reset($relatedContacts);
 
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contact/BAO/Relationship.php
-      foreach ($details['memberships'] as $membershipId => $membershipValues) {
-        $membershipInherittedFromContactID = NULL;
-        if (!empty($membershipValues['owner_membership_id'])) {
-=======
       foreach ($relationshipProcessor->getRelationshipMembershipsForContact((int) $cid) as $membershipId => $membershipValues) {
         $membershipInherittedFromContactID = NULL;
         if (!empty($membershipValues['owner_membership_id'])) {
           // @todo - $membership already has this now.
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contact/BAO/Relationship.php
           // Use get not getsingle so that we get e-notice noise but not a fatal is the membership has already been deleted.
           $inheritedFromMembership = civicrm_api3('Membership', 'get', ['id' => $membershipValues['owner_membership_id'], 'sequential' => 1])['values'][0];
           $membershipInherittedFromContactID = (int) $inheritedFromMembership['contact_id'];
@@ -1658,15 +1652,9 @@ LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
         $relTypeIds = [];
         if ($action & CRM_Core_Action::DELETE) {
           // @todo don't return relTypeId here - but it seems to be used later in a cryptic way (hint cryptic is not a complement).
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contact/BAO/Relationship.php
-          list($relTypeId, $isDeletable) = self::isInheritedMembershipInvalidated($membershipValues, $values, $cid, $mainRelatedContactId);
-          if ($isDeletable) {
-            CRM_Member_BAO_Membership::deleteRelatedMemberships($membershipValues['owner_membership_id'], $membershipValues['membership_contact_id']);
-=======
           list($relTypeId, $isDeletable) = self::isInheritedMembershipInvalidated($membershipValues, $values, $cid);
           if ($isDeletable) {
             CRM_Member_BAO_Membership::deleteRelatedMemberships($membershipValues['owner_membership_id'], $membershipValues['contact_id']);
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contact/BAO/Relationship.php
           }
           continue;
         }
@@ -2356,26 +2344,10 @@ AND cc.sort_name LIKE '%$name%'";
    * @param $membershipValues
    * @param array $values
    * @param int $cid
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contact/BAO/Relationship.php
-   * @param int $mainRelatedContactId
-=======
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contact/BAO/Relationship.php
    *
    * @return array
    * @throws \CiviCRM_API3_Exception
    */
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contact/BAO/Relationship.php
-  private static function isInheritedMembershipInvalidated($membershipValues, array $values, $cid, $mainRelatedContactId): array {
-    $membershipType = CRM_Member_BAO_MembershipType::getMembershipType($membershipValues['membership_type_id']);
-    $relTypeIds = $membershipType['relationship_type_id'];
-    $membshipInheritedFrom = $membershipValues['owner_membership_id'] ?? NULL;
-    if (!$membshipInheritedFrom || !in_array($values[$cid]['relationshipTypeId'], $relTypeIds)) {
-      return [implode(',', $relTypeIds), FALSE];
-    }
-    //CRM-16300 check if owner membership exist for related membership
-    $isDeletable = !empty($values[$mainRelatedContactId]['memberships'][$membshipInheritedFrom]);
-    return [implode(',', $relTypeIds), $isDeletable];
-=======
   private static function isInheritedMembershipInvalidated($membershipValues, array $values, $cid): array {
     // @todo most of this can go - it's just the weird historical returning of $relTypeId that it does.
     // now we have caching the parent fn can just call CRM_Member_BAO_MembershipType::getMembershipType
@@ -2451,7 +2423,6 @@ AND cc.sort_name LIKE '%$name%'";
       }
     }
     return !empty($existingRelationships);
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contact/BAO/Relationship.php
   }
 
   /**

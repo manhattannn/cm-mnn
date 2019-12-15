@@ -1769,10 +1769,6 @@ WHERE     civicrm_contact.id = " . CRM_Utils_Type::escape($id, 'Integer');
    */
   public static function getHierContactDetails($contactId, $fields) {
     $params = [['contact_id', '=', $contactId, 0, 0]];
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contact/BAO/Contact.php
-    $options = [];
-=======
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contact/BAO/Contact.php
 
     $returnProperties = self::makeHierReturnProperties($fields, $contactId);
 

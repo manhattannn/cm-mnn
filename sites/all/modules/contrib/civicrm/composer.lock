@@ -4,11 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/composer.lock
-    "content-hash": "bfbb5e8d36cb4c2d5fc6d71301ec4aa8",
-=======
     "content-hash": "1db0bb4f001a18ccb889d2c6cc9c5ddf",
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/composer.lock
     "packages": [
         {
             "name": "civicrm/civicrm-cxn-rpc",
@@ -2233,8 +2229,6 @@
             "time": "2017-05-10T20:08:17+00:00"
         },
         {
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/composer.lock
-=======
             "name": "tplaner/when",
             "version": "3.0.0+php53",
             "dist": {
@@ -2274,7 +2268,6 @@
             ]
         },
         {
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/composer.lock
             "name": "xkerman/restricted-unserialize",
             "version": "1.1.12",
             "source": {

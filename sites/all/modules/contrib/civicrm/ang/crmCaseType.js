@@ -379,12 +379,6 @@
       // $scope.caseType.definition.caseRoles, since the xml doesn't have them
       // and we need to display them in the roles table.
       _.each($scope.caseType.definition.caseRoles, function (set) {
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/ang/crmCaseType.js
-        _.each($scope.relationshipTypeOptions, function (relationshipTypeOption) {
-          if (relationshipTypeOption.text == set.name) {
-            // relationshipTypeOption.id here corresponds to one of the civicrm_relationship_type.label database fields, not civicrm_relationship_type.id
-            set.displaylabel = relationshipTypeOption.id;
-=======
         _.each($scope.relationshipTypeOptionsAll, function (relationshipTypeOption) {
           if (relationshipTypeOption.xmlName == set.name) {
             // relationshipTypeOption.text here corresponds to one of the
@@ -394,7 +388,6 @@
             set.displayLabel = relationshipTypeOption.text;
             // break out of inner `each` loop
             return false;
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/ang/crmCaseType.js
           }
         });
       });
@@ -524,27 +517,11 @@
       // which doesn't indicate the id or direction, because the xml spec
       // doesn't support those.
       var names = _.pluck($scope.caseType.definition.caseRoles, 'name');
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/ang/crmCaseType.js
-      if (!_.contains(names, roleName)) {
-        var matchingRoles = _.filter($scope.relationshipTypeOptions, {id: roleName});
-        if (matchingRoles.length) {
-          var matchingRole = matchingRoles.shift();
-          roles.push({name: roleName, displaylabel: matchingRole.text});
-        } else {
-           CRM.loadForm(CRM.url('civicrm/admin/reltype', {action: 'add', reset: 1, label_a_b: roleName}))
-            .on('crmFormSuccess', function(e, data) {
-              var newType = _.values(data.relationshipType)[0];
-              $scope.$apply(function() {
-                $scope.addRoleOnTheFly(roles, newType);
-              });
-            });
-=======
       if (matchingRole) {
         // If it's not in the table already, add it, otherwise do nothing since
         // don't want to add it twice.
         if (!_.contains(names, matchingRole.xmlName)) {
           roles.push({name: matchingRole.xmlName, displayLabel: matchingRole.text});
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/ang/crmCaseType.js
         }
       } else {
          // Not a known relationship type, so create on-the-fly.
@@ -603,15 +580,6 @@
         };
         $scope.relationshipTypeOptions.push(newRelTypeOption);
         $scope.relationshipTypeOptionsAll.push(newRelTypeOption);
-      }
-    };
-
-    $scope.addRoleOnTheFly = function(roles, newType) {
-      roles.push({name: newType.label_b_a, displaylabel: newType.label_a_b});
-      // Assume that the case role should be A-B but add both directions as options.
-      $scope.relationshipTypeOptions.push({id: newType.label_a_b, text: newType.label_a_b});
-      if (newType.label_a_b != newType.label_b_a) {
-        $scope.relationshipTypeOptions.push({id: newType.label_b_a, text: newType.label_b_a});
       }
     };
 

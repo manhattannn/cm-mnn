@@ -2442,14 +2442,9 @@ WHERE      civicrm_membership.is_test = 0
    * @param array $ids
    *   (@return CRM_Contribute_BAO_Contribution
    *
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Member/BAO/Membership.php
-   * @throws \CiviCRM_API3_Exception
-   * @throws \CRM_Core_Exception
-=======
    * @return CRM_Contribute_BAO_Contribution
    * @throws \CRM_Core_Exception
    * @throws \CiviCRM_API3_Exception
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Member/BAO/Membership.php
    */
   public static function recordMembershipContribution(&$params, $ids = []) {
     if (!empty($ids)) {

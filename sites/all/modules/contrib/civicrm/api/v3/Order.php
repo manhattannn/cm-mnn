@@ -90,14 +90,11 @@ function civicrm_api3_order_create($params) {
   civicrm_api3_verify_one_mandatory($params, NULL, ['line_items', 'total_amount']);
   $entity = NULL;
   $entityIds = [];
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/api/v3/Order.php
-=======
   $contributionStatus = CRM_Utils_Array::value('contribution_status_id', $params);
   if ($contributionStatus !== 'Pending' && 'Pending' !== CRM_Core_PseudoConstant::getName('CRM_Contribute_BAO_Contribution', 'contribution_status_id', $contributionStatus)) {
     CRM_Core_Error::deprecatedFunctionWarning("Creating a Order with a status other than pending is deprecated. Currently empty defaults to 'Completed' so as a transition not passing in 'Pending' is deprecated. You can chain payment creation e.g civicrm_api3('Order', 'create', ['blah' => 'blah', 'contribution_status_id' => 'Pending', 'api.Payment.create => ['total_amount' => 5]]");
   }
 
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/api/v3/Order.php
   if (!empty($params['line_items']) && is_array($params['line_items'])) {
     $priceSetID = NULL;
     CRM_Contribute_BAO_Contribution::checkLineItems($params);

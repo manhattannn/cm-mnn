@@ -341,10 +341,7 @@ class CRM_Contribute_Form_AdditionalPayment extends CRM_Contribute_Form_Abstract
       $this->processCreditCard();
     }
 
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Contribute/Form/AdditionalPayment.php
-=======
     // @todo we should clean $ on the form & pass in skipCleanMoney
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Contribute/Form/AdditionalPayment.php
     $trxnsData = $this->_params;
     if ($this->_paymentType == 'refund') {
       $trxnsData['total_amount'] = -$trxnsData['total_amount'];

@@ -870,8 +870,6 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
         $params['preserveDBName'] = TRUE;
       }
     }
-<<<<<<< HEAD:sites/all/modules/contrib-stable/civicrm/CRM/Core/Form.php
-=======
 
     // For legacy reasons we set these creditcard expiry fields if present
     if (isset($params['credit_card_exp_date'])) {
@@ -882,7 +880,6 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
     // Assign IP address parameter
     $params['ip_address'] = CRM_Utils_System::ipAddress();
 
->>>>>>> origin/stage:sites/all/modules/contrib/civicrm/CRM/Core/Form.php
     return $params;
   }
 
