@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * @file
+ * Code for generating custom menu items and pages for MNN Producers
+ */
+ 
+/**
+ * Implements hook_menu().
+ */
+function mnn_producer_menu_menu() {
+  $items['cm_crew_connect'] =
+    array(
+	  'title' => 'Crew Connect',
+	  'description' => 'Crew Connect',
+	  'access arguments' => array('access content'),
+	  'page callback' => 'mnn_producer_menu_crew_connect_menu_item',
+	  'menu_name' => 'navigation',
+	  'type' => MENU_NORMAL_ITEM,
+	  );
+  return $items;
+}
+
+function mnn_producer_menu_crew_connect_menu_item() {
+  global $user;
+  if (!$user || $user->uid == 0) {
+    drupal_goto('user');
+    
+  }
+  
+  drupal_goto('user/' . $user->uid. '/cm_crew_connect');
+}
