@@ -3,21 +3,21 @@
 function mmn_project_commitment_tracker_commitment_checker($result){
 //dsm($result);
   $commitment_met = "No";
-  if ( $result->node_og_membership__field_data_field_interval_field_interval[0]['raw']['tid'] == "775") {
+  if ( $result->node_og_membership__field_data_field_interval_field_interval == "775") {
   //monthly = 775
 //      $monthly_total++;
     if ($result->node_title >= 2) {
       $commitment_met = "Yes";
     } 
   }
-  if ( $result->node_og_membership__field_data_field_interval_field_interval[0]['raw']['tid']  == "781") {
+  if ( $result->node_og_membership__field_data_field_interval_field_interval == "781") {
   //weekly = 781
     $weekly_total++;
     if ($result->node_title >= 8) {
       $commitment_met = "Yes";
     }
   }
-  if ( $result->node_og_membership__field_data_field_interval_field_interval[0]['raw']['tid']  == "774") {
+  if ( $result->node_og_membership__field_data_field_interval_field_interval == "774") {
   // every two weeks = 774
     $biweekly_total++;
     if ($result->node_title >= 6) {
@@ -29,21 +29,21 @@ return $commitment_met;
 
 }
 
-function mnn_project_commitment_tracker_view_headers_report() { 
+function mnn_project_commitment_tracker_view_headers_report($view) { 
 //dsm($view);
   $view2 = views_get_view('producer_show_upload_report');
-  $view2->set_display('block_2');
+  $view2->set_display('attachment_1');
 //  $view->set_arguments(array($tid));
-//  $view2->display_handler->options['filters']=$view->filter;
+  $view2->display_handler->options['filters']=$view->filter;
   // change the amount of items to show
 //  $exposed_input = $view->exposed_input;
-//  $view2->exposed_input = $view->exposed_input;
+  $view2->exposed_input = $view->exposed_input;
 //  $view->exposed_input['contact_sub_type'] = array("Media_Radio_TV_Newspaper_"); 
   // change the amount of items to show
   $view2->set_items_per_page(0);
   $view2->pre_execute();
   $view2->execute();
-dsm($view2);
+//dsm($view2);
  $results = $view2->result;
 
 
