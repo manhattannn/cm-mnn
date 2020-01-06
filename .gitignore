@@ -33,3 +33,5 @@ sites/all/civi-extensions/cache/*/*
 ### NPM / Node modules ###
 **/node_modules/*
 
+#### php fpm settings
+.user.ini
