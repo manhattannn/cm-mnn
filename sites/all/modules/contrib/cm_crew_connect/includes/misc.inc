@@ -1,4 +1,4 @@
-<?
+<?php
 /**
  * Helper function to get a single value off of a entity
 */

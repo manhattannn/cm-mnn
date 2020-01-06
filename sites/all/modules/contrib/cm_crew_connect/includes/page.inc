@@ -1,4 +1,4 @@
-<?
+<?php
 function cm_crew_connect_page($uid) {
   $output = "";
   $project_block = "";

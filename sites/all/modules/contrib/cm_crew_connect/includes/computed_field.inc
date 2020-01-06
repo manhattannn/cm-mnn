@@ -1,4 +1,4 @@
-<?
+<?php
 /*
 function computed_field_field_civicrm_event_link_display($field, $entity_field_item, $entity_lang, $langcode) {
  dsm($field, 'field');
