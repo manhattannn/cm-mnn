@@ -7,19 +7,62 @@
 
 		<style type="text/css">
 #container {
-	margin: 0 auto;
 	max-width: 400px;
-	min-width: 380px;
+	margin: 0 auto;
 }
+
+.highcharts-figure, .highcharts-data-table table {
+	min-width: 380px;    
+	max-width: 600px;
+    margin: 0 auto;
+}
+
+.highcharts-data-table table {
+    font-family: Verdana, sans-serif;
+    border-collapse: collapse;
+    border: 1px solid #EBEBEB;
+    margin: 10px auto;
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+}
+.highcharts-data-table caption {
+    padding: 1em 0;
+    font-size: 1.2em;
+    color: #555;
+}
+.highcharts-data-table th {
+	font-weight: 600;
+    padding: 0.5em;
+}
+.highcharts-data-table td, .highcharts-data-table th, .highcharts-data-table caption {
+    padding: 0.5em;
+}
+.highcharts-data-table thead tr, .highcharts-data-table tr:nth-child(even) {
+    background: #f8f8f8;
+}
+.highcharts-data-table tr:hover {
+    background: #f1f7ff;
+}
+
 		</style>
 	</head>
 	<body>
 <script src="../../code/highcharts.js"></script>
 <script src="../../code/highcharts-more.js"></script>
 <script src="../../code/modules/solid-gauge.js"></script>
+<script src="../../code/modules/exporting.js"></script>
+<script src="../../code/modules/export-data.js"></script>
+<script src="../../code/modules/accessibility.js"></script>
 
-<div id="container"></div>
-
+<figure class="highcharts-figure">
+    <div id="container"></div>
+    <p class="highcharts-description">
+        A chart showing multiple gauge series arcing around the center point,
+        similar to the activity chart found on the Apple Watch. Each gauge has a
+        custom icon, and the tooltip is positioned statically in the center.
+    </p>
+</figure>
 
 
 		<script type="text/javascript">
@@ -54,11 +97,11 @@ function renderIcons() {
     if (!this.series[0].icon) {
         this.series[0].icon = this.renderer.path(['M', -8, 0, 'L', 8, 0, 'M', 0, -8, 'L', 8, 0, 0, 8])
             .attr({
-                'stroke': '#303030',
+                stroke: '#303030',
                 'stroke-linecap': 'round',
                 'stroke-linejoin': 'round',
                 'stroke-width': 2,
-                'zIndex': 10
+                zIndex: 10
             })
             .add(this.series[2].group);
     }
@@ -73,13 +116,13 @@ function renderIcons() {
         this.series[1].icon = this.renderer.path(
             ['M', -8, 0, 'L', 8, 0, 'M', 0, -8, 'L', 8, 0, 0, 8,
                 'M', 8, -8, 'L', 16, 0, 8, 8]
-            )
+        )
             .attr({
-                'stroke': '#ffffff',
+                stroke: '#ffffff',
                 'stroke-linecap': 'round',
                 'stroke-linejoin': 'round',
                 'stroke-width': 2,
-                'zIndex': 10
+                zIndex: 10
             })
             .add(this.series[2].group);
     }
@@ -93,11 +136,11 @@ function renderIcons() {
     if (!this.series[2].icon) {
         this.series[2].icon = this.renderer.path(['M', 0, 8, 'L', 0, -8, 'M', -8, 0, 'L', 0, -8, 8, 0])
             .attr({
-                'stroke': '#303030',
+                stroke: '#303030',
                 'stroke-linecap': 'round',
                 'stroke-linejoin': 'round',
                 'stroke-width': 2,
-                'zIndex': 10
+                zIndex: 10
             })
             .add(this.series[2].group);
     }
@@ -133,7 +176,8 @@ Highcharts.chart('container', {
         style: {
             fontSize: '16px'
         },
-        pointFormat: '{series.name}<br><span style="font-size:2em; color: {point.color}; font-weight: bold">{point.y}%</span>',
+        valueSuffix: '%',
+        pointFormat: '{series.name}<br><span style="font-size:2em; color: {point.color}; font-weight: bold">{point.y}</span>',
         positioner: function (labelWidth) {
             return {
                 x: (this.chart.chartWidth - labelWidth) / 2,
@@ -213,8 +257,6 @@ Highcharts.chart('container', {
         }]
     }]
 });
-
-
 
 		</script>
 	</body>

@@ -12,18 +12,54 @@
 	height: 400px;
 	margin: 0 auto;
 }
+
+caption {
+	padding-bottom: 15px;
+	font-family: 'Verdana';
+	font-size: 1.2em;
+	color:#555;
+}
+
+table {
+	font-family: 'Verdana';
+	font-size: 12pt;          
+	border-collapse: collapse;
+	border: 1px solid #EBEBEB;
+	margin: 2px auto;
+    text-align: center;
+    width: 100%;
+}
+
+table tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+table tr:nth-child(even) {
+  background-color: #FCF9F9;
+}
+
+th {
+	font-weight: 600;
+    padding: 10px;
+}
+
 		</style>
 	</head>
 	<body>
 <script src="../../code/highcharts.js"></script>
 <script src="../../code/modules/venn.js"></script>
 <script src="../../code/modules/exporting.js"></script>
+<script src="../../code/modules/accessibility.js"></script>
+
 <div id="container"></div>
 
 
 
 		<script type="text/javascript">
 Highcharts.chart('container', {
+    accessibility: {
+        description: 'A Venn diagram constructed from three intersecting circles illustrates the Unattainable Triangle. The three circles are labeled, in a clockwise direction, Fast, Cheap and Good. The intersections are as follows: Fast and Cheap equals Not the Best Quality. Cheap and Good equals Will Take Time to Deliver. Good and Fast equals More Expensive. Fast, Cheap and Good equals They’re Dreaming.'
+    },
     series: [{
         type: 'venn',
         name: 'The Unattainable Triangle',

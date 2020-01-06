@@ -10,21 +10,28 @@
 	height: 300px;
 	min-width: 310px;
 	max-width: 800px;
+    margin: 0 auto;
+}
+#button-bar {
+    min-width: 310px;
+    max-width: 800px;
+    margin: 0 auto;
 }
 		</style>
 	</head>
 	<body>
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src="../../code/highcharts.js"></script>
 
 <div id="container"></div>
 
-<button id="large">Large</button>
-<button id="small">Small</button>
+<div id="button-bar">
+    <button id="small">Small</button>
+    <button id="large">Large</button>
+    <button id="auto">Auto</button>
+</div>
 
 
 		<script type="text/javascript">
-
 var chart = Highcharts.chart('container', {
 
     chart: {
@@ -102,12 +109,16 @@ var chart = Highcharts.chart('container', {
     }
 });
 
-$('#small').click(function () {
-    chart.setSize(400, 300);
+document.getElementById('small').addEventListener('click', function () {
+    chart.setSize(400);
 });
 
-$('#large').click(function () {
-    chart.setSize(600, 300);
+document.getElementById('large').addEventListener('click', function () {
+    chart.setSize(600);
+});
+
+document.getElementById('auto').addEventListener('click', function () {
+    chart.setSize(null);
 });
 
 		</script>

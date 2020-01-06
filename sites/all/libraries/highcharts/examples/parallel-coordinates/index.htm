@@ -19,15 +19,16 @@
 		</style>
 	</head>
 	<body>
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
 
 <script src="../../code/highcharts.js"></script>
+<script src="../../code/modules/data.js"></script>
 <script src="../../code/modules/parallel-coordinates.js"></script>
 <div id="container"></div>
 
 
 		<script type="text/javascript">
-$.getJSON(
+Highcharts.getJSON(
     'https://cdn.jsdelivr.net/gh/highcharts/highcharts@v7.0.0/samples/data/marathon.json',
     function (data) {
 

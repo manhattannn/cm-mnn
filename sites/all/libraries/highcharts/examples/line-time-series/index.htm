@@ -10,8 +10,9 @@
 		</style>
 	</head>
 	<body>
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
 <script src="../../code/highcharts.js"></script>
+<script src="../../code/modules/data.js"></script>
 <script src="../../code/modules/exporting.js"></script>
 <script src="../../code/modules/export-data.js"></script>
 
@@ -20,8 +21,7 @@
 
 
 		<script type="text/javascript">
-
-$.getJSON(
+Highcharts.getJSON(
     'https://cdn.jsdelivr.net/gh/highcharts/highcharts@v7.0.0/samples/data/usdeur.json',
     function (data) {
 
@@ -34,7 +34,7 @@ $.getJSON(
             },
             subtitle: {
                 text: document.ontouchstart === undefined ?
-                        'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
+                    'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
             },
             xAxis: {
                 type: 'datetime'

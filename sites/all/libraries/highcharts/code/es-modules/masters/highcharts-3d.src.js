@@ -1,9 +1,11 @@
 /**
- * @license @product.name@ JS v@product.version@ (@product.date@)
+ * @license Highcharts JS v8.0.0 (2019-12-10)
+ * @module highcharts/highcharts-3d
+ * @requires highcharts
  *
  * 3D features for Highcharts JS
  *
- * @license: www.highcharts.com/license
+ * License: www.highcharts.com/license
  */
 'use strict';
 import '../parts-3d/Math.js';

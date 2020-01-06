@@ -1,5 +1,9 @@
 import H from '../parts/Globals.js';
-import '../parts/Utilities.js';
+import U from '../parts/Utilities.js';
+var objectEach = U.objectEach,
+    pick = U.pick;
+
+var fireEvent = H.fireEvent;
 
 /**
  * It provides methods for:
@@ -8,6 +12,7 @@ import '../parts/Utilities.js';
  *   The units of the distance are specific to a transformation,
  *   e.g. for rotation they are radians, for scaling they are scale factors.
  *
+ * @private
  * @mixin
  * @memberOf Annotation
  */
@@ -26,7 +31,7 @@ var eventEmitterMixin = {
             }
         );
 
-        H.objectEach(emitter.options.events, function (event, type) {
+        objectEach(emitter.options.events, function (event, type) {
             var eventHandler = function (e) {
                 if (type !== 'click' || !emitter.cancelClick) {
                     event.call(
@@ -37,14 +42,15 @@ var eventEmitterMixin = {
                 }
             };
 
-            if (type !== 'drag') {
+            if (H.inArray(type, emitter.nonDOMEvents || []) === -1) {
                 emitter.graphic.on(type, eventHandler);
             } else {
-                H.addEvent(emitter, 'drag', eventHandler);
+                H.addEvent(emitter, type, eventHandler);
             }
         });
 
         if (emitter.options.draggable) {
+
             H.addEvent(emitter, 'drag', emitter.onDrag);
 
             if (!emitter.graphic.renderer.styledMode) {
@@ -56,6 +62,10 @@ var eventEmitterMixin = {
                     }[emitter.options.draggable]
                 });
             }
+        }
+
+        if (!emitter.isUpdating) {
+            fireEvent(emitter, 'add');
         }
     },
 
@@ -83,18 +93,21 @@ var eventEmitterMixin = {
             prevChartX,
             prevChartY;
 
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+
         // On right click, do nothing:
         if (e.button === 2) {
             return;
         }
-
-        e.stopPropagation();
 
         e = pointer.normalize(e);
         prevChartX = e.chartX;
         prevChartY = e.chartY;
 
         emitter.cancelClick = false;
+        emitter.chart.hasDraggedAnnotation = true;
 
         emitter.removeDrag = H.addEvent(
             H.doc,
@@ -106,7 +119,7 @@ var eventEmitterMixin = {
                 e.prevChartX = prevChartX;
                 e.prevChartY = prevChartY;
 
-                H.fireEvent(emitter, 'drag', e);
+                fireEvent(emitter, 'drag', e);
 
                 prevChartX = e.chartX;
                 prevChartY = e.chartY;
@@ -119,7 +132,9 @@ var eventEmitterMixin = {
             function (e) {
                 emitter.cancelClick = emitter.hasDragged;
                 emitter.hasDragged = false;
-
+                emitter.chart.hasDraggedAnnotation = false;
+                // ControlPoints vs Annotation:
+                fireEvent(pick(emitter.target, emitter), 'afterUpdate');
                 emitter.onMouseUp(e);
             }
         );

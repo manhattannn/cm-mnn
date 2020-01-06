@@ -15,13 +15,14 @@
 	</head>
 	<body>
 <script src="../../code/highcharts.js"></script>
+<script src="../../code/modules/data.js"></script>
 <script src="../../code/modules/heatmap.js"></script>
 <script src="../../code/modules/treemap.js"></script>
 <div id="container"></div>
 
 
 		<script type="text/javascript">
-$.getJSON('https://cdn.jsdelivr.net/gh/highcharts/highcharts@v7.0.0/samples/data/world-mortality.json', function (data) {
+Highcharts.getJSON('https://cdn.jsdelivr.net/gh/highcharts/highcharts@v7.0.0/samples/data/world-mortality.json', function (data) {
 
     var points = [],
         regionP,
@@ -37,7 +38,7 @@ $.getJSON('https://cdn.jsdelivr.net/gh/highcharts/highcharts@v7.0.0/samples/data
         causeName = {
             'Communicable & other Group I': 'Communicable diseases',
             'Noncommunicable diseases': 'Non-communicable diseases',
-            'Injuries': 'Injuries'
+            Injuries: 'Injuries'
         };
 
     for (region in data) {

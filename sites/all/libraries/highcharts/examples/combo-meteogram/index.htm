@@ -6,6 +6,43 @@
 		<title>Highcharts Example</title>
 
 		<style type="text/css">
+#container {
+    height: 400px; 
+}
+
+.highcharts-figure, .highcharts-data-table table {
+    min-width: 350px; 
+    max-width: 800px;
+    margin: 1em auto;
+}
+
+.highcharts-data-table table {
+    font-family: Verdana, sans-serif;
+    border-collapse: collapse;
+    border: 1px solid #EBEBEB;
+    margin: 10px auto;
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+}
+.highcharts-data-table caption {
+    padding: 1em 0;
+    font-size: 1.2em;
+    color: #555;
+}
+.highcharts-data-table th {
+	font-weight: 600;
+    padding: 0.5em;
+}
+.highcharts-data-table td, .highcharts-data-table th, .highcharts-data-table caption {
+    padding: 0.5em;
+}
+.highcharts-data-table thead tr, .highcharts-data-table tr:nth-child(even) {
+    background: #f8f8f8;
+}
+.highcharts-data-table tr:hover {
+    background: #f1f7ff;
+}
 
 		</style>
 	</head>
@@ -14,15 +51,27 @@
 
 <script src="../../code/highcharts.js"></script>
 <script src="../../code/modules/windbarb.js"></script>
+<script src="../../code/modules/pattern-fill.js"></script>
 <script src="../../code/modules/exporting.js"></script>
-<script src="https://highcharts.github.io/pattern-fill/pattern-fill-v2.js"></script>
+<script src="../../code/modules/accessibility.js"></script>
 <link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 
-<div id="container" style="max-width: 800px; min-width: 380px; height: 310px; margin: 0 auto">
-    <div style="margin-top: 100px; text-align: center" id="loading">
-        <i class="fa fa-spinner fa-spin"></i> Loading data from external source
+
+<figure class="highcharts-figure">
+    <div id="container" style="max-width: 800px; min-width: 380px; height: 310px; margin: 0 auto">
+        <div style="margin-top: 100px; text-align: center" id="loading">
+            <i class="fa fa-spinner fa-spin"></i> Loading data from external source
+        </div>
     </div>
-</div>
+    <p class="highcharts-description">
+        Chart showing meteorological data. This is an advanced example of using
+        Highcharts to load data from an external API, and displaying the data
+        using several custom visuals. The chart loads the data from a weather
+        forecast website. After the data is parsed, the chart is generated, then
+        the icons are added. In the end, the wind arrows are displayed.
+    </p>
+</figure>
+
 <!--
 <div style="width: 800px; margin: 0 auto">
     <a href="#http://www.yr.no/place/United_Kingdom/England/London/forecast_hour_by_hour.xml">London</a>,
@@ -155,13 +204,13 @@ Meteogram.prototype.drawBlocksForWindArrows = function (chart) {
         chart.renderer.path(['M', x, chart.plotTop + chart.plotHeight + (isLong ? 0 : 28),
             'L', x, chart.plotTop + chart.plotHeight + 32, 'Z'])
             .attr({
-                'stroke': chart.options.chart.plotBorderColor,
+                stroke: chart.options.chart.plotBorderColor,
                 'stroke-width': 1
             })
             .add();
     }
 
-      // Center items in block
+    // Center items in block
     chart.get('windbarbs').markerGroup.attr({
         translateX: chart.get('windbarbs').markerGroup.translateX + 8
     });
@@ -198,8 +247,8 @@ Meteogram.prototype.getChartOptions = function () {
 
         defs: {
             patterns: [{
-                'id': 'precipitation-error',
-                'path': {
+                id: 'precipitation-error',
+                path: {
                     d: [
                         'M', 3.3, 0, 'L', -6.7, 10,
                         'M', 6.7, 0, 'L', -3.3, 10,
@@ -245,7 +294,7 @@ Meteogram.prototype.getChartOptions = function () {
             minorTickInterval: 36e5, // one hour
             tickLength: 0,
             gridLineWidth: 1,
-            gridLineColor: (Highcharts.theme && Highcharts.theme.background2) || '#F0F0F0',
+            gridLineColor: 'rgba(128, 128, 128, 0.1)',
             startOnTick: false,
             endOnTick: false,
             minPadding: 0,
@@ -291,7 +340,7 @@ Meteogram.prototype.getChartOptions = function () {
             maxPadding: 0.3,
             minRange: 8,
             tickInterval: 1,
-            gridLineColor: (Highcharts.theme && Highcharts.theme.background2) || '#F0F0F0'
+            gridLineColor: 'rgba(128, 128, 128, 0.1)'
 
         }, { // precipitation axis
             title: {
@@ -574,8 +623,7 @@ Meteogram.prototype.parseYrData = function () {
 // End of the Meteogram protype
 
 
-
- // On DOM ready...
+// On DOM ready...
 
 // Set the hash to the yr.no URL we want to parse
 var place,

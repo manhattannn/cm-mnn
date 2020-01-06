@@ -12,11 +12,45 @@
     height: 500px;
     margin: 1em auto;
 }
+
+caption {
+	padding-bottom: 15px;
+	font-family: 'Verdana';
+	font-size: 1.2em;
+	color:#555;
+}
+
+table {
+	font-family: 'Verdana';
+	font-size: 12pt;          
+	border-collapse: collapse;
+	border: 1px solid #EBEBEB;
+	margin: 2px auto;
+    text-align: center;
+    width: 100%;
+}
+
+table tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+table tr:nth-child(even) {
+  background-color: #FCF9F9;
+}
+
+th {
+	font-weight: 600;
+    padding: 10px;
+}
+
 		</style>
 	</head>
 	<body>
 <script src="../../code/highcharts.js"></script>
 <script src="../../code/modules/variable-pie.js"></script>
+<script src="../../code/modules/exporting.js"></script>
+<script src="../../code/modules/export-data.js"></script>
+<script src="../../code/modules/accessibility.js"></script>
 
 <div id="container"></div>
 
@@ -26,6 +60,9 @@
 Highcharts.chart('container', {
     chart: {
         type: 'variablepie'
+    },
+    accessibility: {
+        description: 'A variable radius pie chart compares the population density and total land mass for seven European nations: Spain, France, Poland, the Czech Republic, Italy, Switzerland and Germany. The chart visualizes the data by using the width of each section to represent total area and the depth of the section to represent population density. Each section is color-coded according to the country and the chart is interactive: by hovering over each section the data points are exposed in a call-out box. The chart is organized by population density in a counterclockwise direction. Germany has the highest population density at 235.6 people per square kilometer, followed by Switzerland, Italy, the Czech Republic, Poland, France and Spain. France has the largest land mass at 551,500 square kilometers. Spain is the second largest country at 505,370 square kilometers but has the lowest population density at 92.9 people per square kilometer. Switzerland is the smallest nation by land mass at 41,277 square kilometers but it has the second highest population density at 214.5 people per square kilometer.'
     },
     title: {
         text: 'Countries compared by population density and total area.'

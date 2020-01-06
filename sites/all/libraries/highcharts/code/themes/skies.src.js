@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v7.0.3 (2019-02-06)
+ * @license Highcharts JS v8.0.0 (2019-12-10)
  *
  * (c) 2009-2019 Torstein Honsi
  *
@@ -11,23 +11,33 @@
         factory['default'] = factory;
         module.exports = factory;
     } else if (typeof define === 'function' && define.amd) {
-        define(function () {
+        define('highcharts/themes/skies', ['highcharts'], function (Highcharts) {
+            factory(Highcharts);
+            factory.Highcharts = Highcharts;
             return factory;
         });
     } else {
         factory(typeof Highcharts !== 'undefined' ? Highcharts : undefined);
     }
 }(function (Highcharts) {
-    (function (Highcharts) {
-        /**
-         * (c) 2010-2019 Torstein Honsi
+    var _modules = Highcharts ? Highcharts._modules : {};
+    function _registerModule(obj, path, args, fn) {
+        if (!obj.hasOwnProperty(path)) {
+            obj[path] = fn.apply(null, args);
+        }
+    }
+    _registerModule(_modules, 'themes/skies.js', [_modules['parts/Globals.js']], function (Highcharts) {
+        /* *
          *
-         * License: www.highcharts.com/license
+         *  (c) 2010-2019 Torstein Honsi
          *
-         * Skies theme for Highcharts JS
-         * @author Torstein Honsi
-         */
-
+         *  License: www.highcharts.com/license
+         *
+         *  Skies theme for Highcharts JS
+         *
+         *  !!!!!!! SOURCE GETS TRANSPILED BY TYPESCRIPT. EDIT TS FILE ONLY. !!!!!!!
+         *
+         * */
         Highcharts.theme = {
             colors: ['#514F78', '#42A07B', '#9B5E4A', '#72727F', '#1F949A',
                 '#82914E', '#86777F', '#42A07B'],
@@ -37,7 +47,7 @@
                 plotShadow: true,
                 plotBackgroundImage: 'https://www.highcharts.com/demo/gfx/skies.jpg',
                 plotBackgroundColor: {
-                    linearGradient: [0, 0, 250, 500],
+                    linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
                     stops: [
                         [0, 'rgba(255, 255, 255, 1)'],
                         [1, 'rgba(255, 255, 255, 0)']
@@ -73,7 +83,7 @@
                     style: {
                         color: '#666',
                         font: '12px Lucida Grande, Lucida Sans Unicode,' +
-                        ' Verdana, Arial, Helvetica, sans-serif'
+                            ' Verdana, Arial, Helvetica, sans-serif'
                     }
                 }
             },
@@ -92,7 +102,7 @@
                     style: {
                         color: '#666',
                         font: '12px Lucida Grande, Lucida Sans Unicode,' +
-                        ' Verdana, Arial, Helvetica, sans-serif'
+                            ' Verdana, Arial, Helvetica, sans-serif'
                     }
                 }
             },
@@ -114,13 +124,12 @@
                 }
             }
         };
-
         // Apply the theme
         Highcharts.setOptions(Highcharts.theme);
 
-    }(Highcharts));
-    return (function () {
+    });
+    _registerModule(_modules, 'masters/themes/skies.src.js', [], function () {
 
 
-    }());
+    });
 }));

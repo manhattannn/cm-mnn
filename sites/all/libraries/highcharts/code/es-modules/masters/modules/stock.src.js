@@ -1,5 +1,8 @@
 /**
- * @license @product.name@ JS v@product.version@ (@product.date@)
+ * @license Highstock JS v8.0.0 (2019-12-10)
+ * @module highcharts/modules/stock
+ * @requires highcharts
+ *
  * Highstock as a plugin for Highcharts
  *
  * (c) 2010-2019 Torstein Honsi

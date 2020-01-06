@@ -1,5 +1,7 @@
 /**
- * @license @product.name@ JS v@product.version@ (@product.date@)
+ * @license Highcharts JS v8.0.0 (2019-12-10)
+ * @module highcharts/highcharts-more
+ * @requires highcharts
  *
  * (c) 2009-2018 Torstein Honsi
  *

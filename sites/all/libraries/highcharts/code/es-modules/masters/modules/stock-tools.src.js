@@ -1,5 +1,9 @@
 /**
- * @license @product.name@ JS v@product.version@ (@product.date@)
+ * @license Highstock JS v8.0.0 (2019-12-10)
+ * @module highcharts/modules/stock-tools
+ * @requires highcharts
+ * @requires highcharts/modules/stock
+ *
  * Advanced Highstock tools
  *
  * (c) 2010-2019 Highsoft AS
