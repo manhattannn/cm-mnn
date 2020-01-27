@@ -1,0 +1,134 @@
+<?php
+/**
+ * @file
+ */
+
+/**
+ * Implementation of hook_permission()
+ */
+function fail2ban_permission() {
+  return array(
+    'administer fail2ban' => array(
+      'title' => t('Administer fail2ban'),
+      'description' => t('Configure fail2ban module settings.'),
+    ),
+    'submit addresses to fail2ban' => array(
+      'title' => t('Submit addresses to fail2ban'),
+      'description' => t('Allows the user to choose whether or not to send a comment IP address to the firewall.'),
+    ),
+  );
+}
+
+function fail2ban_menu() {
+  $items['admin/config/development/logging/fail2ban'] = array(
+    'title' => 'Fail2ban',
+    'description' => 'Fail2ban is a system utility that allows you to automatically add firewall entries.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('fail2ban_admin_settings'),
+    'access arguments' => array('administer fail2ban'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'fail2ban.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_form_FORMID_alter().
+ *
+ * @see fail2ban_comment_admin_overview_submit()
+ */
+function fail2ban_form_comment_admin_overview_alter(&$form, $form_state) {
+  if (user_access('submit addresses to fail2ban')) {
+    $form['options']['fail2ban'] = array(
+      '#type' => 'checkbox',
+      '#prefix' => '<br />',
+      '#title' => 'Firewall originating IP address',
+    );
+    $form['#submit'][] = 'fail2ban_comment_admin_overview_submit';
+  }
+}
+
+/**
+ * Form submit handler to mass-report and unpublish or delete comments.
+ */
+function fail2ban_comment_admin_overview_submit($form, &$form_state) {
+  if ($form_state['values']['fail2ban'] == 1) {
+    // The mollom module prefixes the operation name with its own guff.
+    // Cope with it.
+    if (strpos($form_state['values']['operation'], '-' > 0)) {
+      list($id, $operation) = explode('-', $form_state['values']['operation']);
+    }
+    else {
+      $operation = $form_state['values']['operation'];
+    }
+    foreach ($form_state['values']['comments'] as $cid => $value) {
+      if ($value) {
+        if ($comment = comment_load($cid)) {
+          if ($operation == 'unpublish' || $operation == 'delete') {
+            fail2ban_syslog($comment);
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * The function that does the actual work, writing a log message.
+ *
+ * @param $comment
+ *   The comment being deleted.
+ */
+function fail2ban_syslog($comment) {
+  // Load all settings.
+  $message = variable_get('fail2ban_logstring', 'Submitting address [!address] to the firewall');
+
+  // Just watchdog() the message and syslog.module does the rest.
+  watchdog('fail2ban', $message, array('!address' => $comment->hostname), WATCHDOG_INFO);
+}
+
+/**
+ * Implements hook_form_FORMID_alter().
+ *
+ * Coz we like keeping our extra log facilities.
+ *
+ * @see syslog_form_system_logging_settings_alter().
+ * @see system_logging_settings().
+ */
+function fail2ban_form_system_logging_settings_alter(&$form, &$form_state) {
+  // According to http://php.net/manual/en/function.openlog.php LOG_AUTHPRIV should be
+  // used in preference over LOG_AUTH whenever it is available. So let's check.
+  //
+  if (defined('LOG_AUTHPRIV')) {
+    $facilities = array(LOG_AUTHPRIV => 'LOG_AUTHPRIV: security/authorization messages (private)');
+  }
+  else {
+    $facilities = array(LOG_AUTH => 'LOG_AUTH: security/authorization messages');
+  }
+
+  // Add the rest.
+  //
+  $facilities += array(
+    // LOG_CRON => 'LOG_CRON: clock daemon (cron and at)',
+    LOG_DAEMON => 'LOG_DAEMON: other system daemons',
+    // LOG_KERN => 'LOG_KERN: kernel messages',
+    LOG_LOCAL0 => 'LOG_LOCAL0: reserved for local use, not available in Windows',
+    LOG_LOCAL1 => 'LOG_LOCAL1: reserved for local use, not available in Windows',
+    LOG_LOCAL2 => 'LOG_LOCAL2: reserved for local use, not available in Windows',
+    LOG_LOCAL3 => 'LOG_LOCAL3: reserved for local use, not available in Windows',
+    LOG_LOCAL4 => 'LOG_LOCAL4: reserved for local use, not available in Windows',
+    LOG_LOCAL5 => 'LOG_LOCAL5: reserved for local use, not available in Windows',
+    LOG_LOCAL6 => 'LOG_LOCAL6: reserved for local use, not available in Windows',
+    LOG_LOCAL7 => 'LOG_LOCAL7: reserved for local use, not available in Windows',
+    // LOG_LPR => 'LOG_LPR: line printer subsystem',
+    // LOG_MAIL => 'LOG_MAIL: mail subsystem',
+    // LOG_NEWS => 'LOG_NEWS: USENET news subsystem',
+    // LOG_SYSLOG => 'LOG_SYSLOG: messages generated internally by syslogd',
+    LOG_USER => 'LOG_USER: generic user-level messages',
+    // LOG_UUCP => 'LOG_UUCP: UUCP subsystem',
+  );
+
+  if (defined('LOG_LOCAL0')) {
+    $form['syslog_facility']['#options'] = $facilities;
+  }
+}
