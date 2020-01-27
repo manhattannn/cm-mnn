@@ -1,0 +1,70 @@
+<?php
+/**
+ * @file
+ */
+
+/**
+ * Implements hook_install().
+ */
+function fail2ban_install() {
+  // Ensure the module weight is hgher than the syslog module weight.
+  $weight = db_query('SELECT weight FROM {system} WHERE name = :name', array(':name' => 'syslog'))->fetchField();
+  db_query('UPDATE {system} SET weight = :weight WHERE name = :name', array(':weight' => ++$weight, ':name' => 'fail2ban'));
+}
+
+/**
+ * Implements hook_uninstall()
+ */
+function fail2ban_uninstall() {
+  variable_del('fail2ban_logstring');
+}
+
+/**
+ * Implementation of hook_update_N()
+ *
+ * Migrate the module settings into a single array.
+ */
+function fail2ban_update_7100() {
+
+  // Create a new settings array.
+  $settings = array(
+    'logstring' => variable_get('fail2ban_logstring', 'Submitting address [!address] to the firewall'),
+    'whitelist' => variable_get('fail2ban_whitelist', "127.0.0.0/8"),
+    'logopt' => array(
+      'identifier' => variable_get('fail2ban_identifier', 'drupal'),
+      'options' => variable_get('fail2ban_options', array(LOG_ODELAY)),
+      'facility' => variable_get('fail2ban_facility', LOG_USER),
+      'priority' => variable_get('fail2ban_priority', array(LOG_NOTICE)),
+    ),
+  );
+
+  // Save the new settings array.
+  variable_set('fail2ban', $settings);
+
+  // Remove the old settings.
+  variable_del('fail2ban_identifier');
+  variable_del('fail2ban_options');
+  variable_del('fail2ban_facility');
+  variable_del('fail2ban_priority');
+  variable_del('fail2ban_logstring');
+  variable_del('fail2ban_whitelist');
+
+  // Tell the user what we did. Because it's nice.
+  return t('Your fail2ban settings have been migrated to a new format.');
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Remove all module preferences except for the log string and tweak the
+ * module weight.
+ */
+function fail2ban_update_7200() {
+  $settings = variable_get('fail2ban', array('logstring' => ''));
+  variable_set('fail2ban_logstring', $settings['logstring']);
+  variable_del('fail2ban');
+
+  // Ensure the module weight is hgher than the syslog module weight.
+  $weight = db_query('SELECT weight FROM {system} WHERE name = :name', array(':name' => 'syslog'))->fetchField();
+  db_query('UPDATE {system} SET weight = :weight WHERE name = :name', array(':weight' => ++$weight, ':name' => 'fail2ban'));
+}
