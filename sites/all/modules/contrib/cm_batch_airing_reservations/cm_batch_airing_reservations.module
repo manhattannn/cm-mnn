@@ -529,7 +529,7 @@ function cm_batch_airing_reservation_get_overlap_reservation($start,$end,
 
 function cm_batch_airing_reservations_res_item_map() {
   $filename = 
-    "sites/all/modules/contrib-cm/cm_batch_airing_reservations/res_item_map/".
+    "sites/all/modules/contrib/cm_batch_airing_reservations/res_item_map/".
     CM_BATCH_AIRING_RESERVATIONS_RES_ITEM_MAP_FILE;
   if (file_exists($filename)) {
     require_once($filename);
@@ -553,7 +553,7 @@ function cm_batch_airing_reservations_get_active_pid() {
   $action = arg(4);
   if ($action == 'start' && !$pid) {
     $cmd = "php -d max_execution_time=64800 -f " .
-      "sites/all/modules/contrib-cm/cm_batch_airing_reservations/scripts/".
+      "sites/all/modules/contrib/cm_batch_airing_reservations/scripts/".
       "run.php > /dev/null 2>&1 & echo \$!";
     $pid = exec($cmd,$cmd_results,$cmd_status);
     $_SESSION[CM_BATCH_AIRING_RESERVATIONS_PID] = $pid;
