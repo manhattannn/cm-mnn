@@ -20,6 +20,10 @@ function role_expire_admin_settings($form, &$form_state) {
   );
   // It is important to respect the keys on this array merge.
   $roles_select = $default + $roles;
+  // Role anonymous.
+  unset($roles_select[1]);
+  // Role authenticated.
+  unset($roles_select[2]);
 
   $form['general'] = array(
     '#type' => 'fieldset',
