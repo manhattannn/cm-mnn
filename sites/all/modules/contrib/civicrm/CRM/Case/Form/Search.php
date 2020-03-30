@@ -62,7 +62,7 @@ class CRM_Case_Form_Search extends CRM_Core_Form_Search {
 
     //check for civicase access.
     if (!CRM_Case_BAO_Case::accessCiviCase()) {
-      CRM_Core_Error::fatal(ts('You are not authorized to access this page.'));
+      CRM_Core_Error::statusBounce(ts('You are not authorized to access this page.'));
     }
 
     //validate case configuration.
@@ -75,10 +75,10 @@ class CRM_Case_Form_Search extends CRM_Core_Form_Search {
     /**
      * set the button names
      */
-    $this->_searchButtonName = $this->getButtonName('refresh');
     $this->_actionButtonName = $this->getButtonName('next', 'action');
 
     $this->_done = FALSE;
+    $this->sortNameOnly = TRUE;
 
     parent::preProcess();
 

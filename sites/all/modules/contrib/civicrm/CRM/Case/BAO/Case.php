@@ -1141,7 +1141,7 @@ SELECT civicrm_case.id, case_status.label AS case_status, status_id, civicrm_cas
 
     $values = [];
     $query = <<<HERESQL
-    SELECT cc.display_name as name, cc.sort_name as sort_name, cc.id, cr.relationship_type_id, crt.label_b_a as role, crt.name_b_a as role_name, ce.email, cp.phone
+    SELECT cc.display_name as name, cc.sort_name as sort_name, cc.id, cr.relationship_type_id, crt.label_b_a as role, crt.name_b_a as role_name, crt.name_a_b as role_name_reverse, ce.email, cp.phone
     FROM civicrm_relationship cr
     JOIN civicrm_relationship_type crt
      ON crt.id = cr.relationship_type_id
@@ -1158,7 +1158,7 @@ SELECT civicrm_case.id, case_status.label AS case_status, status_id, civicrm_cas
      AND cr.is_active
      AND cc.id NOT IN (%2)
     UNION
-    SELECT cc.display_name as name, cc.sort_name as sort_name, cc.id, cr.relationship_type_id, crt.label_a_b as role, crt.name_a_b as role_name, ce.email, cp.phone
+    SELECT cc.display_name as name, cc.sort_name as sort_name, cc.id, cr.relationship_type_id, crt.label_a_b as role, crt.name_a_b as role_name, crt.name_b_a as role_name_reverse, ce.email, cp.phone
     FROM civicrm_relationship cr
     JOIN civicrm_relationship_type crt
      ON crt.id = cr.relationship_type_id
@@ -1196,7 +1196,8 @@ HERESQL;
           'phone' => $dao->phone,
         ];
         // Add more info about the role (creator, manager)
-        $role = CRM_Utils_Array::value($dao->role_name, $caseRoles);
+        // The XML historically has the reverse direction, so look up reverse.
+        $role = CRM_Utils_Array::value($dao->role_name_reverse, $caseRoles);
         if ($role) {
           unset($role['name']);
           $details += $role;
@@ -1510,7 +1511,7 @@ HERESQL;
           $groupInfo['title'] = $results['title'];
           $params = [['group', '=', $groupInfo['id'], 0, 0]];
           $return = ['contact_id' => 1, 'sort_name' => 1, 'display_name' => 1, 'email' => 1, 'phone' => 1];
-          list($globalContacts) = CRM_Contact_BAO_Query::apiQuery($params, $return, NULL, $sort, $offset, $rowCount, TRUE, $returnOnlyCount);
+          list($globalContacts) = CRM_Contact_BAO_Query::apiQuery($params, $return, NULL, $sort, $offset, $rowCount, TRUE, $returnOnlyCount, FALSE);
 
           if ($returnOnlyCount) {
             return $globalContacts;

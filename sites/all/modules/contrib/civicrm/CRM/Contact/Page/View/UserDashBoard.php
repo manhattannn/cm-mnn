@@ -62,7 +62,7 @@ class CRM_Contact_Page_View_UserDashBoard extends CRM_Core_Page {
     }
     elseif ($this->_contactId != $userID && !$validUser) {
       if (!CRM_Contact_BAO_Contact_Permission::allow($this->_contactId, CRM_Core_Permission::VIEW)) {
-        CRM_Core_Error::fatal(ts('You do not have permission to access this contact.'));
+        CRM_Core_Error::statusBounce(ts('You do not have permission to access this contact.'));
       }
       if (!CRM_Contact_BAO_Contact_Permission::allow($this->_contactId, CRM_Core_Permission::EDIT)) {
         $this->_edit = FALSE;
@@ -77,7 +77,7 @@ class CRM_Contact_Page_View_UserDashBoard extends CRM_Core_Page {
    */
   public function preProcess() {
     if (!$this->_contactId) {
-      CRM_Core_Error::fatal(ts('You must be logged in to view this page.'));
+      throw new CRM_Core_Exception(ts('You must be logged in to view this page.'));
     }
 
     list($displayName, $contactImage) = CRM_Contact_BAO_Contact::getDisplayAndImage($this->_contactId);

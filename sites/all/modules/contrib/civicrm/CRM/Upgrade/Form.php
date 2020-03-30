@@ -35,6 +35,8 @@ class CRM_Upgrade_Form extends CRM_Core_Form {
    * Minimum php version required to run (equal to or lower than the minimum install version)
    *
    * As of Civi 5.16, using PHP 5.x will lead to a hard crash during bootstrap.
+   *
+   * Tip: Keep in sync with composer.json ("config => platform => php")
    */
   const MINIMUM_PHP_VERSION = '7.0.0';
 
@@ -794,6 +796,8 @@ SET    version = '$version'
     // Rebuild all triggers and re-enable logging if needed
     $logging = new CRM_Logging_Schema();
     $logging->fixSchemaDifferences();
+
+    CRM_Core_ManagedEntities::singleton(TRUE)->reconcile(TRUE);
   }
 
   /**

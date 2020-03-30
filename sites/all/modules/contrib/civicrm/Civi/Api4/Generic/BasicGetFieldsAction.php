@@ -25,11 +25,19 @@ use Civi\API\Exception\NotImplementedException;
 use Civi\Api4\Utils\ActionUtil;
 
 /**
- * Get fields for an entity.
+ * Lists information about fields for the $ENTITY entity.
+ *
+ * This field information is also known as "metadata."
+ *
+ * Note that different actions may support different lists of fields.
+ * By default this will fetch the field list relevant to `get`,
+ * but a different list may be returned if you specify another action.
  *
  * @method $this setLoadOptions(bool $value)
  * @method bool getLoadOptions()
  * @method $this setAction(string $value)
+ * @method $this setValues(array $values)
+ * @method array getValues()
  */
 class BasicGetFieldsAction extends BasicGetAction {
 
@@ -41,9 +49,18 @@ class BasicGetFieldsAction extends BasicGetAction {
   protected $loadOptions = FALSE;
 
   /**
+   * Fields will be returned appropriate to the specified action (get, create, delete, etc.)
+   *
    * @var string
    */
   protected $action = 'get';
+
+  /**
+   * Fields will be returned appropriate to the specified values (e.g. ['contact_type' => 'Individual'])
+   *
+   * @var array
+   */
+  protected $values = [];
 
   /**
    * To implement getFields for your own entity:
@@ -113,6 +130,17 @@ class BasicGetFieldsAction extends BasicGetAction {
       'replace' => 'create',
     ];
     return $sub[$this->action] ?? $this->action;
+  }
+
+  /**
+   * Add an item to the values array
+   * @param string $fieldName
+   * @param mixed $value
+   * @return $this
+   */
+  public function addValue(string $fieldName, $value) {
+    $this->values[$fieldName] = $value;
+    return $this;
   }
 
   public function fields() {

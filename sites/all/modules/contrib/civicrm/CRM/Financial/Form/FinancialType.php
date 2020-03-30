@@ -38,13 +38,15 @@ class CRM_Financial_Form_FinancialType extends CRM_Contribute_Form {
 
   /**
    * Set variables up before form is built.
+   *
+   * @throws \CRM_Core_Exception
    */
   public function preProcess() {
     // Check permission for Financial Type when ACL-FT is enabled
     if (CRM_Financial_BAO_FinancialType::isACLFinancialTypeStatus()
       && !CRM_Core_Permission::check('administer CiviCRM Financial Types')
     ) {
-      CRM_Core_Error::fatal(ts('You do not have permission to access this page.'));
+      CRM_Core_Error::statusBounce(ts('You do not have permission to access this page.'));
     }
     $this->_id = CRM_Utils_Request::retrieve('id', 'Positive', $this);
     parent::preProcess();
@@ -116,7 +118,7 @@ class CRM_Financial_Form_FinancialType extends CRM_Contribute_Form {
   public function postProcess() {
     if ($this->_action & CRM_Core_Action::DELETE) {
       $errors = CRM_Financial_BAO_FinancialType::del($this->_id);
-      if (!empty($errors)) {
+      if (is_array($errors) && !empty($errors)) {
         CRM_Core_Error::statusBounce($errors['error_message'], CRM_Utils_System::url('civicrm/admin/financial/financialType', "reset=1&action=browse"), ts('Cannot Delete'));
       }
       CRM_Core_Session::setStatus(ts('Selected financial type has been deleted.'), ts('Record Deleted'), 'success');

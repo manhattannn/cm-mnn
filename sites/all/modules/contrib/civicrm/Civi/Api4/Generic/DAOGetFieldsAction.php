@@ -24,8 +24,7 @@ namespace Civi\Api4\Generic;
 use Civi\Api4\Service\Spec\SpecFormatter;
 
 /**
- * Get fields for a DAO-based entity.
- *
+ * @inheritDoc
  * @method $this setIncludeCustom(bool $value)
  * @method bool getIncludeCustom()
  */
@@ -39,7 +38,7 @@ class DAOGetFieldsAction extends BasicGetFieldsAction {
   protected $includeCustom = TRUE;
 
   /**
-   * Get fields for a DAO-based entity
+   * Get fields for a DAO-based entity.
    *
    * @return array
    */
@@ -51,8 +50,8 @@ class DAOGetFieldsAction extends BasicGetFieldsAction {
     if ($fields) {
       $this->includeCustom = strpos(implode('', $fields), '.') !== FALSE;
     }
-    $spec = $gatherer->getSpec($this->getEntityName(), $this->getAction(), $this->includeCustom);
-    return SpecFormatter::specToArray($spec->getFields($fields), $this->loadOptions);
+    $spec = $gatherer->getSpec($this->getEntityName(), $this->getAction(), $this->includeCustom, $this->values);
+    return SpecFormatter::specToArray($spec->getFields($fields), $this->loadOptions, $this->values);
   }
 
   public function fields() {

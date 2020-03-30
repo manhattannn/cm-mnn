@@ -21,6 +21,12 @@ use CRM_Core_PseudoConstant;
  *
  */
 class PropertyBag implements \ArrayAccess {
+  /**
+   * @var array
+   * - see legacyWarning
+   */
+  public static $legacyWarnings = [];
+
   protected $props = ['default' => []];
 
   protected static $propMap = [
@@ -87,7 +93,9 @@ class PropertyBag implements \ArrayAccess {
   }
 
   /**
-   * @var string Just for unit testing.
+   * Just for unit testing.
+   *
+   * @var string
    */
   public $lastWarning;
 
@@ -159,12 +167,34 @@ class PropertyBag implements \ArrayAccess {
   }
 
   /**
+   * Log legacy warnings info.
+   *
    * @param string $message
    */
   protected function legacyWarning($message) {
-    $message = "Deprecated code: $message";
+    if (empty(static::$legacyWarnings)) {
+      // First time we have been called.
+      register_shutdown_function([PropertyBag::class, 'writeLegacyWarnings']);
+    }
+    // Store warnings instead of logging immediately, as calls to Civi::log()
+    // can take over half a second to work in some hosting environments.
+    static::$legacyWarnings[$message] = TRUE;
+
+    // For unit tests:
     $this->lastWarning = $message;
-    Civi::log()->warning($message);
+  }
+
+  /**
+   * Save any legacy warnings to log.
+   *
+   * Called as a shutdown function.
+   */
+  public static function writeLegacyWarnings() {
+    if (!empty(static::$legacyWarnings)) {
+      $message = "Civi\\Payment\\PropertyBag related deprecation warnings:\n"
+        . implode("\n", array_keys(static::$legacyWarnings));
+      Civi::log()->warning($message, ['civi.tag' => 'deprecated']);
+    }
   }
 
   /**
@@ -250,9 +280,9 @@ class PropertyBag implements \ArrayAccess {
    * @param array $data
    */
   public function mergeLegacyInputParams($data) {
-    $this->legacyWarning("We have merged input params into the property bag for now but please rewrite code to not use this.");
+    $this->legacyWarning('We have merged input params into the property bag for now but please rewrite code to not use this.');
     foreach ($data as $key => $value) {
-      if ($value !== NULL) {
+      if ($value !== NULL && $value !== '') {
         $this->offsetSet($key, $value);
       }
     }
