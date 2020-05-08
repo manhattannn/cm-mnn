@@ -81,6 +81,9 @@ function civicrm_api3_contact_create($params) {
 
   if (empty($params['contact_type']) && $contactID) {
     $params['contact_type'] = CRM_Contact_BAO_Contact::getContactType($contactID);
+    if (!$params['contact_type']) {
+      throw new API_Exception('Contact id ' . $contactID . ' not found.');
+    }
   }
 
   if (!isset($params['contact_sub_type']) && $contactID) {
@@ -754,6 +757,10 @@ function civicrm_api3_contact_getquick($params) {
   // If we are doing quicksearch by a field other than name, make sure that field is added to results
   if (!empty($params['field_name'])) {
     $field_name = CRM_Utils_String::munge($params['field_name']);
+    // there is no good reason to request api_key via getquick
+    if ($field_name == 'api_key') {
+      throw new API_Exception('Illegal value "api_key" for parameter "field_name"');
+    }
     // Unique name contact_id = id
     if ($field_name == 'contact_id') {
       $field_name = 'id';
