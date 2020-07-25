@@ -16,10 +16,10 @@ function civicrm_multiday_event_types_fullcalendar_classes($entity) {
 
   $tid = db_query('SELECT field_civicrm_multidayevent_type_tid FROM {field_data_field_civicrm_multiday_session} JOIN {field_data_field_civicrm_multidayevent_type} ON {field_data_field_civicrm_multidayevent_type}.entity_id = {field_data_field_civicrm_multiday_session}.entity_id WHERE field_civicrm_multiday_session_value = :id', array(':id' => $entity->eid))->fetchField();
 
-//  $classes = array(
-//    'colors-taxonomy-term-' . $tid,
-//    NULL,
-//  );
+  $classes = array(
+    'colors-taxonomy-term-' . $tid,
+    NULL,
+  );
 
    // Add a class for the date field being used.
   if (isset($entity->fullcalendar_date_field)) {
