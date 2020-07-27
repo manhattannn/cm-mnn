@@ -3,18 +3,18 @@
     Drupal.behaviors.reservationsProjectPopulate = {
 	attach: function (context, settings) {
 	    $('.rps_pick', context).live('click', function() {
-	      var project_button_id = $(this).attr('id').substring(16);
-	      var project_title = $(this).attr('name');
+		var project_button_id = $(this).attr('id').substring(16);
+		var project_title = $(this).attr('name');
 
-	      var field_type = 
-		$("#reservations_project_suggestor_field_selector").val();
 
-	      $("input[id^=" + field_type + "]").each(function() {
-		$(this).focus();
-		$(this).val(project_title+" ("+project_button_id+")");
-		$(this).blur();
-	      });
+		$("input[id^=edit-og-node1-und-0-admin-0-target-id]").
+		    each(function() {
 
+			$(this).focus();
+			$(this).val(project_title+" ("+project_button_id+")");
+			$(this).blur();
+		    
+		    });
 	    });
 	}
     };    
