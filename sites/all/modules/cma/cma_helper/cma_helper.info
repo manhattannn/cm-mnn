@@ -1,0 +1,10 @@
+name = CMA Helper Functions
+package = Community Media Advanced
+description = "CMA helper functions shared by other modules."
+
+project = "cma_helper"
+core = 7.x
+version = "7.x-1.0"
+
+project_status_url = https://github.com/cm-advanced/cma_helper
+
