@@ -1,4 +1,3 @@
-
  +---------------------------------------------------------------------------+
  | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
  | Additionally, Kevin Reynen + Dane Powell                                  |
