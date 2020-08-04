@@ -48,7 +48,7 @@ function reservations_project_suggestor_menu() {
 }
 
 function reservations_project_suggestor_ajax_callback($user_name) {
-  $js_settings = drupal_add_js('sites/all/modules/contrib/reservations_project_suggestor.js');
+  $js_settings = drupal_add_js('sites/all/modules/reservations/modules/reservations_project_suggestor/reservations_project_suggestor.js');
 
 
   $user = user_load_by_name($user_name);
