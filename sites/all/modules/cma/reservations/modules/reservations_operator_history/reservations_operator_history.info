@@ -1,11 +1,18 @@
-name = CMA Reservations: Operator History
+; CMA Reservations - reservations system
+; +---------------------------------------------------------------------------+
+; | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+; |                                                                           |
+; | This work is published under the GNU AGPLv3 license without any           |
+; | warranty. For full license and copyright information, see                 |
+; | https://www.gnu.org/licenses/agpl-3.0.html                                |
+; +---------------------------------------------------------------------------+
+name = Reservations: Operator History
+package = CMA Reservations
 description = Module will create a new table and store reservation operator history
-package = Community Media Advanced
+project = "reservations"
+
 core = 7.x
-version = 7.x-1.3
-project = reservations_operator_history
-project status url = https://github.com/cm-advanced/reservations_operator_history
+version = "7.x-3.0"
+
 dependencies[] = viewfield
 dependencies[] = reservations
-
-

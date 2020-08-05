@@ -1,4 +1,14 @@
-table.resource-daily-chart {
+/*
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ |                                                                           |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
+ */
+
+ table.resource-daily-chart {
   border-spacing: 0;
   cellpadding: 0;
   margin-left: none;

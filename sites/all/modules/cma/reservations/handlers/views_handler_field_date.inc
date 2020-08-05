@@ -2,7 +2,14 @@
 
 /**
  * @file
- * reservations views handlers
+ * reservations views_handler_field_date
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ |                                                                           |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
  */
 
 

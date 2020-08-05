@@ -3,13 +3,21 @@
 /**
  * @file
  * Reservations - Managed Equipment Reservation Checkout and Inventory
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen + Dane Powell                                  |
+ |                                                                           |  
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+  
  */
 
 // Item default availability options.
-define('RESERVATIONS_AVA_F', 1);
-define('RESERVATIONS_UNA_F', 2);
-define('RESERVATIONS_AVA_T', 3);
-define('RESERVATIONS_UNA_S', 4);
+define('RESERVATIONS_AVA_F', 1); // Available.
+define('RESERVATIONS_UNA_F', 2); // Unavailable.
+define('RESERVATIONS_AVA_T', 3); // Template Only.
+define('RESERVATIONS_UNA_S', 4); // No Longer in Inventory (edited).
 
 // Reservation status options.
 define('RESERVATIONS_STATUS_UNCONFIRMED', 1);
@@ -36,10 +44,20 @@ define('RESERVATIONS_ITEM_STATUS_RESERVED', 1);
 define('RESERVATIONS_ITEM_STATUS_CHECKED_OUT', 2);
 
 //Optional view to filter out available items for a bucket upon checkout
-define('RESERVATIONS_AVAILABLE_BUCKET_ITEM_OVERRIDE_VIEW', 
+define('RESERVATIONS_AVAILABLE_BUCKET_ITEM_OVERRIDE_VIEW',
        'reservations_available_bucket_item_override');
 
+define('RESERVATION_VIEWS', 'reservation_ui_res_items,
+reservations_ui_incoming_res,
+reservations_ui_list_res,
+reservations_ui_my_res,
+reservations_ui_node_res,
+reservations_ui_overdue_res,
+reservations_ui_unconfirmed_res');
+
+
 module_load_include('inc', 'reservations', 'includes/database');
+module_load_include('inc', 'reservations', 'includes/database_new');
 module_load_include('inc', 'reservations', 'includes/api');
 
 /**
@@ -56,13 +74,13 @@ function reservations_permission() {
       'title' => '<em class="placeholder">Reservations</em>: View all Reservations',
       'description' => t('Allows users to view Reservations. When Reservations nodes are unpublished, users can only access their own unpublished Reservations. This permission can be used to bypass that and create a public availability calendar of unpublished nodes without needing to allow access to unpublished nodes of other content types.'),
     ),
-  // now uses the core 'create reservations_reservation content' permission for the content type
-  /*
-    'create reservations' => array(
-      'title' => '<em class="placeholder">Reservations</em>: Create new content',
-      'description' => t('Required to create a Reservation, but this permission alone is not enough.  To reserve items, a user must also have Edit Own and Delete Own permissions to at least one content type.  Without that, users will see empty select lists of the items available to them.'),
-    ),
-  */
+    // now uses the core 'create reservations_reservation content' permission for the content type
+    /*
+      'create reservations' => array(
+        'title' => '<em class="placeholder">Reservations</em>: Create new content',
+        'description' => t('Required to create a Reservation, but this permission alone is not enough.  To reserve items, a user must also have Edit Own and Delete Own permissions to at least one content type.  Without that, users will see empty select lists of the items available to them.'),
+      ),
+    */
     'create confirmed reservations' => array(
       'title' => '<em class="placeholder">Reservations</em>: Create new content (Confirmed status)',
       'description' => t('This permission allows users to create/edit reservations with a status of unconfirmed or confirmed. It does not allow the user to change the status.  Users without this permission can NOT adjust the dates, times, or items in a Reservation after it has been confirmed.'),
@@ -121,7 +139,7 @@ function reservations_menu() {
     'file path' => drupal_get_path('module', 'system'),
     'weight' => -99,
   );
-    
+
   // Standard Administration settings.
   $items['admin/config/reservations/reservations'] = array(
     'title' => 'Reservations API settings',
@@ -135,6 +153,16 @@ function reservations_menu() {
     'type' => MENU_NORMAL_ITEM,
   );
 
+  // reservations staff config.
+  $items['admin/config/reservations/staff'] = array(
+    'title' => 'Staff Settings',
+    'description' => 'Configuration options for the Reservations Staff.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('reservations_admin_staff_settings'),
+    'access arguments' => array('access administration pages'),
+    'file' => 'includes/reservations.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
   return $items;
 }
 
@@ -158,7 +186,21 @@ function reservations_node_info() {
  * Implements hook_node_access().
  */
 function reservations_node_access($node, $op, $account) {
-  global $user;
+
+  // Don't allow anonymous users any access including view.
+  if (user_is_anonymous() && variable_get('reservations_disallow_anonymous_access', 0) ) {
+    if (!reservations_node_anonymous_access($node)) {
+      return NODE_ACCESS_DENY;
+    }
+  }
+
+
+  // @todo - the below code does not work.
+  // This looks like a Drupal 6 hook_access() function that was not upgraded.
+  // For this to work, we need to make the following replacements.
+  // 1) "return TRUE;" ==> "return NODE_ACCESS_ALLOW"
+  // 2) "return FALSE;" ==> "return NODE_ACCESS_IGNORE"
+  // Will also need the logic reviewed and testing.
 
   $type = isset($node->type) ? $node->type : $node;
   $uid = isset($node->uid) ? $node->uid : FALSE;
@@ -178,8 +220,8 @@ function reservations_node_access($node, $op, $account) {
       if (($op == 'delete' or $op == 'update') && isset($node->reservations_reservation_status)
         && $node->reservations_reservation_status != RESERVATIONS_STATUS_UNCONFIRMED
         && !user_access('create confirmed reservations')) {
-          return FALSE;
-        }
+        return FALSE;
+      }
 
       if ($uid === FALSE || $uid == $account->uid) {
         return TRUE;
@@ -190,13 +232,63 @@ function reservations_node_access($node, $op, $account) {
 }
 
 /**
+ * Implements hook_views_pre_build().
+ *
+ * This function is used to control access to views without having to
+ * individually edit them.
+ *
+ * @param $view - the view reference.
+ */
+function reservations_views_pre_build(&$view) {
+
+  if (user_is_anonymous() && variable_get('reservations_disallow_anonymous_access', 0) ) {
+    // Get the list of restricted views.
+    $restricted_view_names =  variable_get('reservations_disallow_anonymous_views', RESERVATION_VIEWS);
+    // Remove line ending.
+    $restricted_view_names = str_replace("\r", '' ,$restricted_view_names);
+    $restricted_view_names = str_replace("\n", '' ,$restricted_view_names);
+    // Remove spaces and tabs
+    $restricted_view_names = str_replace("\t", '' ,$restricted_view_names);
+    $restricted_view_names = str_replace(" ", '' ,$restricted_view_names);
+
+    // Convert into an array.
+    $restricted_view_names = explode(",", $restricted_view_names);
+    if (in_array($view->name, $restricted_view_names)) {
+      drupal_access_denied();
+      drupal_exit();
+    }
+  }
+}
+
+
+/**
+ * Can the node be viewed by an anonymous user.
+ */
+function reservations_node_anonymous_access($node) {
+
+  $type = isset($node->type) ? $node->type : $node;
+
+  // If a reservation.
+  if ($type == 'reservations_reservation') {
+    return FALSE;
+  }
+  else {
+    // Check if a reservable item content type..
+    $ts = reservations_type_setting($type);
+    if ($ts != 'disabled') {
+        return FALSE;
+    }
+  }
+  // Can be viewed by anonymous user if none of the conditions have been met.
+  return TRUE;
+}
+
+/**
  * Implements hook_init().
  */
 function reservations_init() {
   drupal_add_css(drupal_get_path('module', 'reservations') . '/reservations.css');
-
 }
-
 
 /**
  * Implements hook_prepare().
@@ -204,34 +296,304 @@ function reservations_init() {
 function reservations_prepare(&$node) {
   if (!isset($node->reservations_reservation_status)) {
     $node->reservations_reservation_status = variable_get('reservations_default_reservation_status', strval(RESERVATIONS_STATUS_UNCONFIRMED));
-        }
+  }
 }
 
 /**
  * Implements hook_validate().
+ * Also called from reservations_staff.module - don't use the $node parameter
+ * since it is not passed by reservations_staff
+ *
+ * OPENFLOWS - LOTTIE - 4/10/2018 - change to use hook_validate
+ * replace module_form_ID_node_validate (reservations_reservation_node_validate)
+ * the validation hook was not being called for every reservation node
  */
-function reservations_reservation_node_validate($form, &$form_state) {
-
+function reservations_validate($node, $form, &$form_state) {
+  // OPENFLOWS - LOTTIE - 4/10/2018 - THIS MIGHT BE OBSOLETE
+  // it was once used for dynamically adding more select items to reserve
   if (!empty($form_state['ahah_submission'])) {
     return;
   }
-
   // No validation necessary on deletion.
   if (isset($form_state['clicked_button']['#id']) && $form_state['clicked_button']['#id'] == 'edit-delete') {
     return;
   }
 
-  // Do not validation if their errors from the main validation function.
+  // Do not validation if their errors from the main node validation function.
   if (form_get_errors()) {
+    drupal_set_message(t('An error occurred.'), 'error', FALSE);
     return;
   }
 
-  reservations_validate_status($form, $form_state);
-  reservations_validate_reservations_reservation_date($form, $form_state);
+  try {
+      reservations_load_user($form_state['values']);
 
-  // Tests for existing items.
-  reservations_validate_empty_reservation_items($form, $form_state);
-  reservations_validate_reservations_selected_items($form, $form_state);
+      $validation_override = $form_state['values']['override'];
+
+      // Count items to be deleted.
+      $delete_count = 0;
+      $item_count = 0;
+      foreach ($form_state['values']['reservations_reservation_items'] as $did => $item) {
+          if (isset($item['reservations_placeholder_nid'])) {
+              $item_count++;
+              if ($item['reservations_remove_item_checkbox']) {
+                  $delete_count++;
+              }
+          }
+      }
+      // Check a valid button was pressed.
+      $clicked_btn = $form_state['clicked_button']['#value'];
+      if (($delete_count > 0) && !in_array($clicked_btn, array(
+              'Save',
+              'Save and Edit'
+          ))) {
+          form_set_error('', t('As you have chosen item(s) for deletion, you should only use the “Save” and ”Save and Edit” buttons. You can also use the "Delete" button if you need to delete the entire reservation).'));
+          return;
+      }
+      // If all items are marked for deletion.
+      if (($delete_count > 0) && ($delete_count == $item_count)) {
+          form_set_error('', t('You can not delete all the items in the reservation.'));
+          return;
+      }
+
+      // If it is a cloned node with items on it that has not been saved
+      if ($delete_count > 0 && is_null($form_state['values']['nid'])) {
+          form_set_error('', t('You can not delete items from a reservation that has not been saved.'));
+          return;
+      }
+
+      // Delete Items before validation runs.
+      $dialog_delete_items_confirmation_value =
+          (isset($form_state['input']) &&
+              isset($form_state['input']['dialog_delete_items_confirmation_value'])) ?
+              $form_state['input']['dialog_delete_items_confirmation_value'] : NULL;
+      $deleted_items = FALSE;
+      if (isset($form_state['values']['reservations_reservation_items'])) {
+          foreach ($form_state['values']['reservations_reservation_items'] as $did => $item) {
+              if ($item['reservations_remove_item_checkbox']) {
+                  if ($item['reservations_placeholder_nid']) {
+                      // If dialog set to delete items.
+                      if ($dialog_delete_items_confirmation_value) {
+                          // Delete items
+                          node_delete($item['reservations_placeholder_nid']);
+
+                          // Define a hook here to allow things to happen to the reservation
+                          // after the placeholder node is deleted from the reservation
+                          // will call pcm_reservation_reservations_post_reservation_item_delete()
+                          module_invoke_all('reservations_post_reservation_item_delete',
+                              $node);
+                          $deleted_items = TRUE;
+                          $form_state['rebuild'] = TRUE;
+                          $form_state['need_delete_items_confirmation'] = FALSE;
+                      } else {
+                          // Otherwise set dialog state to delete.
+                          // and come out so the form gets rebuilt.
+                          $form_state['rebuild'] = TRUE;
+                          $form_state['need_delete_items_confirmation'] = TRUE;
+                          return;
+                      }
+                  }
+                  unset($form_state['values']['reservations_reservation_items'][$did]);
+              }
+          }
+      }
+
+
+      //OPENFLOWS - LOTTIE - 4/10/18 - this was needed because of a conditional
+      // field bug that has been fixed
+      //$errors = form_get_errors();
+      //if (is_array($errors)) {
+      //foreach($errors as $k => $err) {
+      //conditional fields throw errors when they shouldn't be required
+      //if (strpos($k, 'reservable_template')) {
+      //  continue;
+      //}
+      //return;
+      //}
+      //}
+
+      //OPENFLOWS - LOTTIE - 4/10/2018
+      // this must be used instead of the parameter because reservation_staff
+      // passes NULL
+      $node = (object)$form_state['values'];
+      $langcode = $node->language;
+
+
+      $checking_in =
+          ($node->reservations_reservation_status == RESERVATIONS_STATUS_CHECKED_IN)
+              ? TRUE : FALSE;
+
+      // The state the reservation is in / (original state).
+      $reservation_state = $node->reservations_original_reservation_status;
+
+    // Clear / init the extended date variable.
+    global $reservation_ext_date;
+    $reservation_ext_date = NULL;
+
+    // Work out if cleaning buffers should be used if set.
+    global $cleaning_buffer_checks;
+    $cleaning_buffer_checks = array(
+      'start_buffer_validation' => TRUE,
+      'end_buffer_validation' => TRUE,
+    );
+    // Work out if start and end buffers checking need disabling.
+    if ($validation_override) {
+      $cleaning_buffer_checks['start_buffer_validation'] = FALSE;
+      $cleaning_buffer_checks['end_buffer_validation'] = FALSE;
+    }
+    elseif ($reservation_state == RESERVATIONS_STATUS_CHECKED_OUT) {
+      $cleaning_buffer_checks['start_buffer_validation'] = FALSE;
+      // Is the reservation beying extended.
+      $end_date_utc = $node->field_reservations_date[$langcode][0]['value2'];
+      if (isset($reservation_ext_date) && ($reservation_ext_date['end_date'] <= $end_date_utc)) {
+        $cleaning_buffer_checks['end_buffer_validation'] = FALSE;
+      }
+    }
+
+
+    // Check if a partial return.
+    if (reservations_is_extend_checkin($node, $form_state)) {
+
+
+      // If not a partial return (all items selected).
+      if (!reservations_is_partial_return($node)) {
+        $msg = 'You have chosen to extend the reservation and selected all';
+        $msg .= ' the items. Select only some items or chose "Checkin all';
+        $msg .= '  items on the reservation" from the "Checkin options"';
+        $msg .= '  dropdown.';
+        // Set an error
+        form_set_error('checkout_options', t($msg));
+        // Don't do the rest of validation as so much is determined by the option.
+        return;
+      }
+
+      // Setup variables needed for time calculations.
+      $langcode = $node->language;
+      $timezone = new DateTimeZone($node->field_reservations_date[$langcode][0]['timezone']);
+
+      // Get the extend date.
+      $extend_date_utc = $form_state['values']['checkout_extend_date'];
+
+      // If user chose to extend the reservation they must provide an extend date.
+      If (empty($extend_date_utc)) {
+        form_set_error('checkout_extend_date][date', t('You have chosen to extend the reservation and therefore must provide an "Extend Date".'));
+        // Don't do the rest of validation as so much is determined on having the extend date.
+        return;
+
+      }
+      $extend_date = new DateTime($extend_date_utc, $timezone);
+
+      // Get the current time.
+      $current = new DateTime('now', $timezone);
+
+      // Get the end date.
+      $end_date_utc = $node->field_reservations_date[$langcode][0]['value2'];
+      $end_date = new DateTime($end_date_utc, $timezone);
+      // If the extend date is in the past.
+      if ($extend_date->getTimestamp() < $current->getTimestamp()) {
+        form_set_error('checkout_extend_date][date', t('You must extend the order using a future date and time'));
+      } else {
+        // All ok.
+        // Convert extended date to UTC.
+        $timezone = variable_get('date_default_timezone', 'UTC');
+
+        $datestr = $extend_date->format('Y-m-d H:i:s');
+        $date_object = new DateTime($datestr, new DateTimeZone($timezone));
+        $date_object->setTimezone(new DateTimeZone('UTC')); // I think this line is not needed but don't have time to re test.
+        $utcdatetime = date_format($date_object, DATE_FORMAT_DATETIME);
+
+        $reservation_ext_date = array(
+          'nid' => $node->nid,
+          'end_date' => $utcdatetime,
+        );
+
+      }
+    }
+
+    reservations_validate_status($form, $form_state);
+
+
+    // If we have an extended date.
+    if (isset($reservation_ext_date)) {
+      // Use the extended date for validation.
+      $end_fld = 'checkout_extend_date]';
+      // Extend date can not be empty (this should never get called but safe to keep in case rules change elsewhere)
+      if (empty($reservation_ext_date['end_date'])) {
+        form_set_error($end_fld . '[date', t('You must specify a date to extend the reservation to (this will be used for the new end date of items not checked in).'));
+      }
+      else {
+        // Run the normal validation but on the extend date.
+        reservations_validate_reservations_reservation_date($form, $form_state, $validation_override, $reservation_ext_date['end_date'], $end_fld);
+      }
+    }
+    else {
+        // Normal validation of the end date.
+        reservations_validate_reservations_reservation_date($form, $form_state, $validation_override);
+    }
+
+    // Tests for existing items.
+    //ONLY DO THIS TEST IF WE AREN'T CHECKING IN
+    if (!$checking_in) {
+        reservations_validate_empty_reservation_items($form, $form_state);
+        reservations_validate_reservations_selected_items($form, $form_state);
+    }
+
+    //test for when checking in
+    reservations_validate_checked_in_reservation_items($form, $form_state);
+
+    if (form_get_errors()) {
+        drupal_set_message(t('An error occurred.'), 'error', FALSE);
+    }
+
+    if (reservations_is_partial_return($node)) {
+
+      // Set the url to the edit page.
+      $url = url('node/' . $node->nid . '/edit', array());
+      // Set the redirect.
+      $form_state['redirect'] = $url;
+      $_GET['destination'] = $url;
+      $_REQUEST['destination'] = $url;
+
+      // If user pressed the save and edit we must disable this function as the
+      // save and edit module is not aware of the clone and will act on the original
+      // node.
+      if (in_array('redirect_save_edit_submit', $form_state['submit_handlers'])) {
+        // Get the location of the save and edit call.
+        $index = array_search('redirect_save_edit_submit', $form_state['submit_handlers']);
+        // Replace it with a normal submit.
+        $form_state['submit_handlers'][$index] = 'node_form_submit';
+      }
+
+      // Same with the save and view - this will act as save and edit as it should
+      // after a partial return.
+      if (in_array('redirect_cma_save_view_submit', $form_state['submit_handlers'])) {
+        // Get the location of the save and edit call.
+        $index = array_search('redirect_cma_save_view_submit', $form_state['submit_handlers']);
+        // Replace it with a normal submit.
+        $form_state['submit_handlers'][$index] = 'node_form_submit';
+      }
+    }
+
+
+      if ($deleted_items) {
+          // Build the destanation of the new url.
+          $options = array();
+          if (isset($_GET['destination']) && !url_is_external($_GET['destination'])) {
+              $destination = $_GET['destination'];
+              $options['query'] = array('destination' => $destination);
+          }
+          // Unset the existing destination.
+          unset($_GET['destination']);
+
+          // Reload the page.
+          drupal_set_message(t('The reservation has been reloaded as one or more items were removed!'));
+          // Call the load user as the finally will not get called after a drupal_goto().
+          reservations_load_user();
+          drupal_goto('node/' . $form_state['values']['nid'] . '/edit', $options);
+      }
+  } finally {
+      reservations_load_user();
+  }
 }
 
 
@@ -249,12 +611,11 @@ function reservations_insert($node) {
 function reservations_update($node) {
   if (isset($node->revision) && $node->revision) {
     drupal_write_record("reservations_reservation", $node);
-      }
-      else {
+  }
+  else {
     drupal_write_record("reservations_reservation", $node, "vid");
   }
   reservations_add_reservation_items($node);
-
 }
 
 /**
@@ -270,10 +631,10 @@ function reservations_delete($node) {
         'reservations_item_status' => RESERVATIONS_ITEM_STATUS_AVAILABLE,
       );
       drupal_write_record('reservations_reservation_item_node', $update, 'nid');
-          }
+    }
     // Remove the placeholder node.
     node_delete($item['reservations_placeholder_nid']);
-        }
+  }
 
   reservations_delete_record('reservations_reservation', $node, 'nid');
   reservations_delete_record('reservations_reservation_detail', $node, 'nid');
@@ -285,10 +646,24 @@ function reservations_delete($node) {
  * Implements hook_form().
  */
 function reservations_form($node, &$form_state) {
-  
+
+  //IF WE ARE LANDING HERE AS PART OF A PARTIAL RETURN, WE WILL FORWARD TO
+  //THE NEWER RESERVATION SO OPERATOR CAN ADJUST TIMES IF NEED BE
+  if (isset($_SESSION['reservations_new_partial_return']) &&
+    $_SESSION['reservations_new_partial_return']) {
+      $new_reservation = clone $_SESSION['reservations_new_partial_return'];
+      $_SESSION['reservations_new_partial_return'] = '';
+      if (isset($new_reservation->nid)) {
+        drupal_goto("node/" . $new_reservation->nid . "/edit");
+        return;
+      }
+  }
+
+
+  drupal_add_library('system', 'ui.dialog');
+
   $form = node_content_form($node, $form_state);
   $reservation_nid = isset($node->nid) ? $node->nid : NULL;
-  
 
   // During initial form build, add the node entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
@@ -303,13 +678,64 @@ function reservations_form($node, &$form_state) {
   else {
     $node = $form_state['node'];
   }
-  
+
   // Add a wrapper for the choices and more button.
   $form['choice_wrapper'] = array(
     '#tree' => FALSE,
     '#prefix' => '<div class="clear-block" id="reservations-choice-wrapper">',
     '#suffix' => '</div>',
   );
+
+  // Update the date labels.
+  // $form_state['values']['field_reservations_date'][$langcode][0]['value']['date']
+  $datef = $form_state['values']['field_reservations_date'];
+
+  $form['initial_state'] = array(
+    '#type' => 'hidden',
+    '#value' => $node->reservations_reservation_status,
+  );
+
+
+  // If reservation is checkout
+  if ($node->reservations_reservation_status == RESERVATIONS_STATUS_CHECKED_OUT) {
+
+
+    $form['#attached']['js'] = array(
+      //drupal_get_path('module', 'reservations')  . '/checkin_options.js',
+      'type' => 'file',
+      'data' => drupal_get_path('module', 'reservations')  . '/checkin_options.js',
+      'group' => JS_DEFAULT,
+      'scope' => 'header',
+      'weight' => -999,
+    );
+    // Add options.
+
+    $checkout_options = array(
+      NULL => '-- select item ---',
+      1 => 'Check-in all items on the reservation',
+      2 => 'Extend all or part of the reservation'
+    );
+    $form['choice_wrapper']['checkout_options'] = array(
+      '#title' => t('Check in options'),
+      '#type' => 'select',
+      '#options' => $checkout_options,
+    );
+
+    $format = 'm/d/Y h:ia';
+
+
+    $form['choice_wrapper']['checkout_extend_date'] = array(
+      '#type' => 'date_popup',
+      '#title' => t('Extend Date'),
+      '#date_format' => $format,
+      '#date_label_position' => 'within', // See other available attributes and what they do in date_api_elements.inc
+      '#date_increment' => 15, // Optional, used by the date_select and date_popup elements to increment minutes and seconds.
+      '#date_year_range' => '-3:+3', // Optional, used to set the year range (back 3 years and forward 3 years is the default).
+    );
+
+  }
+
+
 
   // Build existing reserved items table on existing reservations.
   $form['choice_wrapper']['reservations_reservation_items'] = reservations_build_reservation_table_form($form, $form_state, $node, TRUE);
@@ -319,81 +745,82 @@ function reservations_form($node, &$form_state) {
   //CHANGE MADE ON 6/22/2016 BY OPENFLOWS MARK LIBKUMAN
   //GETTING RID OF THE ADD MORE BUTTON, WILL ALWAYS BE SET TO 12
   //$choice_count = (isset($node->choice_count)) ? $node->choice_count : 12;
-  $choice_count = 12;
+  $choice_count = 50;
 
-
-  //if (isset($form_state['post']['op']) && $form_state['post']['op'] == "Add more items") {
-  //  $choice_count += 3;
-  //}
+  if ($node->reservations_reservation_status >=
+    RESERVATIONS_STATUS_CHECKED_OUT) {
+    $choice_count = 0;
+  }
 
   $form['choice_wrapper']['choice_count'] = array(
     '#type' => 'value',
     '#value' => $choice_count,
   );
-  
+
   //$options = reservations_build_reservable_items($node, $form_state, NULL);
-  
+
   //function reservations_build_reservable_items($node, $form_state, $reservation_nid = NULL) {
-  
- 
-  //set inventory 
+
+
+  //set inventory
   $inventory = module_exists('reservations_inventory') ? reservations_inventory_set_inventory($node) : NULL;
-  
+
   $langcode = $node->language;
   // Newly set dates take precedence.
   if (isset($form_state['values']['field_reservations_date'][$langcode][0]['value']['date'])) {
-    
+
     $start_string = $form_state['values']['field_reservations_date'][$langcode][0]['value']['date'] . ' ' . $form_state['input']['field_reservations_date'][$langcode][0]['value']['time'];
     $end_string = $form_state['values']['field_reservations_date'][$langcode][0]['value2']['date'] . ' ' . $form_state['input']['field_reservations_date'][$langcode][0]['value2']['time'];
-    
+
     $start_object = reservations_create_local_date_object($start_string);
     $end_object = reservations_create_local_date_object($end_string);
-  
-    if($start_object) {
-      $start = date_format($start_object, DATE_FORMAT_DATETIME); 
+
+    if ($start_object) {
+      $start = date_format($start_object, DATE_FORMAT_DATETIME);
       $end = date_format($end_object, DATE_FORMAT_DATETIME);
-    } else {
-      $start     = NULL;
-      $end       = NULL;
     }
-    
+    else {
+      $start = NULL;
+      $end = NULL;
+    }
+
   }
   // Dates loaded from the reservation are next.
   elseif (isset($node->nid)) {
     $date_info = $node->field_reservations_date[$langcode][0];
-    $start     = $date_info['value'];
-    $end       = $date_info['value2'];
+    $start = $date_info['value'];
+    $end = $date_info['value2'];
   }
   // New reservation, so no date filtering.
   else {
     $is_new = TRUE;
-    $start     = NULL;
-    $end       = NULL;
+    $start = NULL;
+    $end = NULL;
   }
-    
+
   $options = array();
   $options_disabled = array();
-  
+
   $options['options'][''] = '<' . t('Select') . '>';
   $default = NULL;
-  
+
   $vid = variable_get('reservations_grouping_vid', 0);
-  
-  
+
+
   $terms = taxonomy_get_tree($vid);
   //add check to see if there are any terms
   foreach ($terms as $term) {
     $options['options'][$term->name] = array();
   }
-  
+
   $reservable_types = reservations_content_types();
-  
+
   // This array holds all reservable items the user may reserve.
   // Loop through each reserable type.
   foreach ($reservable_types as $reservable_type) {
 
-    $include = FALSE;  // default to skipping the type unless 
-    
+    $include = FALSE;  // default to skipping the type unless
+
     if ($inventory) {
       if (!empty($reservable_type['inventory_tids'])) {
         foreach ($reservable_type['inventory_tids'] as $tid) {
@@ -402,105 +829,96 @@ function reservations_form($node, &$form_state) {
           }
         }
       }
-    } else {
+    }
+    else {
       // if there is no inventory, include everything
       $include = TRUE;
     }
-    
-    if ($include) {
-     
-	  if ($reservable_type['reservations_active_status'] != RESERVATIONS_STATUS_ACTIVE) {
-	    continue;
-	  }
-	  
-	  if (!reservations_check_content_type_user_permissions($reservable_type['type'])) {
-	    continue;
-	  }
-	  
-	  if (empty($is_new)) {
-	    $restrictions = reservations_check_content_type_restrictions($reservable_type['type'], $start, $end);
-		if (!empty($restrictions)) {
-		  continue;
-		}
-	  }
-	  
-	  //set the grouping to Other if there isn't one
-	  $grouping = isset($reservable_type['reservations_item_grouping']) ? $reservable_type['reservations_item_grouping'] : 'Other';
-	  	
-	  // if it's a bucket, add it to the select list
-	  if ($reservable_type['reservations_type_setting'] == 'bucket') {
-	    
-	    	  
-	    // Check for available items in the bucket at the time when time is included
-	    $available_bucket_items = reservations_get_available_bucket_count($reservable_type['type'], $start, $end, $reservation_nid) - $reservable_type['reservations_spare_items'];
-		  if ($available_bucket_items) {
-		    $options['options'][$grouping][$reservable_type['type']] = $reservable_type['type_name'];
-		  } else {
-		    //disable item in list
-		    $options_disabled['options'][$grouping][$reservable_type['type']] = $reservable_type['type_name'];
-		    
-		    
-		  }
-	
-	   } 
-	   //PROCESS RESOURCES
-	   elseif ($reservable_type['reservations_type_setting'] == 'resource') {
-	     // No date filtering for new reservations.
-	     //dsm($reservable_type['type']);
-		 $item_options = reservations_get_reservable_items($reservable_type['type'], $start, $end, $reservation_nid);
-		 //dsm($item_options);
-		 
-		 if (!empty($item_options)) {
-		   foreach ($item_options as $key => $item) {
-		     
-			 $options['options'][$grouping][$key] = $item;
-		    }
-		  } else {
-		  
-		     //$options_disabled['options'][$grouping][$key] = $item;
 
-		    //disable item in list
-		  }
-	   }  
+    if ($include) {
+
+      if ($reservable_type['reservations_active_status'] != RESERVATIONS_STATUS_ACTIVE) {
+        continue;
+      }
+
+      if (!reservations_check_content_type_user_permissions($reservable_type['type'])) {
+        continue;
+      }
+
+      if (empty($is_new)) {
+        $restrictions = reservations_check_content_type_restrictions($reservable_type['type'], $start, $end);
+        if (!empty($restrictions)) {
+          continue;
+        }
+      }
+
+      //set the grouping to Other if there isn't one
+      $grouping = isset($reservable_type['reservations_item_grouping']) ? $reservable_type['reservations_item_grouping'] : 'Other';
+
+      // if it's a bucket, add it to the select list
+      if ($reservable_type['reservations_type_setting'] == 'bucket') {
+
+
+        // Check for available items in the bucket at the time when time is included
+        $available_bucket_items = reservations_get_available_bucket_count($reservable_type['type'], $start, $end, $reservation_nid, $inventory) - $reservable_type['reservations_spare_items'];
+        if ($available_bucket_items) {
+          $options['options'][$grouping][$reservable_type['type']] = $reservable_type['type_name'];
+        }
+        else {
+          //disable reservations_get_available_bucket_countitem in list
+          $options_disabled['options'][$grouping][$reservable_type['type']] = $reservable_type['type_name'];
+
+
+        }
+
+      }
+      //PROCESS RESOURCES
+      elseif ($reservable_type['reservations_type_setting'] == 'resource') {
+        // No date filtering for new reservations.
+        //dsm($reservable_type['type']);
+        $item_options = reservations_get_reservable_items($reservable_type['type'], $start, $end, $reservation_nid);
+        //dsm($item_options);
+
+        if (!empty($item_options)) {
+          foreach ($item_options as $key => $item) {
+
+            $options['options'][$grouping][$key] = $item;
+          }
+        }
+        else {
+
+          //$options_disabled['options'][$grouping][$key] = $item;
+
+          //disable item in list
+        }
+      }
     } // $inventroy include
   }
 
   //dsm($options['options']);
-  
+
   // Remove grouping keys with no items.
   foreach ($terms as $term) {
     if (empty($options['options'][$term->name])) {
       unset ($options['options'][$term->name]);
     }
   }
-  
+
   //$alt_options = $options['options'];
-  
   // Add the current choices to the form.
-  for ($delta = 1; $delta <= $choice_count; $delta++) {
-    $default = isset($node->reservations_reservation_items["choice_" . $delta]['reservations_item_nid']) ?
-      $node->reservations_reservation_items["choice_" . $delta]['reservations_item_nid'] : '';
+  if ($reservable_type['reservations_active_status'] == RESERVATIONS_STATUS_ACTIVE) {
+    for ($delta = 1; $delta <= $choice_count; $delta++) {
+      $default = isset($node->reservations_reservation_items["choice_" . $delta]['reservations_item_nid']) ?
+        $node->reservations_reservation_items["choice_" . $delta]['reservations_item_nid'] : '';
 
-    //$form['choice_wrapper']['reservations_reservation_items']["choice_" . $delta]['reservations_item_nid'] = _reservations_choice_form($node, $form_state, $delta, $default);
-    
-    
-    
-    $form['choice_wrapper']['reservations_reservation_items']["choice_" . $delta]['reservations_item_nid'] = array(
-      '#type' => 'select',
-      '#options' => $options['options'],
-      '#default_value' => $default,
-      //'#parents' => array('choice', $delta, 'item'),
-    );
-    
-    //$form['myboxes']['bar'] = array('#disabled' => TRUE,);
-
+      $form['choice_wrapper']['reservations_reservation_items']["choice_" . $delta]['reservations_item_nid'] =
+        array(
+          '#type' => 'select',
+          '#options' => $options['options'],
+          '#default_value' => $default,
+        );
+    }
   }
-  
-  $options = array();
-  for ($i = 1; $i < 13; $i++) {
-    $options[$i] = $i;
-  }
-
 
   if (user_access('manage reservations')) {
     $form['reservations_reservation_status'] = array(
@@ -522,55 +940,85 @@ function reservations_form($node, &$form_state) {
     '#value' => (isset($node->reservations_original_reservation_status)) ? $node->reservations_original_reservation_status : $node->reservations_reservation_status,
   );
 
-  $form['#validate'][] = 'reservations_reservation_node_validate';
+  //OPENFLOWS - LOTTIE - 4/10/2018 - remove custom validation
+  // replace with node-type-specific hook_validation
+  //$form['#validate'][] = 'reservations_reservation_node_validate';
   //$form['#after_build'][] = '_reservations_after_build';
 
   $form['#cache'] = TRUE; // Make sure the form is cached.
 
+  // OPENFLOWS - LOTTIE - 4/10/2018 - THIS MIGHT BE OBSOLETE
+  // it was once used for dynamically adding more select items to reserve
   // Pull the correct action out of form_state if it's there to avoid AHAH+Validation action-rewrite.
   if (isset($form_state['action'])) {
     $form['#action'] = $form_state['action'];
   }
-  
+
   $diffallowed = variable_get('reservations_diff_warning', '0');
-  
+
   if ($reservation_nid && $diffallowed) {
-    
+
     $timezone = variable_get('date_default_timezone', 0);
-    
+
     $now = strtotime(format_date(time(), 'custom', 'Y-m-d h:i', $timezone));
-            
-    //if this reservation is being checked out and the start hours are 
+
+    //if this reservation is being checked out and the start hours are
     // > or < reservations_diff_warning hours from now
     // time zone/dst does NOT matter here
     if ($node->reservations_reservation_status == RESERVATIONS_STATUS_PENDING) {
-      
+
       // only works with PHP5.3
       //$starttime = reservations_create_local_date_object($node->field_reservations_date['und'][0]['value'])->getTimestamp();
-      
+
       $starttime = reservations_create_local_date_object($node->field_reservations_date['und'][0]['value'])->format('U');
-      
-      
+
+
       $diff = abs($starttime - $now) / 60;
 
       if ($diff > variable_get('reservations_diff_warning', '0')) {
         drupal_set_message(t('This Reservations is being checked out more than @minutes minutes before or after the Reservation was scheduled to start.  Please adjust the start time for accurate records', array('@minutes' => $diffallowed)), 'warning');
       }
     }
-    
+
     if ($node->reservations_reservation_status == RESERVATIONS_STATUS_CHECKED_OUT) {
-      
+
       //$endtime = reservations_create_local_date_object($node->field_reservations_date['und'][0]['value2'])->getTimestamp();
-      
+
       $endtime = reservations_create_local_date_object($node->field_reservations_date['und'][0]['value2'])->format('U');
-      
+
       $diff = abs($endtime - $now) / 60;
       if ($diff > variable_get('reservations_diff_warning', '0')) {
         drupal_set_message(t('This Reservations is being checked in more than @minutes minutes before or after the Reservation was scheduled to end.  Please adjust the end time for accurate records', array('@minutes' => $diffallowed)), 'warning');
       }
     }
-  } 
-  
+  }
+
+  // Confirmation dialog - Validation will set need_delete_items_confirmation.
+  // Javascript will be triggered by the ok button and will set the hidden
+  // form element: dialog_delete_items_confirmation_value.
+  $need_delete_items_confirmation =
+    isset($form_state['need_delete_items_confirmation']) ?
+    $form_state['need_delete_items_confirmation'] : NULL;
+  if (isset($need_delete_items_confirmation) && $need_delete_items_confirmation) {
+    $form['reservations_dialog'] = array(
+      '#type' => 'fieldset',
+      '#title' => '',
+      '#id' => 'reservations_dialog',
+      '#weight' => 5,
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+    $form['reservations_dialog']['dialog_text'] = array(
+      '#markup' => '<p>' . t('You have chosen to delete one or more items. Please confirm the deletion' . '<p>')
+        . t('Note: the deletion will force a page refresh and any other changes you have made to the form will be lost.' . '<p>'),
+    );
+    $form['dialog_delete_items_confirmation_value'] = array(
+      '#type' => 'hidden',
+      '#value' => 0,
+    );
+
+  }
+
   return $form;
 }
 
@@ -579,36 +1027,112 @@ function reservations_form($node, &$form_state) {
  * Implements hook_form_alter().
  */
 function reservations_form_alter(&$form, $form_state, $form_id) {
-  
+
   $type = (isset($form['#bundle'])) ? $form['#bundle'] : NULL;
-  
+
   switch ($form_id) {
-    
+
     // putting this here instead of reservations_form allows it to be run after the date fields are added
     case 'reservations_reservation_node_form':
       if (user_access('suspend reservations access') && !user_access('manage reservations')) {
         drupal_set_message(t('Your permission to make Reservations has been suspended.  Please contact a staff member.'), 'error');
         $form = NULL;
       }
+      // Staff reservations - set reserve for.
+      // @todo - code needs review.
+      if (user_access('manage reservations')) {
+        // Get the node.
+        if (isset($form_state['values'])) {
+          $node = (array) $form_state['values'] + (array) $form['#node'];
+        }
+        else {
+          $node = $form['#node'];
+        }
+        $node = (object) $node;
+        // Move the author field and set autocomplete and ahah handlers.
+        // We do this here and not in after_build because the ahah hash is handled before after_build is called.
+        $form['name'] = $form['author']['name'];
+
+        //IF WE ARE CLONING A TEMPLATE, REMOVE THE "Reserve for" VALUE
+        $is_template =
+          $form['field_is_reservable_template'][LANGUAGE_NONE]
+          ['#default_value'];
+        if (arg(2) == 'clone' && $is_template) {
+          $form['name']['#default_value'] = '';
+        }
+        if (arg(2) == 'clone' && !$is_template) {
+          if (is_numeric(arg(1))) {
+            $node = node_load(arg(1));
+            $form['name']['#default_value'] = $node->name;
+          }
+        }
+        $form['name']['#title'] = 'Reserve for';
+        $form['name']['#weight'] = -99;
+
+        if (module_exists('civicrm_user_reference')) {
+          $form['name']['#autocomplete_path'] = 'civicrm_user_reference/autocomplete-nouid';
+        }
+        // Disable Ajax for "Reserve for" / "Override Validation" as it only
+        // raises an error and does not do anything useful.
+//        $form['name']['#ajax'] = array(
+//          'callback' => 'reservations_update_staff_form_name',
+//          'wrapper' => 'reservations-staff-edit-form-wrapper',
+//          'method' => 'replace',
+//          'effect' => 'fade',
+//        );
+
+        $form['name']['#prefix'] = '<table><tr><td>';
+        $form['name']['#suffix'] = '</td>';
+
+        unset($form['author']['name']);
+
+        //create override checkbox
+        $form['override'] = array(
+          '#type' => 'checkbox',
+          '#title' => 'Override Validation',
+          '#description' => 'If this box is ticked validation will run for the currently logged in user instead of the user shown in the "Reserve for" box.',
+          '#default_value' => isset($node->override) ? $node->override : variable_get('reservations_staff_override_by_default', 0),
+          '#weight' => -97,
+          '#columns' => 0,
+          '#prefix' => '<td>',
+          '#suffix' => '</td></tr></table>',
+        );
+        // Disable Ajax for "Reserve for" / "Override Validation" as it only
+        // raises an error and does not do anything useful.
+//        $form['override']['#ajax'] = array(
+//          'callback' => 'reservations_update_staff_form_name',
+//          'wrapper' => 'reservations-staff-edit-form-wrapper',
+//          'method' => 'replace',
+//          'effect' => 'fade',
+//        );
+        // wrapper for above ajax.
+//        $form['#prefix'] = '<div id="reservations-staff-edit-form-wrapper">';
+//        $form['#suffix'] = '</div>';
+      }
+      // @todo - Is this needed?
+      reservations_load_user();
+      // End of: Staff reservations - set reserve for.
+
       break;
-      
+
     // Node settings form.
     case $type . '_node_form':
 
       //////////////////////////////////////////////////////////////////
       //BEGIN HACK BY MNN OPENFLOWS MARK LIBKUMAN
       //WHEN ADDING GENERIC INVENTORY ITEMS, DISPLAY RESERVATION SETTINGS
-      $template_mode = 
-	(($type == 'equipment_template') || 
-	 ($type == 'facility_template') ||
-	 ($type == 'equipment_non_reservable_') ||
-	 ($type == 'facility_non_reservable_') ) ?
-	TRUE : FALSE;
+      $template_mode =
+        (($type == 'equipment_template') ||
+          ($type == 'facility_template') ||
+          ($type == 'equipment_non_reservable_') ||
+          ($type == 'facility_non_reservable_')) ?
+          TRUE : FALSE;
 
-      if (reservations_is_reservations_type($type) || $template_mode) {
-      //if (reservations_is_reservations_type($type)) {
-      //END HACK BY MNN OPENFLOWS MARK LIBKUMAN
-      ////////////////////////////////////////////////////////////////////
+      if ((reservations_is_reservations_type($type) || $template_mode) &&
+        user_access('administer reservations')) {
+        //if (reservations_is_reservations_type($type)) {
+        //END HACK BY MNN OPENFLOWS MARK LIBKUMAN
+        ////////////////////////////////////////////////////////////////////
         $node = (object) $form['#node'];
 
         $sub_type = isset($node->reservations_sub_type) ? $node->reservations_sub_type : RESERVATIONS_SUB_TYPE_ITEM;
@@ -624,6 +1148,7 @@ function reservations_form_alter(&$form, $form_state, $form_id) {
               '#group' => 'additional_settings',
             );
           }
+
           $form['reservations']['reservations_default_availability'] = array(
             '#title' => t('Default booking availability'),
             '#type' => 'radios',
@@ -633,6 +1158,7 @@ function reservations_form_alter(&$form, $form_state, $form_id) {
             '#element_validate' => array('reservations_validate_default_availability'),
           );
         }
+
         $form['reservations_sub_type'] = array(
           '#type' => 'value',
           '#value' => $sub_type,
@@ -645,13 +1171,22 @@ function reservations_form_alter(&$form, $form_state, $form_id) {
   }
 }
 
+/**
+ * Menu callback that reprocesses the form with the new author
+ *
+ * @todo - Disable Ajax for "Reserve for" / "Override Validation" as it only
+ * raises an error and does not do anything useful.
+ */
+//function reservations_update_staff_form_name($form, $form_state) {
+//  return $form['NAME'];
+//}
 
 /**
  * Implements hook_form_FORM_ID_alter().
  */
 function reservations_form_node_type_delete_confirm_alter(&$form, &$form_state) {
   $type = str_replace('-', '_', arg(3));
-  reservations_delete_node_type_validate($form);   
+  reservations_delete_node_type_validate($form);
 }
 
 /**
@@ -661,7 +1196,7 @@ function reservations_form_node_admin_content_alter(&$form, &$form_state) {
   if (!isset($form['#validate'])) {
     $form['#validate'] = array();
   }
-  $form['#validate'][] = 'reservations_node_admin_delete_validate';      
+  $form['#validate'][] = 'reservations_node_admin_delete_validate';
 }
 
 /**
@@ -671,8 +1206,9 @@ function reservations_form_node_delete_confirm_alter(&$form, &$form_state) {
   $node = node_load((int) arg(1));
   if (!reservations_delete_item_validate($node)) {
     unset($form['actions']['submit']);
-  }      
+  }
 }
+
 
 /**
  * Implements hook_form_FORM_ID_alter().
@@ -699,13 +1235,13 @@ function reservations_form_node_type_form_alter(&$form, &$form_state) {
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
     '#attached' => array(
-    'js' => array(drupal_get_path('module', 'menu') . '/menu.admin.js'),
-     ),
+      'js' => array(drupal_get_path('module', 'menu') . '/menu.admin.js'),
+    ),
   );
 
-  $warning  = '<div>' . t('<strong> WARNING:</strong> changing this setting has no effect on existing reserved items.') . '</div>';
+  $warning = '<div>' . t('<strong> WARNING:</strong> changing this setting has no effect on existing reserved items.') . '</div>';
 
-  $options  = array(
+  $options = array(
     'disabled' => t('Disabled'),
     'bucket' => t('Bucket'),
     'resource' => t('Resource'),
@@ -727,126 +1263,123 @@ function reservations_form_node_type_form_alter(&$form, &$form_state) {
       '#value' => $type_setting,
       '#description' => check_plain($type_setting . ' - ' . t('The setting can not be changed because content already exists for this type.')),
       '#weight' => -30,
-     );
-
-   } else {
-   
-     $description_items = array(
-       'disabled' => t('This content type cannot be reserved'),
-       'resource' => t('Use this content type to create unique items that can be reserved.'),
-       'bucket' => t('Use this content type to create interchangeable items that can be reserved (ex. Camera). Buckets reference interchangeable items. The actual item does not have to be chosen until the reservation is checked out.'),
-      );
-
-
-      $form['reservations']['reservations_type_setting'] = array(
-        '#type' => 'radios',
-        '#title' => t('Reservable item type'),
-        '#options' => $options,
-        '#default_value' => isset($settings->reservations_type_setting) ? $settings->reservations_type_setting : 'disabled',
-        '#description_items' => $description_items,
-        '#after_build' => array('reservations_type_setting_after_build'),
-        '#weight' => -30,
-      );
-    }
-
-    if (isset($nodes) && $nodes && $type_setting == 'disabled') {
-      return;
-    }
-
-    $status = array(
-      RESERVATIONS_STATUS_ACTIVE => t('Active'),
-      RESERVATIONS_STATUS_INACTIVE => t('Inactive'),
     );
 
-    $form['reservations']['reservations_active_status'] = array(
+  }
+  else {
+
+    $description_items = array(
+      'disabled' => t('This content type cannot be reserved'),
+      'resource' => t('Use this content type to create unique items that can be reserved.'),
+      'bucket' => t('Use this content type to create interchangeable items that can be reserved (ex. Camera). Buckets reference interchangeable items. The actual item does not have to be chosen until the reservation is checked out.'),
+    );
+
+
+    $form['reservations']['reservations_type_setting'] = array(
       '#type' => 'radios',
-      '#title' => t('Status'),
-      '#options' => $status,
-      '#default_value' => isset($settings->reservations_active_status) ? intval($settings->reservations_active_status) : RESERVATIONS_STATUS_ACTIVE,
-      '#description' => t('Set to active to allow this type to be reserved.'),
-      '#weight' => -20,
+      '#title' => t('Reservable item type'),
+      '#options' => $options,
+      '#default_value' => isset($settings->reservations_type_setting) ? $settings->reservations_type_setting : 'disabled',
+      '#description_items' => $description_items,
+      '#after_build' => array('reservations_type_setting_after_build'),
+      '#weight' => -30,
     );
-    
-    $vid = variable_get('reservations_grouping_vid', 0);    
-    $tid = isset($settings->reservations_grouping) ? $settings->reservations_grouping : NULL;
-      
-    // weighted -9
-    $grouping_array = reservations_taxonomy_term_select(t('Grouping'), NULL, $tid, $vid, t('This will alter order the content types are displayed to users reserving items from buckets. Terms added to the Reservations Groupings vocabulary will appear here.'), 0, '<' . t('Select') . '>');
+  }
 
-    $form['reservations']['reservations_grouping'] = $grouping_array;
-    
-    
-    
+  if (isset($nodes) && $nodes && $type_setting == 'disabled') {
+    return;
+  }
+
+  $status = array(
+    RESERVATIONS_STATUS_ACTIVE => t('Active'),
+    RESERVATIONS_STATUS_INACTIVE => t('Inactive'),
+  );
+
+  $form['reservations']['reservations_active_status'] = array(
+    '#type' => 'radios',
+    '#title' => t('Status'),
+    '#options' => $status,
+    '#default_value' => isset($settings->reservations_active_status) ? intval($settings->reservations_active_status) : RESERVATIONS_STATUS_ACTIVE,
+    '#description' => t('Set to active to allow this type to be reserved.'),
+    '#weight' => -20,
+  );
+
+  $vid = variable_get('reservations_grouping_vid', 0);
+  $tid = isset($settings->reservations_grouping) ? $settings->reservations_grouping : NULL;
+
+  // weighted -9
+  $grouping_array = reservations_taxonomy_term_select(t('Grouping'), NULL, $tid, $vid, t('This will alter order the content types are displayed to users reserving items from buckets. Terms added to the Reservations Groupings vocabulary will appear here.'), 0, '<' . t('Select') . '>');
+
+  $form['reservations']['reservations_grouping'] = $grouping_array;
 
 
-     $form['reservations']['rules'] = array(
-        '#markup' => '<b>Reservation Rules</b>',
-        '#weight' => -8,
-     );
-    
-    
-    $form['reservations']['reservations_max_hours_per_reservation'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Maximum hours per reservation'),
-        '#size' => 10,
-        '#default_value' => isset($settings->reservations_max_hours_per_reservation) ? $settings->reservations_max_hours_per_reservation : 0,
-        '#element_validate' => array('reservations_is_numeric_validate'),
-        '#description' => filter_xss(t('The maximum hours the item can be reserved for in one reservation. Set to zero for no limit.') . $warning),
-        '#weight' => -7,
-     );
-            
-      
-      $form['reservations']['reservations_allow_overnight'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Allow overnight reservation'),
-        '#default_value' => isset($settings->reservations_allow_overnight) ? $settings->reservations_allow_overnight : 0,
-        '#description' => filter_xss(t('Allow a reservation to continue over multiple days.  If this is not checked, items in this content type must be returned before the checkout closes.') . $warning),
-      );
+  $form['reservations']['rules'] = array(
+    '#markup' => '<b>Reservation Rules</b>',
+    '#weight' => -8,
+  );
 
-      $form['reservations']['reservations_push'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Push forward when item is due and checkout is closed'),
-        '#default_value' => isset($settings->reservations_push) ? $settings->reservations_push : 0,
-        '#description' => filter_xss(t('Allow a reservation with this type to push forward until checkout open if return falls on day configured to allow pushing.') . $warning),
-      );
-      
-      // This setting is only valid for buckets.
-      if (!isset($settings->reservations_type_setting) || $settings->reservations_type_setting == 'bucket') {
-        
-        $form['reservations']['bucket'] = array(
-          '#markup' => '<b>Bucket Specific Settings</b>',
-          '#weight' => 29,
-        );
-        
-        $form['reservations']['reservations_auto_assign_bucket_item'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Automatically assign a bucket item when Reservation is created'),
-          '#default_value' => isset($settings->reservations_auto_assign_bucket_item) ? $settings->reservations_auto_assign_bucket_item : 0,
-          '#description' => t('Automatically assign the best fit bucket item when reserving a new bucket item.  This saves time when checking items out but can create problems when an item is not returned on time.'),
-          '#weight' => 30,
-        );
-      }
-      
-      // This setting is only valid for buckets.
-      if (!isset($settings->reservations_type_setting) || $settings->reservations_type_setting == 'bucket') {
-        $form['reservations']['reservations_spare_items'] = array(
-          '#type' => 'textfield',
-          '#title' => t('Spare items'),
-          '#size' => 10,
-          '#default_value' => isset($settings->reservations_spare_items) ? $settings->reservations_spare_items : 0,
-          '#element_validate' => array('reservations_is_numeric_validate'),
-          '#description' => filter_xss(t("Set this to the number of items of this type that should always be unavailable and thus unreservable.  This way you'll still have enough items for future reservations in case something breaks.") . $warning),
-          '#weight' => 31,
-        ); 
-      }
 
-      
-      //form fields shared with resouce nodes
-      reservations_add_settings_form($form, $form_state);
+  $form['reservations']['reservations_max_hours_per_reservation'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum hours per reservation'),
+    '#size' => 10,
+    '#default_value' => isset($settings->reservations_max_hours_per_reservation) ? $settings->reservations_max_hours_per_reservation : 0,
+    '#element_validate' => array('reservations_is_numeric_validate'),
+    '#description' => filter_xss(t('The maximum hours the item can be reserved for in one reservation. Set to zero for no limit.') . $warning),
+    '#weight' => -7,
+  );
 
-      $form['#validate'][] = 'reservations_node_type_save_validate';
-      //$form['#submit'][]   = 'reservations_node_type_save_submit';
 
+  $form['reservations']['reservations_allow_overnight'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow overnight reservation'),
+    '#default_value' => isset($settings->reservations_allow_overnight) ? $settings->reservations_allow_overnight : 0,
+    '#description' => filter_xss(t('Allow a reservation to continue over multiple days.  If this is not checked, items in this content type must be returned before the checkout closes.') . $warning),
+  );
+
+  $form['reservations']['reservations_push'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Push forward when item is due and checkout is closed'),
+    '#default_value' => isset($settings->reservations_push) ? $settings->reservations_push : 0,
+    '#description' => filter_xss(t('Allow a reservation with this type to push forward until checkout open if return falls on day configured to allow pushing.') . $warning),
+  );
+
+  // This setting is only valid for buckets.
+  if (!isset($settings->reservations_type_setting) || $settings->reservations_type_setting == 'bucket') {
+
+    $form['reservations']['bucket'] = array(
+      '#markup' => '<b>Bucket Specific Settings</b>',
+      '#weight' => 29,
+    );
+
+    $form['reservations']['reservations_auto_assign_bucket_item'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Automatically assign a bucket item when Reservation is created'),
+      '#default_value' => isset($settings->reservations_auto_assign_bucket_item) ? $settings->reservations_auto_assign_bucket_item : 0,
+      '#description' => t('Automatically assign the best fit bucket item when reserving a new bucket item.  This saves time when checking items out but can create problems when an item is not returned on time.'),
+      '#weight' => 30,
+    );
+  }
+
+  // This setting is only valid for buckets.
+  if (!isset($settings->reservations_type_setting) || $settings->reservations_type_setting == 'bucket') {
+    $form['reservations']['reservations_spare_items'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Spare items'),
+      '#size' => 10,
+      '#default_value' => isset($settings->reservations_spare_items) ? $settings->reservations_spare_items : 0,
+      '#element_validate' => array('reservations_is_numeric_validate'),
+      '#description' => filter_xss(t("Set this to the number of items of this type that should always be unavailable and thus unreservable.  This way you'll still have enough items for future reservations in case something breaks.") . $warning),
+      '#weight' => 31,
+    );
+  }
+
+
+  //form fields shared with resouce nodes
+  reservations_add_settings_form($form, $form_state);
+
+  $form['#validate'][] = 'reservations_node_type_save_validate';
+  //$form['#submit'][]   = 'reservations_node_type_save_submit';
 }
 
 
@@ -858,7 +1391,7 @@ function reservations_content_extra_fields() {
     'label' => t('Reservations Settings'),
     'description' => t('Allows user to select Reservation status.'),
     'weight' => 100,
-      );
+  );
   $extras['choice_wrapper'] = array(
     'label' => t('Reservations Choices'),
     'description' => t('Child items included in the Reservation.'),
@@ -879,6 +1412,7 @@ function reservations_node_operations($return = NULL) {
   );
   return $operations;
 }
+
 
 /**
  * Implements hook_token_list().
@@ -973,70 +1507,74 @@ function reservations_views_handlers() {
   );
 }
 
+
 /**
  * Implements hook_cron().
  */
 function reservations_cron() {
 
   if (FALSE) {
-  // 2009-05-22 20:45:00
-  $time = gmdate('Y-m-j H:i:s');
+    // 2009-05-22 20:45:00
+    $time = gmdate('Y-m-j H:i:s');
 
-  $nodes = reservations_db_reservations_by_status_in_timespan(array(RESERVATIONS_STATUS_UNCONFIRMED, RESERVATIONS_STATUS_PENDING), $time, $time);
+    $nodes = reservations_db_reservations_by_status_in_timespan(array(
+      RESERVATIONS_STATUS_UNCONFIRMED,
+      RESERVATIONS_STATUS_PENDING
+    ), $time, $time);
 
-  foreach (array_keys($nodes) as $reservation_nid) {
+    foreach (array_keys($nodes) as $reservation_nid) {
 
-    $reservation = node_load($reservation_nid);
+      $reservation = node_load($reservation_nid);
 
-    //check child items of that reservations for autocheckout
-    foreach ($reservaton->reservations_reservation_items as $item) {
-      $node = node_load($item['reservations_item_nid']);
-      if (!$node or !$node->reservations_autocheckout) {
-        // skip out to the next reservation.
-        continue 2;
-      }
-  }
-
-    //after checking all of the autocheckout settings for all the child items, are they all autocheckout?
-    watchdog('reservations', "Setting node " . $reservation_nid . " to checked out");
-    $reservation->reservations_reservation_status = RESERVATIONS_STATUS_CHECKED_OUT;
-    node_save($reservation);
-  }
-
-  $nodes = reservations_db_reservations_by_status_in_timespan(array(RESERVATIONS_STATUS_CHECKED_OUT), NULL, $time);
-
-  foreach (array_keys($nodes) as $reservation_nid) {
-
-    //check child items of that reservations for autocheckin
-    $reservation = node_load($reservation_nid);
-
-    foreach ($reservaton->reservations_reservation_items as $item) {
-      $node = node_load($item['reservations_item_nid']);
-      if (!$node or !$node->reservations_autocheckin) {
-        // skip out to the next reservation.
-        continue 2;
+      //check child items of that reservations for autocheckout
+      foreach ($reservaton->reservations_reservation_items as $item) {
+        $node = node_load($item['reservations_item_nid']);
+        if (!$node or !$node->reservations_autocheckout) {
+          // skip out to the next reservation.
+          continue 2;
         }
       }
 
-    //after checking all of the autocheckout settings for all the child items, are they all autocheckout?
-    watchdog('reservations', "Setting node " . $reservation_nid . " to checked in");
-    $reservation->reservations_reservation_status = RESERVATIONS_STATUS_CHECKED_IN;
-    node_save($reservation);
-  }
+      //after checking all of the autocheckout settings for all the child items, are they all autocheckout?
+      watchdog('reservations', "Setting node " . $reservation_nid . " to checked out");
+      $reservation->reservations_reservation_status = RESERVATIONS_STATUS_CHECKED_OUT;
+      node_save($reservation);
+    }
 
-  // Give no shows a one hour grace period.
-  // TODO: move grace period to admin option.
-  // 2009-05-22 20:45:00
-  $time = gmdate('Y-m-j H:i:s', time() + 3600);
-  //find all pending reservations that have started and set their stauts to no show
-  $nodes = reservations_db_reservations_by_status_in_timespan(array(RESERVATIONS_STATUS_PENDING), $time, NULL);
+    $nodes = reservations_db_reservations_by_status_in_timespan(array(RESERVATIONS_STATUS_CHECKED_OUT), NULL, $time);
 
-  foreach (array_keys($nodes) as $reservation_nid) {
-    watchdog('reservations', "Setting node " . $reservation_nid . " to no show");
-    $node = node_load($reservation_nid);
-    $node->reservations_reservation_status = RESERVATIONS_STATUS_NO_SHOW;
-    node_save($node);
-  }
+    foreach (array_keys($nodes) as $reservation_nid) {
+
+      //check child items of that reservations for autocheckin
+      $reservation = node_load($reservation_nid);
+
+      foreach ($reservaton->reservations_reservation_items as $item) {
+        $node = node_load($item['reservations_item_nid']);
+        if (!$node or !$node->reservations_autocheckin) {
+          // skip out to the next reservation.
+          continue 2;
+        }
+      }
+
+      //after checking all of the autocheckout settings for all the child items, are they all autocheckout?
+      watchdog('reservations', "Setting node " . $reservation_nid . " to checked in");
+      $reservation->reservations_reservation_status = RESERVATIONS_STATUS_CHECKED_IN;
+      node_save($reservation);
+    }
+
+    // Give no shows a one hour grace period.
+    // TODO: move grace period to admin option.
+    // 2009-05-22 20:45:00
+    $time = gmdate('Y-m-j H:i:s', time() + 3600);
+    //find all pending reservations that have started and set their stauts to no show
+    $nodes = reservations_db_reservations_by_status_in_timespan(array(RESERVATIONS_STATUS_PENDING), $time, NULL);
+
+    foreach (array_keys($nodes) as $reservation_nid) {
+      watchdog('reservations', "Setting node " . $reservation_nid . " to no show");
+      $node = node_load($reservation_nid);
+      $node->reservations_reservation_status = RESERVATIONS_STATUS_NO_SHOW;
+      node_save($node);
+    }
   }
 }
 
@@ -1044,6 +1582,18 @@ function reservations_cron() {
  * Implements hook_view().
  */
 function reservations_view($node, $view_mode) {
+  //IF WE ARE LANDING HERE AS PART OF A PARTIAL RETURN, WE WILL FORWARD TO
+  //THE NEWER RESERVATION SO OPERATOR CAN ADJUST TIMES IF NEED BE
+  if (isset($_SESSION['reservations_new_partial_return']) &&
+    $_SESSION['reservations_new_partial_return']) {
+    $new_reservation = clone $_SESSION['reservations_new_partial_return'];
+    $_SESSION['reservations_new_partial_return'] = '';
+    if (isset($new_reservation->nid)) {
+      drupal_goto("node/" . $new_reservation->nid) . '/edit';
+      return;
+    }
+  }
+
   // TODO: should we fix node previews?
   if (!isset($node->preview)) {
     $node->content['reservations_reservation_status'] = reservations_display_reservation_status(reservations_record_status($node->reservations_reservation_status));
@@ -1068,7 +1618,7 @@ function reservations_load($nodes) {
 
     // TODO get rid of reservations array.  should match form api post fields.
     $return->reservations_reservation_items = reservations_reservation_items($node);
-    
+
     foreach ($return as $property => &$value) {
       //dsm($value);
       $node->$property = $value;
@@ -1110,12 +1660,12 @@ function reservations_node_update($node) {
   // Process active Reservations node types and reservation nodes.
   if (reservations_is_reservations_type($node->type)) {
     $reservations_type = reservations_type_setting($node->type);
-    
+
     //get the reservable settings on the node, if it was created as a non
-    //reservable item it won't have any, so we'll need to treat it as an 
+    //reservable item it won't have any, so we'll need to treat it as an
     //insert when we do the drupal_write_record
     //this only happens when you can switch content types on a node
-    $item_node_settings = 
+    $item_node_settings =
       reservations_reservation_item_node_settings($node->vid);
 
     if ($node->revision || !$item_node_settings) {
@@ -1129,6 +1679,7 @@ function reservations_node_update($node) {
   }
 }
 
+
 /**
  * Implements hook_node_delete().
  */
@@ -1140,7 +1691,7 @@ function reservations_node_delete($node) {
     reservations_delete_record('reservations_reservation_detail', $node, 'reservations_placeholder_nid');
     reservations_delete_record('reservations_' . $reservations_type . '_node', $node, 'nid');
     reservations_delete_record('reservations_reservation_item_node', $node, 'nid');
-    }
+  }
 }
 
 /**
@@ -1178,11 +1729,11 @@ function reservations_theme() {
     'reservations_conflict_grid' => array(
       'template' => 'reservations_conflict_grid',
       'variables' => array(
-        'type' => NULL, 
-        'title' => NULL, 
-        'start' => NULL, 
+        'type' => NULL,
+        'title' => NULL,
+        'start' => NULL,
         'end' => NULL,
-        'nid' => NULL, 
+        'nid' => NULL,
         'reservation_vid' => NULL,
         'inventory_tid' => NULL,
       ),
@@ -1201,6 +1752,7 @@ function reservations_theme() {
     ),
   );
 }
+
 
 /**
  * Implements hook_simpletest().
@@ -1239,15 +1791,15 @@ function _reservations_content_type_info($reset = FALSE) {
             $weight = $term->weight;
           }
         }
-        
+
         $reservations_setting['reservations_item_grouping'] = isset($grouping) ? $grouping : NULL;
         $reservations_setting['reservations_item_grouping_weight'] = isset($weight) ? $weight : NULL;
-        
+
         //@TODO: This needs to be a hook for both inventory and pricing
         if (module_exists('reservations_inventory')) {
           $reservations_setting['inventory_tids'] = reservations_inventory_get_inventory_tids($reservations_setting['type']);
         }
-        
+
         if (module_exists('reservations_pricing')) {
           $reservations_setting['pricing_tids'] = reservations_pricing_get_pricing_tids($reservations_setting['type']);
 
@@ -1282,7 +1834,7 @@ function reservations_delete_item_validate($node) {
   if ($node->type != 'reservations_reservation' && $type_setting != 'disabled' && isset($node->reservations_sub_type) && $node->reservations_sub_type == RESERVATIONS_SUB_TYPE_ITEM) {
     // Determine CCK table and columns the date data is stored in.
     $field = field_info_field('field_reservations_date');
-    $table           = key($field['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
+    $table = key($field['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
 
     // Join on nid here so that any version of the reservation that contain
     // the item is caught.
@@ -1306,6 +1858,7 @@ function reservations_delete_item_validate($node) {
   return TRUE;
 }
 
+
 /**
  * Validates saving of Reservations node types.
  */
@@ -1315,14 +1868,14 @@ function reservations_node_type_save_validate($form, &$form_state) {
   if ($values['reservations_type_setting'] != 'disabled' && (int) $values['reservations_active_status'] == RESERVATIONS_STATUS_INACTIVE) {
     // Determine CCK table and columns the date data is stored in.
     $field = field_info_field('field_reservations_date');
-    $table           = key($field['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
+    $table = key($field['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
     $column_end_date = $field['storage']['details']['sql']['FIELD_LOAD_CURRENT'][$table]['value2'];
 
     $time = gmdate('Y-m-d H:i:s');
     $type_setting = $values['reservations_type_setting'];
-    
+
     //@TODO: FIX THIS vvv - Currently you can't disbale inventory items.
-    
+
     // Pull all active reservations that use the node type.
     // TODO Please convert this statement to the D7 database API syntax.
     $reservations = db_query("SELECT ctn.nid, ctn.title FROM {" . $table . "} ct INNER JOIN {reservations_reservation_detail} md ON ct.revision_id = md.vid INNER JOIN {node} ctn ON ct.revision_id = ctn.vid INNER JOIN {reservations_{$type_setting}_node} m ON md.reservations_placeholder_nid = m.nid INNER JOIN {node} mn ON m.vid = mn.vid  WHERE mn.type = :type AND m.reservations_sub_type = :reservations_sub_type AND $column_end_date >= :end AND NOT (md.reservations_item_status <= :reservations_item_status)",
@@ -1345,6 +1898,7 @@ function reservations_node_type_save_validate($form, &$form_state) {
   }
 }
 
+
 /**
  * Validates deletion of node types.
  *
@@ -1361,7 +1915,7 @@ function reservations_delete_node_type_validate(&$form) {
 
     // Determine CCK table and columns the date data is stored in.
     $field = field_info_field('field_reservations_date');
-    $table           = key($field['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
+    $table = key($field['storage']['details']['sql']['FIELD_LOAD_CURRENT']);
 
     // Join on nid here so that any version of the reservation that contain
     // the bucket/resource is caught.
@@ -1376,19 +1930,22 @@ function reservations_delete_node_type_validate(&$form) {
     $bad_reservations = array();
     foreach ($reservations as $reservation) {
       $bad_reservations[$reservation->nid] = l($reservation->title, "node/$reservation->nid/edit", array('query' => drupal_get_destination()));
-        }
+    }
 
     if (!empty($bad_reservations)) {
       $name = node_type_get_name($type);
       drupal_set_message(t('@type can not be deleted because it is associated with the following reservations:', array('@type' => $name)) . theme('item_list', array('items' => $bad_reservations)), 'error');
       unset($form['actions']['submit']);
-      }
+    }
   }
 }
 
 /**
  * Does the very standard things that must be done in any normal callback.
  * Used by each callback in this example module.
+ *
+ * OPENFLOWS - LOTTIE - 4/10/2018 - THIS MIGHT BE OBSOLETE
+ * it was once used for dynamically adding more select items to reserve
  */
 function reservations_ahah_get_form() {
   // The form is generated in an include file which we need to include manually.
@@ -1438,9 +1995,13 @@ function reservations_ahah_get_form() {
   return array($form, $form_state);
 }
 
+
 /**
  * @todo Please document this function.
  * @see http://drupal.org/node/1354
+ *
+ * OPENFLOWS - LOTTIE - 4/10/2018 - THIS MIGHT BE OBSOLETE
+ * it was once used for dynamically adding more select items to reserve
  */
 function reservations_ahah_output($selected_portion, $show_status = FALSE) {
   if ($show_status) {
@@ -1461,8 +2022,8 @@ function reservations_ahah_output($selected_portion, $show_status = FALSE) {
 
   // Final rendering callback.
   drupal_json_output(array('status' => TRUE, 'data' => $output));
-
 }
+
 
 // TODO: should not do theming in validation funcitons.
 /**
@@ -1471,18 +2032,18 @@ function reservations_ahah_output($selected_portion, $show_status = FALSE) {
  */
 function reservations_theme_conflict_grid(
  $type, $title, $start, $end, $nid, $vid, $inventory_tid) {
-                    
-  return theme('reservations_conflict_grid', 
-           array(
-              'type' => $type, 
-              'title' => $title, 
-              'start' => $start, 
-              'end' => $end,
-              'nid' => $nid, 
-              'reservation_vid' => $vid,
-              'inventory_tid' => $inventory_tid,
-            )
-          );         
+
+  return theme('reservations_conflict_grid',
+    array(
+      'type' => $type,
+      'title' => $title,
+      'start' => $start,
+      'end' => $end,
+      'nid' => $nid,
+      'reservation_vid' => $vid,
+      'inventory_tid' => $inventory_tid,
+    )
+  );
 }
 
 /**
@@ -1521,10 +2082,12 @@ function reservations_display_reservation_status($status) {
 function reservations_build_reservation_table_form($form, &$form_state, $node, $edit_page = FALSE) {
   global $user;
 
-  $table            = array();
-  $table['#theme']  = 'reservations_build_reservation_table_display';
+  $table = array();
+  $table['#theme'] = 'reservations_build_reservation_table_display';
+  $node->is_edit_mode = $edit_page;
   $table['#node']   = $node;
   $table['#tree']   = TRUE;
+  $table['#weight'] = 1;  // between Res Info and Operator History
   $table['#table']  = array();
   $table['#header'] = array(
     t('Item'),
@@ -1538,6 +2101,10 @@ function reservations_build_reservation_table_form($form, &$form_state, $node, $
   }
 
   $table['#header'][] = t('Type');
+
+  // @$header_label was not not defined inside the loop.
+  $header_label = array();
+
   foreach ($items as $did => $item) {
 
     if (!is_numeric($did)) {
@@ -1553,79 +2120,40 @@ function reservations_build_reservation_table_form($form, &$form_state, $node, $
     }
 
     $form['display_name']['#markup'] = $form['name']['#value'];
-    $form['display_item_title']['#markup'] = $form['item_title']['#value'];
+
+    if ($form['reservations_item_nid']['#value']) {
+      $link = l($form['item_title']['#value'],
+        "node/" . $form['reservations_item_nid']['#value']);
+
+      $form['display_item_title']['#markup'] = $link;
+    }
+    else {
+      $form['display_item_title']['#markup'] = $form['item_title']['#value'];
+    }
 
     if (user_access('manage reservations')) {
       $placeholder_node = node_load($item['reservations_placeholder_nid']);
-      /*
-        TODO fix this.
-      if (reservations_has_accessories($item['type'])) {
-
-        if (!in_array(t('Accessories'), $table['#header'])) {
-          $table['#header'][] = t('Accessories');
-        }
-
-        if ($edit_page) {
-          if ($node->reservations_reservation_status == RESERVATIONS_STATUS_CHECKED_OUT) {
-            $collapsed = FALSE;
-          }
-          else {
-            $collapsed = TRUE;
-          }
-
-          // Container for just the item selector.
-          $form['accessories'] = array(
-            '#type' => 'fieldset',
-            '#title' => t('Add accessories'),
-            '#collapsible' => TRUE,
-            '#collapsed' => $collapsed,
-            '#prefix' => '<div id="reservations-accessories-' . $placeholder_node->nid . '">',
-            '#suffix' => '</div>',
-            'choices' => reservations_build_accessory_form($form_state, $placeholder_node, $did),
-          );
-        }
-        else {
-          $accessories = '';
-          $terms = taxonomy_node_get_terms($placeholder_node);
-
-          if (!empty($terms)) {
-            foreach ($terms as $accessory) {
-              $accessories .= $accessory->name . ', ';
-            }
-          }
-          $form['accessories'] = array(
-            '#type' => 'markup',
-            '#title' => t('Accessories'),
-            '#value' => $accessories,
-          );
-
-        }
-
-        //$operations .= ' &nbsp;&nbsp;' . l(t('edit'), "node/$item->reservations_placeholder_nid/edit", array('query' => drupal_get_destination()));
-        // Only allow editing or deletion if unconfirmed or confirmed.
-        if ($edit_page && $node->reservations_reservation_status >= RESERVATIONS_STATUS_CHECKED_OUT) {
-          foreach ($form['accessories']['choices'] as $vid => $values) {
-            $form['accessories']['choices'][$vid]['#disabled'] = TRUE;
-          }
-          $form['accessories']['#title'] = t('Accessories');
-        }
-      }
-      */
     }
     // Only allow editing or deletion if unconfirmed or confirmed.
     if ($edit_page && $node->reservations_reservation_status < RESERVATIONS_STATUS_CHECKED_OUT) {
-      if (!in_array(t('Operations'), $table['#header'])) {
-        $table['#header'][] = t('Operations');
-      }
-
+      // If user has made the reservation and has the permission to manage
+      // reservations.
       if (user_access('manage reservations') || $node->uid == $user->uid) {
-        if (!in_array(t('Operations'), $table['#header'])) {
-          $table['#header'][] = t('Operations');
+
+        // Remove item checkbox.
+        if (!in_array(t('Remove Item'), $table['#header'])) {
+          $table['#header'][] = t('Remove Item');
         }
-        $operations = ' &nbsp;&nbsp;' . l(t('delete'), "node/" . $item['reservations_placeholder_nid'] . "/delete", array('query' => drupal_get_destination()));
+        $form['reservations_remove_item_checkbox'] =
+          array(
+            '#type' => 'checkbox',
+            '#attributes' => array('class' => array('reservations-remove-item')),
+          );
       }
-      $operations .= ' &nbsp;&nbsp;' . l(t('edit'), "node/" . $item['reservations_placeholder_nid'] . "/edit", array('query' => drupal_get_destination()));
+      //WHY WOULD WE WANT TO TO EDIT THE PLACE HOLDER NODE?
+      //$operations .= ' &nbsp;&nbsp;' . l(t('edit'), "node/" . $item['reservations_placeholder_nid'] . "/edit", array('query' => drupal_get_destination()));
     }
+
     $form['ops']['#markup'] = isset($operations) ? $operations : NULL;
 
     $type_setting = reservations_type_setting($item['type']);
@@ -1636,43 +2164,121 @@ function reservations_build_reservation_table_form($form, &$form_state, $node, $
 
         $options = array(0 => '<' . t('Select') . '>');
 
-	//Fetch available bucket items
-	$default_available_items = 
-	  reservations_get_available_bucket_items($node, $item['type']);
+        //Fetch available bucket items
+        $default_available_items =
+          reservations_get_available_bucket_items($node, $item['type']);
 
-	//see if there is a custom view to furthur filter the items
-	if (module_exists('views') && views_get_view(RESERVATIONS_AVAILABLE_BUCKET_ITEM_OVERRIDE_VIEW)) {
-	  //build and execute the view using the content type of the bucket
-	  $view = views_get_view(RESERVATIONS_AVAILABLE_BUCKET_ITEM_OVERRIDE_VIEW);
-	  $view->set_arguments(array($item['type']));
-	  $view->execute('default');       
-	  $results = $view->result;
+        //see if there is a custom view to furthur filter the items
+        if (module_exists('views') && views_get_view(RESERVATIONS_AVAILABLE_BUCKET_ITEM_OVERRIDE_VIEW)) {
+          //build and execute the view using the content type of the bucket
+          $view = views_get_view(RESERVATIONS_AVAILABLE_BUCKET_ITEM_OVERRIDE_VIEW);
+          $view->set_arguments(array($item['type']));
+          $view->execute('default');
+          $results = $view->result;
 
-	  //iterate over the results and create a new array of items that are
-	  //in the defaullt_available list and add the new label
-	  $available_items = array();
-	  foreach($results as $bucket_item) {
-	    if ($default_available_items[$bucket_item->nid]) {
-	      $available_items[$bucket_item->nid] = $bucket_item->views_php_1;
-	    }
-	  }
-	}
-	else {
-	  $available_items = $default_available_items;
-	}
+          //iterate over the results and create a new array of items that are
+          //in the defaullt_available list and add the new label
+          $available_items = array();
+          foreach ($results as $bucket_item) {
+            if ($default_available_items[$bucket_item->nid]) {
+              $available_items[$bucket_item->nid] = $bucket_item->views_php_1;
+            }
+          }
+        }
+        else {
+          $available_items = $default_available_items;
+        }
 
         $options += $available_items;
 
-        $form['reservations_item_nid'] = array(
-          '#type' => 'select',
-          '#options' => $options,
-          '#default_value' => $item['reservations_item_nid'],
-        );
-        if ($node->reservations_reservation_status >= RESERVATIONS_STATUS_CHECKED_OUT) {
+
+        if ($edit_page && $node->reservations_reservation_status >=
+          RESERVATIONS_STATUS_CHECKED_OUT) {
           $form['reservations_item_nid']['#disabled'] = TRUE;
+          $form['reservations_item_nid'] =
+            array(
+              '#type' => 'value',
+              '#value' => $item['reservations_item_nid'],
+            );
+
+        }
+        else {
+          $form['reservations_item_nid'] = array(
+            '#type' => 'select',
+            '#options' => $options,
+            '#default_value' => $item['reservations_item_nid'],
+          );
+
         }
       }
     }
+    if ($edit_page && $node->reservations_reservation_status ==
+      RESERVATIONS_STATUS_CHECKED_OUT) {
+      $has_inventory_item_status_vocabulary = FALSE;
+      $item_status_vocabulary =
+        taxonomy_vocabulary_machine_name_load('inventory_item_status');
+      if ($item_status_vocabulary) {
+        $has_inventory_item_status_vocabulary = TRUE;
+        $terms = taxonomy_get_tree($item_status_vocabulary->vid);
+
+        $options = array();
+        foreach ($terms as $term_data) {
+          $term = taxonomy_term_load($term_data->tid);
+          $can_user_see_status = FALSE;
+          foreach ($term->field_inventory_item_status_role[LANGUAGE_NONE]
+                   as $role_field) {
+            $rid = (int) $role_field['value'];
+            if (user_has_role($rid)) {
+              $can_user_see_status = TRUE;
+            }
+          }
+          if ($can_user_see_status) {
+            $options[$term->tid] = $term->name;
+          }
+        }
+
+        $default = '';
+        $inventory_item = node_load($item['reservations_item_nid']);
+        $default =
+          reservations_get_single_field_value($inventory_item,
+            'field_reservable_item_status',
+            'tid');
+      }
+      if (!in_array($header_label, $table['#header'])) {
+        $header_label = t('Check In') . '<br/>' .
+          '<input type="checkbox" id="reservations-check-all" /> ';
+
+
+        $table['#header'][] = $header_label;
+
+
+        if ($has_inventory_item_status_vocabulary) {
+          $table['#header'][] = t('Item Condition');
+          $table['#header'][] = t('Condition Notes');
+        }
+
+
+      }
+      $form['reservations_checkin_checkbox'] =
+        array(
+          '#type' => 'checkbox',
+          '#attributes' => array('class' => array('reservations-check-in')),
+        );
+
+
+      if ($has_inventory_item_status_vocabulary) {
+        $form['reservations_checkin_item_condition'] =
+          array(
+            '#type' => 'select',
+            '#options' => $options,
+            '#default_value' => $default
+          );
+
+        $form['reservations_checkin_condition_notes'] =
+          array('#type' => 'textfield');
+      }
+    }
+
 
     //$form['#table'][$did]['accessories'] = $accessories;
     $table[$did] = $form;
@@ -1680,6 +2286,7 @@ function reservations_build_reservation_table_form($form, &$form_state, $node, $
 
   return $table;
 }
+
 
 function reservations_add_settings_form(&$form, $form_state) {
 
@@ -1718,7 +2325,7 @@ function reservations_add_settings_form(&$form, $form_state) {
 
   // Bucket item nodes have no individual pricing, so just zero these values out.
   // Althought you can override them on the reserervation nodes.
-  if ($type_setting == 'resource' or $form['#id'] == 'node-type-form' or $sub_type == RESERVATIONS_SUB_TYPE_RESERVATION ) {
+  if ($type_setting == 'resource' or $form['#id'] == 'node-type-form' or $sub_type == RESERVATIONS_SUB_TYPE_RESERVATION) {
     $form['reservations']['reservations_rate_per_hour'] = array(
       '#type' => 'textfield',
       '#title' => t('Rate per hour'),
@@ -1745,7 +2352,7 @@ function reservations_add_settings_form(&$form, $form_state) {
     );
   }
 
-  if (($type_setting  == 'resource' and $sub_type == RESERVATIONS_SUB_TYPE_ITEM) or $form['#id'] == 'node-type-form') {
+  if (($type_setting == 'resource' and $sub_type == RESERVATIONS_SUB_TYPE_ITEM) or $form['#id'] == 'node-type-form') {
 
     $form['reservations']['reservations_min_cancel_hours'] = array(
       '#type' => 'textfield',
@@ -1755,50 +2362,11 @@ function reservations_add_settings_form(&$form, $form_state) {
       '#element_validate' => array('reservations_is_numeric_validate'),
       '#description' => t('Minimum number of hours before the start time a user may cancel a reservation for the item.'),
     );
-//     $form['reservations']['reservations_autocheckout'] = array(
-//       '#type' => 'checkbox',
-//       '#title' => t('Auto checkout'),
-//       '#default_value' => isset($node->reservations_autocheckout) ? $node->reservations_autocheckout : NULL,
-//       '#description' => t('Automatically check this item out when the Reservation starts.'),
-//     );
-//     $form['reservations']['reservations_autocheckin'] = array(
-//       '#type' => 'checkbox',
-//       '#title' => t('Auto checkin'),
-//       '#default_value' => isset($node->reservations_autocheckin) ? $node->reservations_autocheckin : NULL,
-//       '#description' => t('Automatically check this item in when the Reservation ends.'),
-//     );
-//     $form['reservations']['reservations_selfcheckout'] = array(
-//       '#type' => 'checkbox',
-//       '#title' => t('Self checkout'),
-//       '#default_value' => isset($node->reservations_selfcheckout) ? $node->reservations_selfcheckout : NULL,
-//       '#description' => t('Manage checkout with additional code.'),
-//     );
+
   }
 }
 
-/*
-function _reservations_after_build($form, &$form_state) {
 
-  $weight = ($form['field_reservations_date']['#weight'] + 1);
-  $form['field_reservations_date'][0]['field_reservations_date_button'] = array(
-    '#type' => 'submit',
-    '#value' => t('Limit Lists to Available Items'),
-    '#weight' => $weight,
-    '#submit' => array('reservations_date_filter'),
-    /* TODO Fix for D7
-    '#ajax' => array(
-      //'path' => 'reservations/js',
-      'callback' => 'reservations_choice_js',
-      'wrapper' => 'reservations-choice-wrapper',
-      'method' => 'replace',
-      'effect' => 'fade',
-    ),
-
-  );
-
-  return $form;
-}
- */
 
 
 
@@ -1820,19 +2388,27 @@ function reservations_node_type_update($info) {
     // TODO Please review the conversion of this statement to the D7 database API syntax.
     /* db_query("UPDATE {reservations_node_type} SET type = '%s' WHERE type = '%s'", $info->type, $info->old_type) */
     db_update('reservations_node_type')
-  ->fields(array(
-      'type' => $info->type,
-    ))
-  ->condition('type', $info->old_type)
-  ->execute();
+      ->fields(array(
+        'type' => $info->type,
+      ))
+      ->condition('type', $info->old_type)
+      ->execute();
   }
   reservations_node_type_update_variables($info, TRUE);
   cache_clear_all('reservations_' . $info->type . '_data', 'cache');
   cache_clear_all('reservations_content_type_info', 'cache');
 }
 
-// @TODO: date_convert no longer exist so I think this can be removed
-function reservations_convert_date_popup($dates, $date_format   = 'm/d/Y g:ia') {
+
+/**
+ * Convert local time (date_default_timezone) to UTC .
+ *
+ *
+ * @param $dates
+ * @param string $date_format
+ * @return array
+ */
+function reservations_convert_local_datetime_to_utc($dates, $date_format   = 'm/d/Y g:ia') {
   module_load_include('inc', 'date_api', 'date_api_elements');
 
   $date_timezone = variable_get('date_default_timezone', 'UTC');
@@ -1847,33 +2423,6 @@ function reservations_convert_date_popup($dates, $date_format   = 'm/d/Y g:ia') 
   $start = $start->format($date_format);
   $end = $end->format($date_format);
 
-  return array('value' => $start, 'value2' => $end);
-
-  //@TODO: Figure out why the rest of this even here?
-  $start         = array(
-    '#value' => array(
-      'date' => $dates['value']['date'],
-      'time' => $dates['value']['time'],
-    ),
-    '#date_timezone' => $date_timezone,
-    '#date_format' => $date_format,
-  );
-  $end = array(
-    '#value' => array(
-      'date' => $dates['value2']['date'],
-      'time' => $dates['value2']['time'],
-    ),
-    '#date_timezone' => $date_timezone,
-    '#date_format' => $date_format,
-  );
-  $start = date_popup_input_value($start);
-  $end = date_popup_input_value($end);
-  $start = date_create($start);
-  $end   = date_create($end);
-  date_timezone_set($start, timezone_open('UTC'));
-  date_timezone_set($end, timezone_open('UTC'));
-  $start = date_convert($start, DATE_OBJECT, DATE_DATETIME);
-  $end = date_convert($end, DATE_OBJECT, DATE_DATETIME);
   return array('value' => $start, 'value2' => $end);
 }
 
@@ -1913,11 +2462,11 @@ function reservations_token_values($type, $object = NULL, $options = array()) {
           $item_node = node_load($item['reservations_placeholder_nid']);
           if ($item['item_title'] != '') {
             $titles[] = $item['item_title'];
-  }
+          }
           else {
             $titles[] = $item['reservations_placeholder_title'];
-    }
-  }
+          }
+        }
 
         $values['reservations_resources'] = check_plain(implode(", ", $titles));
         return $values;
@@ -1943,9 +2492,9 @@ function reservations_token_values($type, $object = NULL, $options = array()) {
  */
 function reservations_build_reservable_items($node, $form_state, $reservation_nid = NULL) {
   //dsm('reservations_build_reservable_items');
-    
+
   $inventory = module_exists('reservations_inventory') ? reservations_inventory_set_inventory($node) : NULL;
-  
+
   $langcode = $node->language;
   // Newly set dates take precedence.
   if (isset($form_state['values']['field_reservations_date'])) {
@@ -1955,111 +2504,114 @@ function reservations_build_reservable_items($node, $form_state, $reservation_ni
   // Dates loaded from the reservation are next.
   elseif (isset($node->nid)) {
     $date_info = $node->field_reservations_date[$langcode][0];
-    $start     = $date_info['value'];
-    $end       = $date_info['value2'];
+    $start = $date_info['value'];
+    $end = $date_info['value2'];
   }
   // New reservation, so no date filtering.
   else {
     $is_new = TRUE;
-    $start     = NULL;
-    $end       = NULL;
+    $start = NULL;
+    $end = NULL;
   }
 
   $options = array();
-  
+
   //@TODO - Why is the select list selecting the last item?
   $options['options'][''] = '<' . t('Select') . '>';
-  
+
   $vid = variable_get('reservations_grouping_vid', 0);
-  
+
   $terms = taxonomy_get_tree($vid);
   foreach ($terms as $term) {
     $options['options'][$term->name] = array();
   }
-  
+
   $reservable_types = reservations_content_types();
-  
+
   // This array holds all reservable items the user may reserve.
   // Loop through each reserable type.
   foreach ($reservable_types as $reservable_type) {
 
-    $include = FALSE;  // default to skipping the type unless 
-    
+    $include = FALSE;  // default to skipping the type unless
+
     if ($inventory) {
       foreach ($reservable_type['inventory_tids'] as $tid) {
-        
+
         if ($tid == $inventory) {
           $include = TRUE;
         }
       }
-    } else {
+    }
+    else {
       // if there is no inventory, include everything
       $include = TRUE;
     }
-    
+
     if ($include) {
-     
-	  if ($reservable_type['reservations_active_status'] != RESERVATIONS_STATUS_ACTIVE) {
-	    continue;
-	  }
-	  
-	  if (!reservations_check_content_type_user_permissions($reservable_type['type'])) {
-	    continue;
-	  }
-	  
-	  if (empty($is_new)) {
-	    $restrictions = reservations_check_content_type_restrictions($reservable_type['type'], $start, $end);
-		if (!empty($restrictions)) {
-		  continue;
-		}
-	  }
-	
-	  	
-	  // if it's a bucket, add it to the select list
-	  if ($reservable_type['reservations_type_setting'] == 'bucket') {
-	    // Check for available items in the bucket at the time when time is included
-	    $available_bucket_items = reservations_get_available_bucket_count($reservable_type['type'], $start, $end, $reservation_nid) - $reservable_type['reservations_spare_items'];
-		  if ($available_bucket_items) {
-		    $options['options'][$reservable_type['reservations_item_grouping']][$key] = $reservable_type['type_name'];
-		  } else {
-		    //disable item in list
-		    //$options['options'][$reservable_type['reservations_item_grouping']][$key] = $reservable_type['type_name'];
-		    
-		    //dsm($options);
-		    //$form['myboxes']['bar'] = array( '#disabled' => TRUE,);
-		  }
-	   } //
-	   elseif ($reservable_type['reservations_type_setting'] == 'resource') {
-	     // No date filtering for new reservations.
-		 $item_options = reservations_get_reservable_items($reservable_type['type'], $start, $end, $reservation_nid);
-		 
-		 if (!empty($item_options)) {
-		   foreach ($item_options as $key => $item) { 
-			 $options['options'][$reservable_type['reservations_item_grouping']][$key] = $item;
-		    }
-		  } else {
-		    //disable item in list
-		  }
-	   }  
+
+      if ($reservable_type['reservations_active_status'] != RESERVATIONS_STATUS_ACTIVE) {
+        continue;
+      }
+
+      if (!reservations_check_content_type_user_permissions($reservable_type['type'])) {
+        continue;
+      }
+
+      if (empty($is_new)) {
+        $restrictions = reservations_check_content_type_restrictions($reservable_type['type'], $start, $end);
+        if (!empty($restrictions)) {
+          continue;
+        }
+      }
+
+
+      // if it's a bucket, add it to the select list
+      if ($reservable_type['reservations_type_setting'] == 'bucket') {
+        // Check for available items in the bucket at the time when time is included
+        $available_bucket_items = reservations_get_available_bucket_count($reservable_type['type'], $start, $end, $reservation_nid) - $reservable_type['reservations_spare_items'];
+        if ($available_bucket_items) {
+          $options['options'][$reservable_type['reservations_item_grouping']][$key] = $reservable_type['type_name'];
+        }
+        else {
+          //disable item in list
+          //$options['options'][$reservable_type['reservations_item_grouping']][$key] = $reservable_type['type_name'];
+
+          //dsm($options);
+          //$form['myboxes']['bar'] = array( '#disabled' => TRUE,);
+        }
+      } //
+      elseif ($reservable_type['reservations_type_setting'] == 'resource') {
+        // No date filtering for new reservations.
+        $item_options = reservations_get_reservable_items($reservable_type['type'], $start, $end, $reservation_nid);
+
+        if (!empty($item_options)) {
+          foreach ($item_options as $key => $item) {
+            $options['options'][$reservable_type['reservations_item_grouping']][$key] = $item;
+          }
+        }
+        else {
+          //disable item in list
+        }
+      }
     } // $inventroy include
   }
 
   //dsm($option);
-  
+
   // Remove grouping keys with no items.
   foreach ($terms as $term) {
     if (empty($options['options'][$term->name])) {
       unset ($options['options'][$term->name]);
     }
   }
-  
+
   return $options;
 }
 
 /**
  * POTENITALLY DEPRECATED FUNCTIONS
  */
- 
+
 function reservations_type_setting_after_build($element) {
   foreach ($element['#description_items'] as $key => $value) {
     $element[$key]['#description'] = $value;
@@ -2083,9 +2635,9 @@ function reservations_taxonomy_term_select($title, $name, $value, $vocabulary_id
       }
     }
   }
-  
+
   //dsm($value);
-  
+
   return array(
     '#type' => 'select',
     '#title' => $title,
@@ -2101,31 +2653,31 @@ function reservations_taxonomy_term_select($title, $name, $value, $vocabulary_id
 /**
  * POTENITALLY DEPRECATED FUNCTIONS
  */
- 
+
  function reservations_build_accessory_form($form_state, $node, $did) {
 
-  $vocabularies = taxonomy_get_vocabularies($node->type);
+   $vocabularies = taxonomy_get_vocabularies($node->type);
 
-  $form = array();
+   $form = array();
 
-  foreach ($node->taxonomy as $tid => $term) {
-    $value[] = $tid;
-  }
-  foreach ($vocabularies as $vocabulary) {
+   foreach ($node->taxonomy as $tid => $term) {
+     $value[] = $tid;
+   }
+   foreach ($vocabularies as $vocabulary) {
 
-    $taxonomy_form   = taxonomy_form($vocabulary->vid, $value);
-    $taxonomy_form['#title'] = '';
-    unset($taxonomy_form['#theme']);
-    $taxonomy_form['#ajax'] = array(
-      'path' => 'reservations/taxonomy/' . $node->nid . '/' . $vocabulary->vid . '/' . $did,
-      'wrapper' => 'reservations-accessories-' . $node->nid,
-      'method' => 'prepend',
-      'effect' => 'fade',
-    );
-    $form[$vocabulary->vid] = $taxonomy_form;
-  }
-  return $form;
-}
+     $taxonomy_form = taxonomy_form($vocabulary->vid, $value);
+     $taxonomy_form['#title'] = '';
+     unset($taxonomy_form['#theme']);
+     $taxonomy_form['#ajax'] = array(
+       'path' => 'reservations/taxonomy/' . $node->nid . '/' . $vocabulary->vid . '/' . $did,
+       'wrapper' => 'reservations-accessories-' . $node->nid,
+       'method' => 'prepend',
+       'effect' => 'fade',
+     );
+     $form[$vocabulary->vid] = $taxonomy_form;
+   }
+   return $form;
+ }
 
 
 
@@ -2140,7 +2692,7 @@ function reservations_taxonomy_term_select($title, $name, $value, $vocabulary_id
     'file' => 'includes/menu.inc',
     'type' => MENU_CALLBACK,
     );
-  
+
 */
 
 
@@ -2185,4 +2737,39 @@ function _reservations_choice_form($node, $form_state, $delta, $default = '', $r
 
 function _reservations_sort_array($a, $b) {
   return count($b) - count($a);
+}
+
+/**
+ * Helper function to get a single value off of a entity
+ */
+function reservations_get_single_field_value($entity, $field_name,
+					     $index = 'value') {
+  if (isset($entity->{$field_name})) {
+    $field = $entity->{$field_name};
+    if (isset($field[LANGUAGE_NONE]) &&
+      isset($field[LANGUAGE_NONE][0]) &&
+      isset($field[LANGUAGE_NONE][0][$index])) {
+      return $field[LANGUAGE_NONE][0][$index];
+    }
+  }
+  return NULL;
+}
+
+
+/**
+ * Implements hook_load_user().
+ */
+function reservations_load_user($post = NULL) {
+  static $admin_user;
+  global $user;
+  if (empty($admin_user)) {
+    $admin_user = $user;
+  }
+  $usr_a = user_load_multiple(array(), array('name' => $post['name']));
+  if ($post and isset($post['override']) and !$post['override'] and ($newuser = array_shift($usr_a))) {
+    $user = $newuser;
+  }
+  else {
+    $user = $admin_user;
+  }
 }

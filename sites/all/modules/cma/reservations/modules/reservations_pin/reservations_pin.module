@@ -1,0 +1,310 @@
+<?php
+/*
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
+ */
+
+function reservations_pin_menu() {
+
+  $items = array();
+
+  $items['admin/config/reservations/reservations_pin'] =
+    array(
+          'title' => 'Reservation Pin Settings Form',
+	  'description' => 'Reservation Pin Settings Form',
+	  'page callback' => 'drupal_get_form',
+	  'page arguments' => array('reservations_pin_settings_form'),
+	  'access callback' => 'reservations_pin_admin_callback',
+	  'type' => MENU_NORMAL_ITEM,
+	  );
+
+  return $items;
+}
+
+function reservations_pin_admin_callback() {
+  //fixme limit to reservations managers or admins
+  if (user_access('administer reservations') ||
+      user_access('administer users')) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+
+function reservations_pin_node_validate($node) {
+  $reservation_pin_enabled = variable_get('reservations_pin_enabled', FALSE);
+  $inventory_pin_enabled = variable_get('inventory_pin_enabled', FALSE);
+  $is_inventory_form = reservations_content_types($node->type) ? TRUE :FALSE;
+  $is_reservations_form = ($node->type == 'reservations_reservation');
+
+  if (($is_inventory_form && $inventory_pin_enabled) ||
+      ($is_reservations_form && $reservation_pin_enabled)){
+    //get value
+    $pin = $node->reservations_pin;
+
+    $uid = reservations_pin_get_uid_for_pin($pin);
+    if (!$uid) {
+      form_set_error('reservations_pin', "You must enter in a valid PIN.");
+      return;
+    }
+  }
+}
+
+function reservations_pin_get_uid_for_pin($pin) {
+  $staff_users = reservations_pin_get_staff_users();
+
+  $count = count($staff_users);
+  $counter = 0;
+  foreach ($staff_users as $id=>$name) {
+    $counter ++;
+    $var_name = "reservations_pin_" . $id;
+
+    $staff_pin = variable_get($var_name, '');
+
+    if ($pin && $staff_pin == $pin) {
+      return $id;
+    }
+  }
+  return NULL;
+}
+function reservations_pin_form_alter(&$form, &$form_state, $form_id) {
+  $reservation_pin_enabled = variable_get('reservations_pin_enabled', FALSE);
+  $inventory_pin_enabled = variable_get('inventory_pin_enabled', FALSE);
+
+  $add_pin_field = FALSE;
+
+
+  //IS IT A NODE FORM?
+  if (isset($form['#node_edit_form']) && $form['#node_edit_form']) {
+    $node_type = $form['type']['#value'];
+
+    //IF ITS THE RESERVATITONS FORM AND RESERVATIONS PIN SETTING IS ENABLED
+    if ($node_type == 'reservations_reservation' && $reservation_pin_enabled) {
+      $add_pin_field = TRUE;
+    }
+    //IF ITS NOT THE RESERVATIOSN FORM, SEE IF ITS AN INVENTORY NODE FORM IF
+    else if ($inventory_pin_enabled && $node_type &&
+	     reservations_content_types($node_type)) {
+      $add_pin_field = TRUE;
+    }
+
+//    // Fake user so chrome and other password systems don't pick the pin as a password field.
+//    $form['f_user'] = array(
+//      '#type' => 'fieldset',
+//      '#title' => t('User'),
+//      '#weight' => 5,
+//      '#collapsible' => FALSE,
+//      '#collapsed' => FALSE,
+//      '#attributes' => array( 'style' => 'visibility: hidden'),
+//    );
+//      $form['f_user']['reservations_f_user'] = array(
+//          '#type' => 'textfield',
+//          '#title' => 'User',
+//          '#default_value' => 'dummy',
+//          //'#attributes' => array( 'style' => 'visibility: hidden'),
+//      );
+//      $form['f_user']['reservations_f_pw'] = array(
+//          '#type' => 'password',
+//          '#title' => 'Password',
+//          //'#attributes' => array( 'style' => 'visibility: hidden'),
+//      );
+
+    // if the reservation form is being rebuilt, then all form values will be
+    // cleared including the pin - store it and then retreive it in the
+    // post_render callback
+    if($add_pin_field && $form_state['rebuild'] &&
+          isset($form_state['values']['reservations_pin'])) {
+
+      global $user;
+      variable_set('reservation_pin_' . $user->uid, $form_state['values']['reservations_pin']);
+
+      // The pin can not be handled by type=password as chrome remembers the
+      // password. CSS will obscure the field but we also need to set
+      // autocomplete' => 'off' so it does not show the password that way.
+
+      $form['reservations_pin'] =
+        array(
+          //'#type' => 'password',
+          '#type' => 'textfield',
+          '#attributes' => array('autocomplete' => 'off'),
+          '#title' => 'Operator Pin Number',
+          '#size' => 20,
+          '#weight' => 100,
+          '#required' => TRUE,
+          '#post_render' => array('reservations_pin_form_post_render'),
+       );
+    }
+    elseif ($add_pin_field) {
+      $form['reservations_pin'] =
+        array(
+          //'#type' => 'password',
+          '#type' => 'textfield',
+          '#attributes' => array('autocomplete' => 'off'),
+          '#title' => 'Operator Pin Number',
+          '#size' => 20,
+          '#weight' => 100,
+          '#required' => TRUE,
+        );
+    }
+  }
+}
+
+/**
+  * #post_render callback for the reservations_pin field so that we can
+  * retrieve and fill the password when the reservation form is rebuilt
+  */
+function reservations_pin_form_post_render(&$form) {
+  global $user;
+  $pin = variable_get('reservation_pin_' . $user->uid, 0);
+
+  $form =
+      str_replace('input type="password"',
+        'input type="password" value="' . $pin .'"', $form);
+  return($form);
+}
+
+function reservations_pin_settings_form_validate($form, $form_state) {
+  $dupes = array();
+  $pins = array();
+
+  foreach($form['pin_form'] as $field_name => $element) {
+    if (strpos($field_name,  'eservations_pin_') &&
+	!strpos($field_name, '_markup') &&
+	!strpos($field_name, '_enabled')) {
+      $pin = $element['#value'];
+      if ($pin) {
+	if (in_array($pin, $pins)) {
+	  $dupes[$pin] = isset($dupes[$pin]) ? $dupes[$pin] : array();
+	  $dupes[$pin][] = array_search($pin, $pins);
+	  $dupes[$pin][] = $field_name;
+	}
+	$pins[$field_name] = $pin;
+      }
+    }
+  }
+
+  foreach($dupes as $pin => $field_names) {
+    foreach($field_names as $field_name) {
+      form_set_error($field_name,
+		     $form['pin_form'][$field_name.'_markup']['#markup'] .
+		     ' shares a pin with another user.');
+    }
+  }
+
+}
+function reservations_pin_settings_form($form, $form_state) {
+
+  $form = array();
+  $form['pin_form'] = array(
+				 '#type' => 'fieldset',
+				 '#title' => t('Enable Pin'),
+				 );
+
+  $form['pin_form']['reservations_pin_enabled'] =
+    array(
+	  '#type' => 'checkbox',
+	  '#title' => t("Enable pin for reservations form?"),
+	  '#default_value' => variable_get('reservations_pin_enabled'),
+	  );
+
+  $form['pin_form']['inventory_pin_enabled'] =
+    array(
+	  '#type' => 'checkbox',
+	  '#title' => t("Enable pin for inventory item form?"),
+	  '#default_value' => variable_get('inventory_pin_enabled'),
+	  );
+
+
+  $staff_users = reservations_pin_get_staff_users();
+
+  $count = count($staff_users);
+  $counter = 0;
+  foreach ($staff_users as $id=>$name) {
+    $counter ++;
+    $var_name = "reservations_pin_" . $id;
+
+    $default_value = variable_get($var_name, '');
+
+    $prefix = $suffix = '';
+    if ($counter == 1) {
+      $prefix .= "<table class='reservations_pin_settings'><tr>";
+    }
+
+    $prefix .= "<td width=300>";
+
+
+    $form['pin_form'][$var_name.'_markup'] =
+      array(
+	    '#type' => 'markup',
+	    '#markup' => "<strong>".$name."</strong>",
+	    '#prefix' => $prefix,
+	    '#suffix' => "</td>",
+	    );
+
+    if ($counter == $count) {
+      $suffix = "</td></tr></table>";
+    }
+    else {
+      $suffix = "</td></tr>";
+    }
+    $form['pin_form'][$var_name] =
+      array(
+	    '#type' => 'textfield',
+	    '#title' => "Pin",
+	    '#default_value' => $default_value,
+	    '#size' => 10,
+	    '#prefix' => "<td>",
+	    '#suffix' => $suffix,
+	    );
+
+  }
+
+  return system_settings_form($form);
+
+}
+
+function reservations_pin_get_staff_users() {
+  $query = new EntityFieldQuery;
+  $query
+    ->entityCondition('entity_type', 'user')
+    ->addTag('role_filter');
+  $results = $query->execute();
+
+  $ret = array();
+  foreach($results['user'] as $uid=>$result) {
+    $user = user_load($uid);
+    $ret[$uid] = $user->realname . " (".$user->name.")";
+  }
+  asort($ret);
+  return $ret;
+}
+
+/**
+ * Implement hook_query_TAG_alter
+ *
+ * @param QueryAlterableInterface $query
+ */
+function reservations_pin_query_role_filter_alter(QueryAlterableInterface $query) {
+  $role_id = variable_get('reservations_pin_role', 5);
+  $query->leftJoin('users_roles', 'r', 'users.uid = r.uid');
+  $and = db_and()->condition('r.rid', $role_id, '=');
+  $query->condition($and);
+}
+
+function reservations_pin_reservations_operator_history_user_alter(&$user,
+							       &$reservation) {
+  $pin = $reservation->reservations_pin;
+
+  $uid = reservations_pin_get_uid_for_pin($pin);
+  if ($uid) {
+    $new_user = $uid ? user_load($uid) : NULL;
+    $user = $new_user ? $new_user : $user;
+  }
+
+}

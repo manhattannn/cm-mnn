@@ -2,6 +2,14 @@
 /**
  * @file
  * Theme reservations tables.
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen + Dane Powell                                  |
+ |                                                                           |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
  */
 
 foreach ($reservations as $date => $times) {

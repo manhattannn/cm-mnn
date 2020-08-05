@@ -23,6 +23,10 @@ dependencies[] = date
 dependencies[] = date_api
 dependencies[] = date_popup
 dependencies[] = taxonomy
+dependencies[] = ctools
+dependencies[] = views
+
+scripts[] = reservations.js
 
 files[] = reservations.install
 files[] = reservations.module

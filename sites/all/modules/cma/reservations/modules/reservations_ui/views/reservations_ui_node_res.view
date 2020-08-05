@@ -1,0 +1,199 @@
+<?php
+/*
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ |                                                                           |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
+ */
+
+  $view = new view();
+  $view->name = 'reservations_ui_node_res';
+  $view->description = 'View is called by the reservations_ui module in node/%/manage-reservations';
+  $view->tag = '';
+  $view->base_table = 'node';
+  $view->human_name = 'Reservations UI: Node Reservations';
+  $view->core = 0;
+  $view->api_version = '3.0';
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+
+  /* Display: Defaults */
+  $handler = $view->new_display('default', 'Defaults', 'default');
+  $handler->display->display_options['title'] = 'Item Reservations';
+  $handler->display->display_options['use_more_always'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'perm';
+  $handler->display->display_options['access']['perm'] = 'manage reservations';
+  $handler->display->display_options['cache']['type'] = 'none';
+  $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['query']['options']['query_comment'] = FALSE;
+  $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['pager']['type'] = 'mini';
+  $handler->display->display_options['pager']['options']['items_per_page'] = 25;
+  $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'title' => 'title',
+  );
+  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['info'] = array(
+    'title' => array(
+      'sortable' => 1,
+      'separator' => '',
+    ),
+  );
+  /* No results behavior: Global: Text area */
+  $handler->display->display_options['empty']['text']['id'] = 'text';
+  $handler->display->display_options['empty']['text']['table'] = 'views';
+  $handler->display->display_options['empty']['text']['field'] = 'area';
+  $handler->display->display_options['empty']['text']['content'] = '<div class="messages status">There are no reservations for this item.</div>';
+  $handler->display->display_options['empty']['text']['format'] = 'full_html';
+  /* Relationship: Reservations: Reserved item nid */
+  $handler->display->display_options['relationships']['item_nid']['id'] = 'item_nid';
+  $handler->display->display_options['relationships']['item_nid']['table'] = 'reservations_reservation_detail';
+  $handler->display->display_options['relationships']['item_nid']['field'] = 'item_nid';
+  /* Relationship: Content: Author */
+  $handler->display->display_options['relationships']['uid']['id'] = 'uid';
+  $handler->display->display_options['relationships']['uid']['table'] = 'node';
+  $handler->display->display_options['relationships']['uid']['field'] = 'uid';
+  /* Field: Content: Nid */
+  $handler->display->display_options['fields']['nid']['id'] = 'nid';
+  $handler->display->display_options['fields']['nid']['table'] = 'node';
+  $handler->display->display_options['fields']['nid']['field'] = 'nid';
+  $handler->display->display_options['fields']['nid']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['nid']['hide_alter_empty'] = FALSE;
+  /* Field: User: Name */
+  $handler->display->display_options['fields']['name']['id'] = 'name';
+  $handler->display->display_options['fields']['name']['table'] = 'users';
+  $handler->display->display_options['fields']['name']['field'] = 'name';
+  $handler->display->display_options['fields']['name']['relationship'] = 'uid';
+  /* Field: Content: Reservation Dates */
+  $handler->display->display_options['fields']['field_reservations_date']['id'] = 'field_reservations_date';
+  $handler->display->display_options['fields']['field_reservations_date']['table'] = 'field_data_field_reservations_date';
+  $handler->display->display_options['fields']['field_reservations_date']['field'] = 'field_reservations_date';
+  $handler->display->display_options['fields']['field_reservations_date']['alter']['alter_text'] = TRUE;
+  $handler->display->display_options['fields']['field_reservations_date']['alter']['make_link'] = TRUE;
+  $handler->display->display_options['fields']['field_reservations_date']['alter']['path'] = 'node/[nid]';
+  $handler->display->display_options['fields']['field_reservations_date']['hide_alter_empty'] = FALSE;
+  $handler->display->display_options['fields']['field_reservations_date']['settings'] = array(
+    'format_type' => 'short',
+    'fromto' => 'both',
+    'multiple_number' => '',
+    'multiple_from' => '',
+    'multiple_to' => '',
+    'show_repeat_rule' => 'show',
+  );
+  /* Field: Reservations: Reserved items */
+  $handler->display->display_options['fields']['item_nid2']['id'] = 'item_nid2';
+  $handler->display->display_options['fields']['item_nid2']['table'] = 'reservations_reservation_detail';
+  $handler->display->display_options['fields']['item_nid2']['field'] = 'item_nid2';
+  /* Field: Reservations: Reservation status */
+  $handler->display->display_options['fields']['status']['id'] = 'status';
+  $handler->display->display_options['fields']['status']['table'] = 'reservations_reservation';
+  $handler->display->display_options['fields']['status']['field'] = 'status';
+  /* Field: Content: Edit link */
+  $handler->display->display_options['fields']['edit_node']['id'] = 'edit_node';
+  $handler->display->display_options['fields']['edit_node']['table'] = 'views_entity_node';
+  $handler->display->display_options['fields']['edit_node']['field'] = 'edit_node';
+  $handler->display->display_options['fields']['edit_node']['label'] = 'Operations';
+  $handler->display->display_options['fields']['edit_node']['hide_alter_empty'] = FALSE;
+  /* Sort criterion: Content: Reservation Dates -  start date (field_reservations_date) */
+  $handler->display->display_options['sorts']['field_reservations_date_value']['id'] = 'field_reservations_date_value';
+  $handler->display->display_options['sorts']['field_reservations_date_value']['table'] = 'field_data_field_reservations_date';
+  $handler->display->display_options['sorts']['field_reservations_date_value']['field'] = 'field_reservations_date_value';
+  $handler->display->display_options['sorts']['field_reservations_date_value']['order'] = 'DESC';
+  /* Contextual filter: Content: Nid */
+  $handler->display->display_options['arguments']['nid']['id'] = 'nid';
+  $handler->display->display_options['arguments']['nid']['table'] = 'node';
+  $handler->display->display_options['arguments']['nid']['field'] = 'nid';
+  $handler->display->display_options['arguments']['nid']['relationship'] = 'item_nid';
+  $handler->display->display_options['arguments']['nid']['default_action'] = 'empty';
+  $handler->display->display_options['arguments']['nid']['exception']['title_enable'] = TRUE;
+  $handler->display->display_options['arguments']['nid']['title_enable'] = TRUE;
+  $handler->display->display_options['arguments']['nid']['title'] = 'Reservations for %1';
+  $handler->display->display_options['arguments']['nid']['default_argument_type'] = 'node';
+  $handler->display->display_options['arguments']['nid']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['nid']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['nid']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['nid']['specify_validation'] = TRUE;
+  $handler->display->display_options['arguments']['nid']['validate']['type'] = 'node';
+  $handler->display->display_options['arguments']['nid']['validate']['fail'] = 'empty';
+  /* Filter criterion: Content: Type */
+  $handler->display->display_options['filters']['type']['id'] = 'type';
+  $handler->display->display_options['filters']['type']['table'] = 'node';
+  $handler->display->display_options['filters']['type']['field'] = 'type';
+  $handler->display->display_options['filters']['type']['value'] = array(
+    'reservations_reservation' => 'reservations_reservation',
+  );
+  $handler->display->display_options['filters']['type']['group'] = 1;
+  $handler->display->display_options['filters']['type']['expose']['operator'] = FALSE;
+  /* Filter criterion: Reservations: Reservation status */
+  $handler->display->display_options['filters']['status']['id'] = 'status';
+  $handler->display->display_options['filters']['status']['table'] = 'reservations_reservation';
+  $handler->display->display_options['filters']['status']['field'] = 'status';
+  $handler->display->display_options['filters']['status']['value'] = array(
+    3 => '3',
+    4 => '4',
+  );
+  $handler->display->display_options['filters']['status']['group'] = 1;
+  /* Filter criterion: Content: Reservation Dates -  start date (field_reservations_date) */
+  $handler->display->display_options['filters']['field_reservations_date_value_1']['id'] = 'field_reservations_date_value_1';
+  $handler->display->display_options['filters']['field_reservations_date_value_1']['table'] = 'field_data_field_reservations_date';
+  $handler->display->display_options['filters']['field_reservations_date_value_1']['field'] = 'field_reservations_date_value';
+  $handler->display->display_options['filters']['field_reservations_date_value_1']['operator'] = 'between';
+  $handler->display->display_options['filters']['field_reservations_date_value_1']['group'] = 1;
+  $handler->display->display_options['filters']['field_reservations_date_value_1']['default_date'] = 'now -90 days';
+  $handler->display->display_options['filters']['field_reservations_date_value_1']['default_to_date'] = 'now';
+  /* Filter criterion: Content: Reservation Dates -  start date (field_reservations_date) */
+  $handler->display->display_options['filters']['field_reservations_date_value']['id'] = 'field_reservations_date_value';
+  $handler->display->display_options['filters']['field_reservations_date_value']['table'] = 'field_data_field_reservations_date';
+  $handler->display->display_options['filters']['field_reservations_date_value']['field'] = 'field_reservations_date_value';
+  $handler->display->display_options['filters']['field_reservations_date_value']['operator'] = '<=';
+  $handler->display->display_options['filters']['field_reservations_date_value']['group'] = 1;
+  $handler->display->display_options['filters']['field_reservations_date_value']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['field_reservations_date_value']['expose']['operator_id'] = 'field_reservations_date_value_op';
+  $handler->display->display_options['filters']['field_reservations_date_value']['expose']['label'] = 'Show Reservations Starting Before';
+  $handler->display->display_options['filters']['field_reservations_date_value']['expose']['operator'] = 'field_reservations_date_value_op';
+  $handler->display->display_options['filters']['field_reservations_date_value']['expose']['identifier'] = 'field_reservations_date_value';
+  $handler->display->display_options['filters']['field_reservations_date_value']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    3 => 0,
+    7 => 0,
+    14 => 0,
+    62 => 0,
+    5 => 0,
+    59 => 0,
+    54 => 0,
+    60 => 0,
+    61 => 0,
+    16 => 0,
+    20 => 0,
+    17 => 0,
+    56 => 0,
+    55 => 0,
+    58 => 0,
+    4 => 0,
+    15 => 0,
+    33 => 0,
+    35 => 0,
+    36 => 0,
+    38 => 0,
+    37 => 0,
+    53 => 0,
+    39 => 0,
+    41 => 0,
+    42 => 0,
+    43 => 0,
+    40 => 0,
+    44 => 0,
+    45 => 0,
+    46 => 0,
+    48 => 0,
+    47 => 0,
+    49 => 0,
+    51 => 0,
+    50 => 0,
+    52 => 0,
+  );
+  $handler->display->display_options['filters']['field_reservations_date_value']['form_type'] = 'date_popup';

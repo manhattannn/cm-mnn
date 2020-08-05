@@ -3,7 +3,16 @@
 /**
  * @file
  * Reservations
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen                                                |
+ |                                                                           |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
  */
+
 
 
 /**
@@ -27,7 +36,7 @@ function reservations_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('reservations_default_reservation_status', ''),
     '#description' => t('New Reservations will be set to this by default.  Use Checked Out if you are using Reservations to manage the checkout, but do not allow actual Reservations.'),
   );
-  
+
   $form['reservations_back_to_back_allowed'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow Back to Back Reservation'),
@@ -50,7 +59,7 @@ function reservations_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('reservations_max_days_advance_reservation', '0'),
     '#description' => t('Maximum number of days a Reservation can be made in advance.  Set to 0 if to allow Reservations to be made an unlimited time into the future.'),
   );
-  
+
   $form['reservations_diff_warning'] = array(
     '#type' => 'textfield',
     '#title' => t('Max Minutes before Difference Warning'),
@@ -138,7 +147,7 @@ function reservations_admin_settings($form, &$form_state) {
       '#type' => 'checkbox',
       '#title' => t('Allow pushing forward to the next open day for ALL closed dates'),
   );
-  
+
   $form['reservations_push_hours'] = array(
     '#type' => 'textfield',
     '#title' => t('Hours after checkout opens that item is due when pushing forward over closed days is allowed'),
@@ -147,6 +156,28 @@ function reservations_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('reservations_push_hours', '1'),
     '#description' => t('If the checkout is open at 9AM on Monday after being closed on Sunday, a Reservation with a due date that is pushed forward would be due before 10AM on Monday when this is set to 1 hour.'),
   );
+
+
+  $form['reservations_access'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Site Access'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  $form['reservations_access']['reservations_disallow_anonymous_access'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Disallow anonymous access'),
+    '#default_value' => variable_get('reservations_disallow_anonymous_access', 0),
+    '#description' => t('If ticked access to the reservation pages will be disallowed for anonymous users.'),
+  );
+  $form['reservations_access']['reservations_disallow_anonymous_views'] = array(
+    '#type' => 'textarea',
+    '#rows' => 6,
+    '#title' => t('Disallowed views'),
+    '#default_value' => variable_get('reservations_disallow_anonymous_views', RESERVATION_VIEWS),
+    '#description' => t('If access is disallowed for anonymous users, then this it the list of views they will be disallowed.'),
+  );
+
 
 
   $form['reservations_advanced'] = array(
@@ -171,7 +202,7 @@ function reservations_admin_settings($form, &$form_state) {
     '#default_value' => $field['locked'],
     '#description' => t('Reservations requires a Date field to function. This field is locked by default.  Altering or deleting the Date field could cause serious problems.  Always backup before altering this field!'),
   );
-  
+
   $form['reservations_advanced']['reservations_inventory_prefix'] = array(
     '#type' => 'textfield',
     '#title' => t('Add Inventory Prefix to Items'),
@@ -180,7 +211,7 @@ function reservations_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('reservations_inventory_prefix', NULL),
     '#description' => t('Add the table of the prefix field.  If future versions you will be able to select a list of fields.'),
   );
-  
+
   $form['reservations_advanced']['reservations_overdue_window'] = array(
     '#type' => 'textfield',
     '#title' => t('Hours to Ignore Overdue Reservations'),
@@ -189,7 +220,7 @@ function reservations_admin_settings($form, &$form_state) {
     '#default_value' => variable_get('reservations_overdue_window_start', NULL),
     '#description' => t('Hours to Ignore Overdue Reservations.'),
   );
-  
+
   $form['reservations_advanced']['reservations_overdue_buffer'] = array(
     '#type' => 'textfield',
     '#title' => t('Hours New Reservations can Start after an Overdue Reservation'),
@@ -307,5 +338,22 @@ function reservations_admin_validate_hours_of_operation($element, &$form_state) 
         form_error($element, t('Closing time must be greater then opening time.'));
     }
   }
+}
+
+
+/**
+ * Builds the Reservations admininstration settings form.
+ */
+function reservations_admin_staff_settings($form, &$form_state) {
+  $form = array();
+
+  $form['reservations_staff_override_by_default'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Set Override by Default'),
+    '#default_value' => variable_get('reservations_staff_override_by_default', 0),
+    '#description' => t('If this is checked, reservations will be overridden by default for staff.  This is useful when launching Reservations and role/groups permissions are not configured.'),
+  );
+
+  return (system_settings_form($form));
 }
 

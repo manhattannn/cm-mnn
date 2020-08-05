@@ -2,7 +2,14 @@
 
 /**
  * @file
- * Reservations
+ * views_handler_field_item_node_nid
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ |                                                                           |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
  */
 
 /**
@@ -33,9 +40,9 @@ class views_handler_field_item_node_nid extends views_handler_field_prerender_li
   }
 
   function pre_render(&$values) {
-    
+
     $this->field_alias = isset($this->aliases['vid']) ? $this->aliases['vid'] : NULL;
-       
+
     $vids = array();
     foreach ($values as $result) {
       if (!empty($result->{$this->aliases['vid']})) {

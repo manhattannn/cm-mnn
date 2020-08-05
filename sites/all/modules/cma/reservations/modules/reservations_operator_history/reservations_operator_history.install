@@ -1,8 +1,15 @@
 <?php
 
-/**                                                                             
- * Implements hook_install().                                                   
+/**
+ * Implements hook_install().
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
  */
+
 function reservations_operator_history_install() {
 
 
@@ -29,7 +36,7 @@ function reservations_operator_history_install() {
 
 		   );
     field_create_field($field);
-   
+
     // Create the instance on the bundle.
     $instance = array(
 		      'bundle' => 'reservations_reservation',
@@ -60,11 +67,11 @@ function reservations_operator_history_install() {
 		      'field_name' => 'field_operator_history_view',
 		      'label' => 'Operator History',
 		      'required' => 0,
-		      'settings' => 
+		      'settings' =>
 		      array(
-			    'allowed_views' => 
+			    'allowed_views' =>
 			    array(
-				  'reservation_operator_actions' => 
+				  'reservation_operator_actions' =>
 				  'reservation_operator_actions',
 				  ),
 			    'force_default' => 1,
@@ -78,7 +85,7 @@ function reservations_operator_history_install() {
 					'weight' => 31,
 					),
 		      );
-    
+
     field_create_instance($instance);
   }
 }
@@ -86,50 +93,68 @@ function reservations_operator_history_install() {
  * Implementation of hook_schema().
  */
 function reservations_operator_history_schema() {
-  $schema['reservations_operator_history'] = 
+  $schema['reservations_operator_history'] =
     array(
 	  'description' => t('Stores operator actions on reservations'),
-	  'fields' => 
+	  'fields' =>
 	  array(
-		'id' => 
+		'id' =>
 		array(
 		      'description' => 'Primary Key.',
 		      'type' => 'serial',
 		      'unsigned' => TRUE,
 		      'not null' => TRUE),
-		'uid' => 
+		'uid' =>
 		array(
-		      'description' => 
+		      'description' =>
 		      'Operator UID.',
 		      'type' => 'int',
 		      'not null' => TRUE),
-		'reservation_id'    => 
+		'reservation_id'    =>
 		array(
 		      'description' => 'The Reservation ID.',
 		      'type' => 'int',
 		      ),
-		'beginning_status' => 
+		'beginning_status' =>
 		array(
 		      'description' =>  'Beginning Status',
 		      'type' => 'int',
 		      'not null' => TRUE),
-		'end_status' => 
+		'end_status' =>
 		array(
 		      'description' =>  'Ending Status',
 		      'type' => 'int',
 		      'not null' => TRUE),
-		'timestamp'    => 
+		'timestamp'    =>
 		array(
 		      'description'=>'The Start Timestamp of The Series Slot.',
 		      'type' => 'int',
-		      'not null' => TRUE),	    
+		      'not null' => TRUE),
+		'notes'    =>
+		array(
+		      'description'=>'Reservation Operator History Notes',
+		      'type' => 'blob',
+		      'not null' => FALSE),
 		),
+
 	  'indexes' => array(
-			     'reservation_id' => 
-			     array('reservation_id'), 
+			     'reservation_id' =>
+			     array('reservation_id'),
 			     'uid' => array('uid')),
 	  'primary key' => array('id'),
 	  );
-  
+
   return $schema;
+}
+
+/**
+ * Add Notes field to {reservations_operator_history} table.
+ */
+function reservations_operator_history_update_7001() {
+  $spec = array(
+		'type' => 'blob',
+		'description' => "Reservation Operator History Notes",
+		'not null' => FALSE,
+		);
+  db_add_field('reservations_operator_history', 'notes', $spec);
 }

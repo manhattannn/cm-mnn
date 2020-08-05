@@ -1,13 +1,20 @@
+; CMA Reservations - reservations system
+; +---------------------------------------------------------------------------+
+; | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+; | Additionally, Kevin Reynen                                                |
+; |                                                                           |
+; | This work is published under the GNU AGPLv3 license without any           |
+; | warranty. For full license and copyright information, see                 |
+; | https://www.gnu.org/licenses/agpl-3.0.html                                |
+; +---------------------------------------------------------------------------+
 name = Reservations Project Suggestor
+package = CMA Reservations
 description = This module will use AJAX to populate a dive of the user's projects upon selection of the Admin project field
-core = 7.x
-package = Community Media
-dependencies[] = reservations
-
-scripts[] = reservations_project_suggestor.js
-; Information added by drupal.org packaging script on 2013-10-09
-version = "7.x-2.0-alpha2"
-core = "7.x"
 project = "reservations"
-datestamp = "1381332469"
+
+core = 7.x
+version = "7.x-3.x
+
+dependencies[] = reservations
+scripts[] = reservations_project_suggestor.js
 

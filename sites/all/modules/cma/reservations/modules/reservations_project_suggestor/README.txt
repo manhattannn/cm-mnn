@@ -1,12 +1,25 @@
-
  +---------------------------------------------------------------------------+
  | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
- | Additionally, Kevin Reynen                                |
- |                                                                           |  
+ | Additionally, Kevin Reynen + Dane Powell                                  |
+ |                                                                           |
  | This work is published under the GNU AGPLv3 license without any           |
  | warranty. For full license and copyright information, see                 |
  | https://www.gnu.org/licenses/agpl-3.0.html                                |
- +---------------------------------------------------------------------------+ 
+ +---------------------------------------------------------------------------+
+
+Reservations Project Suggestor
+
+Add functionality to the Reservation form that allows the user to see all
+project associated with the author and pick a project.
+
+INSTALLATION
+-------------------------
+  1 - You will need to add a project field to the Reservation form
+  2- Please configure the form: /admin/config/reservations/project_suggestor
+    - Field Name: machine name of field you added to the Reservation form
+    - Field Type: the field type of the field you added to the Reservation form
+    -  Validate Producer Project Membership?
+       - Check this box if you want to validate that the producer is a member of the project
 
 
 How to Apply GNU AFFERO GENERAL PUBLIC LICENSE Terms to Your New Programs - see LICENSE.txt

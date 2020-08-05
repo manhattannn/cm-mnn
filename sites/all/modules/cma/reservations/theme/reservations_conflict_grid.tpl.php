@@ -2,6 +2,14 @@
 /**
  * @file
  * Reservations - Managed Equipment Reservation Checkout and Inventory
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen + Dane Powell                                  |
+ |                                                                           |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
  */
 ?>
 
@@ -20,11 +28,12 @@
 
   <th><?php print  date('m/d/Y', strtotime($date)) ?></th>
 
-    <?php foreach ($pretty_hours[$date] as $time): ?>
+    <?php if (isset($pretty_hours[$date])) {?>
+      <?php foreach ($pretty_hours[$date] as $time): ?>
+        <th colspan="4"><?php print  $time ?> </th>
+      <?php endforeach; ?>
+    <?php }?>
 
-      <th colspan="4"><?php print  $time ?> </th>
-
-    <?php endforeach; ?>
 
     </tr></thead>
 

@@ -1,8 +1,25 @@
-/* Table title for existing items table. */
+/* Table title for existing items table. 
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen + Dane Powell                                  |
+ |                                                                           |  
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+  
+ */
 
 div.existing-items-table-header {
   font-size: 1.5em;
   padding-top: 20px;
+}
+
+/* Add start and End to the reservation dates used on the reservation form */
+label[for=edit-field-reservations-date-und-0-value-datepicker-popup-0]:before {
+  content: "Start ";
+}
+label[for=edit-field-reservations-date-und-0-value2-datepicker-popup-0]:before {
+  content: "End ";
 }
 
 span.edit-details span.complete {

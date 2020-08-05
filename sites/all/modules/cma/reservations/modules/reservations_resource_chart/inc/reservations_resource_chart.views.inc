@@ -1,4 +1,13 @@
 <?php
+/*
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ |                                                                           |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
+ */
 
 function reservations_resource_chart_views_default_views() {
   $view = new view();
@@ -164,5 +173,5 @@ function reservations_resource_chart_views_default_views() {
 
   // At the end, return array of default views.
   return $views;
-  
+
 }

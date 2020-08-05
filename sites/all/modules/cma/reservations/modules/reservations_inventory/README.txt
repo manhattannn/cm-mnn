@@ -1,13 +1,18 @@
-
  +---------------------------------------------------------------------------+
  | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
- | Additionally, Kevin Reynen                                |
- |                                                                           |  
+ |                                                                           |
  | This work is published under the GNU AGPLv3 license without any           |
  | warranty. For full license and copyright information, see                 |
  | https://www.gnu.org/licenses/agpl-3.0.html                                |
- +---------------------------------------------------------------------------+ 
+ +---------------------------------------------------------------------------+
 
+Reservations Inventory
+
+This module was originally developed on drupal.org and can be found here:
+https://www.drupal.org/project/reservations_inventory
+
+Requires that you add a field to Reservation Inventory taxonomy
+  - Show On Menu (field_inventory_show_on_menu)
 
 How to Apply GNU AFFERO GENERAL PUBLIC LICENSE Terms to Your New Programs - see LICENSE.txt
 

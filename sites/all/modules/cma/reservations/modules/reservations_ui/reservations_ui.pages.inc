@@ -1,9 +1,19 @@
 <?php
 /**
- * Move or hide reservable types depending on the setting.
+
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen                                                |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
  */
+/*
+ * Move or hide reservable types depending on the setting.
+*/
 function reservations_ui_node_add_page() {
-  $reservable = array(); 
+  $reservable = array();
   $non_reservable = array();
   $types = node_type_get_types();
   foreach ($types AS $type => $data) {
@@ -24,6 +34,6 @@ function reservations_ui_node_add_page() {
   $output = '<h3>Site Content Types</h3>';
   $output .= theme('node_add_list', array('content' => $non_reservable));
   $output .= '<h3>Reservable Types</h3>';
-  $output .= theme('node_add_list', array('content' => $reservable));  
+  $output .= theme('node_add_list', array('content' => $reservable));
   return $output;
 }
