@@ -3,6 +3,13 @@
 /**
  * @file
  * reservations ui default views
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen                                                |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
  */
 
 
@@ -1138,7 +1145,7 @@ function reservations_fullcalendar_views_default_views() {
   $view->core = 0;
   $view->api_version = '3.0-alpha1';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
-  
+
   /* Display: Defaults */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->display->display_options['title'] = 'Item Reservations';

@@ -3,6 +3,13 @@
 /**
  * @file
  * reservations_fullcalendar functions
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen                                                |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
  */
 
 /**
@@ -34,7 +41,7 @@ function reservations_fullcalendar_preprocess_views_view(&$variables) {
  */
 function reservations_fullcalendar_menu() {
   $items = array();
-  
+
 
   $items['admin/reservations/manage/calendar'] = array(
     'title' => 'Calendar',
@@ -44,7 +51,7 @@ function reservations_fullcalendar_menu() {
     'access arguments' => array('manage reservations'),
     'type' => MENU_NORMAL_ITEM,
   );
-      
+
   $items['node/%node/reservations-calendar'] = array(
     'title' => 'Reservations',
     'description' => 'Takes node object and returns reservations',
@@ -60,7 +67,7 @@ function reservations_fullcalendar_menu() {
 }
 
 /**
- * returns TRUE or FALSE controlling display of Reservations Tab  
+ * returns TRUE or FALSE controlling display of Reservations Tab
  * on Reservable content types
  */
 function reservations_fullcalendar_display_reservations_tab($node) {
@@ -68,12 +75,12 @@ function reservations_fullcalendar_display_reservations_tab($node) {
   if (isset($node->reservations_type_setting) && $node->reservations_type_setting <> 'disabled') {
     return TRUE;
   }
-  
+
   return FALSE;
 }
 
 /**
- * Adds Tab to Reservable content types with list of related Reservation nodes 
+ * Adds Tab to Reservable content types with list of related Reservation nodes
  * if criteria from reservation_ui_display_reservations_tab returns TRUE
  */
 function reservations_fullcalendar_node($node) {
@@ -102,10 +109,10 @@ function reservations_fullcalendar_type($type = NULL) {
  * Implements hook_form_FORM_ID_alter().
  */
 function reservations_fullcalendar_form_views_exposed_form_alter(&$form, $form_state, $form_id) {
-  
+
   if ($form['#id'] == 'views-exposed-form-reservations-ui-node-res-default') {
     $form['#action'] = '/node/' . arg(1) . '/manage-reservations';
-  } 
+  }
 }
 
 /**
@@ -114,20 +121,20 @@ function reservations_fullcalendar_form_views_exposed_form_alter(&$form, $form_s
  */
 function reservations_fullcalendar_fullcalendar_classes($entity) {
   $classes = array();
-   
+
   $item = current($entity->reservations_reservation_items);
   $type = str_replace('_', '-', $item['type']);
-  
+
   $classes = array(
     'colors-node-type-' . $type,
     NULL,
   );
-  
+
    // Add a class for the date field being used.
   if (isset($entity->fullcalendar_date_field)) {
     $classes[] = "fc-event-field-$entity->fullcalendar_date_field";
   }
-  
+
   return $classes;
 }
 
