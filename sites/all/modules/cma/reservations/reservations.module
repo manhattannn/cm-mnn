@@ -6,11 +6,11 @@
  +---------------------------------------------------------------------------+
  | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
  | Additionally, Kevin Reynen + Dane Powell                                  |
- |                                                                           |  
+ |                                                                           |
  | This work is published under the GNU AGPLv3 license without any           |
  | warranty. For full license and copyright information, see                 |
  | https://www.gnu.org/licenses/agpl-3.0.html                                |
- +---------------------------------------------------------------------------+  
+ +---------------------------------------------------------------------------+
  */
 
 // Item default availability options.
@@ -817,7 +817,7 @@ function reservations_form($node, &$form_state) {
 
   // This array holds all reservable items the user may reserve.
   // Loop through each reserable type.
-  foreach ($reservable_types as $reservable_type) {
+  foreach ($reservable_types as $key => $reservable_type) {
 
     $include = FALSE;  // default to skipping the type unless
 
@@ -826,6 +826,11 @@ function reservations_form($node, &$form_state) {
         foreach ($reservable_type['inventory_tids'] as $tid) {
           if ($tid == $inventory) {
             $include = TRUE;
+          }
+          else {
+            // remove reservable_types that are not in the inventory
+            unset ($reservable_types[$key]);
+            continue;
           }
         }
       }
@@ -837,7 +842,10 @@ function reservations_form($node, &$form_state) {
 
     if ($include) {
 
+
       if ($reservable_type['reservations_active_status'] != RESERVATIONS_STATUS_ACTIVE) {
+        // remove reservable_types that are not active
+        unset ($reservable_types[$key]);
         continue;
       }
 
@@ -906,18 +914,16 @@ function reservations_form($node, &$form_state) {
 
   //$alt_options = $options['options'];
   // Add the current choices to the form.
-  if ($reservable_type['reservations_active_status'] == RESERVATIONS_STATUS_ACTIVE) {
-    for ($delta = 1; $delta <= $choice_count; $delta++) {
-      $default = isset($node->reservations_reservation_items["choice_" . $delta]['reservations_item_nid']) ?
-        $node->reservations_reservation_items["choice_" . $delta]['reservations_item_nid'] : '';
+  for ($delta = 1; $delta <= $choice_count; $delta++) {
+    $default = isset($node->reservations_reservation_items["choice_" . $delta]['reservations_item_nid']) ?
+      $node->reservations_reservation_items["choice_" . $delta]['reservations_item_nid'] : '';
 
-      $form['choice_wrapper']['reservations_reservation_items']["choice_" . $delta]['reservations_item_nid'] =
-        array(
-          '#type' => 'select',
-          '#options' => $options['options'],
-          '#default_value' => $default,
-        );
-    }
+    $form['choice_wrapper']['reservations_reservation_items']["choice_" . $delta]['reservations_item_nid'] =
+      array(
+        '#type' => 'select',
+        '#options' => $options['options'],
+        '#default_value' => $default,
+      );
   }
 
   if (user_access('manage reservations')) {
