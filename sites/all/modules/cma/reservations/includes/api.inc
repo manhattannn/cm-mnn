@@ -6,11 +6,11 @@
  +---------------------------------------------------------------------------+
  | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
  | Additionally, Kevin Reynen                                                |
- |                                                                           |  
+ |                                                                           |
  | This work is published under the GNU AGPLv3 license without any           |
  | warranty. For full license and copyright information, see                 |
  | https://www.gnu.org/licenses/agpl-3.0.html                                |
- +---------------------------------------------------------------------------+  
+ +---------------------------------------------------------------------------+
  */
 
 
@@ -1149,13 +1149,17 @@ function reservations_item_reservation_status($code = NULL) {
 function reservations_record_status($code = NULL) {
   $types = array(
     RESERVATIONS_STATUS_UNCONFIRMED => t('Unconfirmed'),
-    RESERVATIONS_STATUS_PENDING => t('Reserved'),
+    RESERVATIONS_STATUS_PENDING => t('Confirmed'),
     RESERVATIONS_STATUS_CHECKED_OUT => t('Checked out'),
     RESERVATIONS_STATUS_CHECKED_IN => t('Checked in'),
     RESERVATIONS_STATUS_NO_SHOW => t('No Show'),
     RESERVATIONS_STATUS_DENIED => t('Denied'),
     RESERVATIONS_STATUS_CANCELLED => t('Cancelled'),
   );
+  
+  // allow UI reservation status to be altered with hook
+  drupal_alter('reservation_record_status', $types);
+
   if (isset($code)) {
     return $types[$code];
   }
