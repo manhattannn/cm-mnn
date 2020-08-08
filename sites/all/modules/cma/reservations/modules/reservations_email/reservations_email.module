@@ -74,6 +74,7 @@ function reservations_email_menu() {
  */
 function reservations_email_admin_body_settings($form, &$form_state) {
   $types = reservations_record_status();
+  
   foreach ($types as $key => $type) {
     $form['reservations_email_body' . $key] = array(
       '#title' => t('Message for ' . $type),
@@ -617,15 +618,14 @@ function reservations_email_get_department_terms() {
  * Helper function to get the setting value/label pairs for status change
  */
 function reservations_email_get_status_change_options() {
-  return
-    array(
+
+  $addtl_types = array(
 	  'always' => t('Upon every Save'),
 	  'new' => t('Upon Creation'),
-	  RESERVATIONS_STATUS_PENDING => t('Upon Confirmation'),
-	  RESERVATIONS_STATUS_CHECKED_OUT => t('Upon Checkout'),
-	  RESERVATIONS_STATUS_CHECKED_IN => t('Upon Checkin'),
-	  );
+  );
+  $types = reservations_record_status();
 
+  return array_merge($addtl_types, $types);
 }
 /**
  * Helper function to get a single value off of a entity
