@@ -661,7 +661,7 @@ function  reservations_validate_checked_in_reservation_items($form, $form_state)
       if ($item['reservations_item_nid']) {
         $item_node = node_load($item['reservations_item_nid']);
         $tid = reservations_get_single_field_value($item_node,
-          'field_reservable_item_status',
+          'field_equipment_item_status',
           'tid');
 
         if ($tid && $tid != $item['reservations_checkin_item_condition']) {
@@ -1637,7 +1637,7 @@ function reservations_add_reservation_items($node) {
           $item_node = node_load($item['reservations_item_nid']);
           $tid =
             reservations_get_single_field_value($item_node,
-              'field_reservable_item_status',
+              'field_equipment_item_status',
               'tid');
           $reservation_link =
             l(t("Updated via Reservation"), "node/" . $node->nid);
@@ -1666,7 +1666,7 @@ function reservations_add_reservation_items($node) {
       if ($items_to_save) {
         foreach ($items_to_save as $item) {
           $item_node = $item['node'];
-          $item_node->field_reservable_item_status[LANGUAGE_NONE][0]['tid'] =
+          $item_node->field_equipment_item_status[LANGUAGE_NONE][0]['tid'] =
             $item['reservations_checkin_item_condition'];
           $item_node->field_reservable_condition_notes[LANGUAGE_NONE]
           [0]['value'] = $item['reservations_checkin_condition_notes'];

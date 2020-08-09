@@ -2247,7 +2247,7 @@ function reservations_build_reservation_table_form($form, &$form_state, $node, $
         $inventory_item = node_load($item['reservations_item_nid']);
         $default =
           reservations_get_single_field_value($inventory_item,
-            'field_reservable_item_status',
+            'field_equipment_item_status',
             'tid');
       }
       if (!in_array($header_label, $table['#header'])) {
