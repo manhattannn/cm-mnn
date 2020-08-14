@@ -310,7 +310,7 @@ function reservations_inventory_node_type_save_validate($form, &$form_state) {
     //update only if the type already exists
     $inventory = db_query("SELECT tids FROM {reservations_inventory_node_type} WHERE type = :type", array(':type' => $values['old_type']))->fetchField();
 
-    if ($inventory) {
+    if ($inventory !== FALSE) {
       $num_updated = db_update('reservations_inventory_node_type')
         ->fields(array(
           'type' => $values['old_type'],
