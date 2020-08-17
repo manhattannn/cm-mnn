@@ -309,6 +309,11 @@ function reservations_prepare(&$node) {
  * the validation hook was not being called for every reservation node
  */
 function reservations_validate($node, $form, &$form_state) {
+  // Admin override allows bypathing all validation.
+  if (isset($form_state['values']['admin_override']) && $form_state['values']['admin_override']) {
+    return;
+  }
+
   // OPENFLOWS - LOTTIE - 4/10/2018 - THIS MIGHT BE OBSOLETE
   // it was once used for dynamically adding more select items to reserve
   if (!empty($form_state['ahah_submission'])) {
@@ -547,8 +552,10 @@ function reservations_validate($node, $form, &$form_state) {
 
     if (reservations_is_partial_return($node)) {
 
-      // Set the url to the edit page.
-      $url = url('node/' . $node->nid . '/edit', array());
+//      // Set the url to the edit page.
+//      $url = url('node/' . $node->nid . '/edit', array());
+      // Set the URL to the view page.
+      $url = url('node/' . $node->nid, array());
       // Set the redirect.
       $form_state['redirect'] = $url;
       $_GET['destination'] = $url;
@@ -1091,6 +1098,20 @@ function reservations_form_alter(&$form, $form_state, $form_id) {
         $form['name']['#suffix'] = '</td>';
 
         unset($form['author']['name']);
+
+        // Does the user have the admin role (ID 3)
+        if(user_has_role(3)) {
+          $form['admin_override'] = array(
+            '#type' => 'checkbox',
+            '#title' => 'Admin Override Validation',
+            '#description' => 'This will bypath all validation (available to site admins only).',
+            '#default_value' => FALSE,
+            '#weight' => -97,
+            '#columns' => 0,
+            '#prefix' => '<td>',
+            '#suffix' => '</td>',
+          );
+        }
 
         //create override checkbox
         $form['override'] = array(
