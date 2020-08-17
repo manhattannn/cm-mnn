@@ -261,7 +261,11 @@ function reservations_inventory_form_reservations_reservation_node_form_alter(&$
      $form['field_reservations_inventory']['#type'] = 'hidden';
     }
   }
-
+  if (user_access('administer permissions')) {
+    //can see but no longer edit?
+    $form['field_reservations_inventory']['#disabled'] = FALSE;
+    unset($form['field_reservations_inventory']['#type']);
+  }
 }
 
 /**
