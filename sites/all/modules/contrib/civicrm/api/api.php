@@ -184,12 +184,7 @@ function _civicrm_api3_api_getfields(&$apiRequest) {
  *   true if error, false otherwise
  */
 function civicrm_error($result) {
-  if (is_array($result)) {
-    return (array_key_exists('is_error', $result) &&
-      $result['is_error']
-    ) ? TRUE : FALSE;
-  }
-  return FALSE;
+  return is_array($result) && !empty($result['is_error']);
 }
 
 /**
@@ -267,7 +262,7 @@ function _civicrm_api_replace_variable($value, $parentResult, $separator) {
       if (array_key_exists($fieldname, $parentResult) && is_array($parentResult[$fieldname])) {
         $arrayLocation = $parentResult[$fieldname];
         foreach ($stringParts as $key => $innerValue) {
-          $arrayLocation = CRM_Utils_Array::value($innerValue, $arrayLocation);
+          $arrayLocation = $arrayLocation[$innerValue] ?? NULL;
         }
         $value = $arrayLocation;
       }
@@ -286,33 +281,25 @@ function _civicrm_api_replace_variable($value, $parentResult, $separator) {
  *
  * @return string
  *   Entity name in underscore separated format.
+ *
+ * @deprecated
  */
 function _civicrm_api_get_entity_name_from_camel($entity) {
-  if (!$entity || $entity === strtolower($entity)) {
-    return $entity;
+  if (!$entity) {
+    // @todo - this should not be called when empty.
+    return '';
   }
-  elseif ($entity == 'PCP') {
-    return 'pcp';
-  }
-  else {
-    $entity = ltrim(strtolower(str_replace('U_F',
-          'uf',
-          // That's CamelCase, beside an odd UFCamel that is expected as uf_camel
-          preg_replace('/(?=[A-Z])/', '_$0', $entity)
-        )), '_');
-  }
-  return $entity;
+  return CRM_Core_DAO_AllCoreTables::convertEntityNameToLower($entity);
 }
 
 /**
  * Having a DAO object find the entity name.
  *
- * @param object $bao
+ * @param CRM_Core_DAO $bao
  *   DAO being passed in.
  *
  * @return string
  */
 function _civicrm_api_get_entity_name_from_dao($bao) {
-  $daoName = str_replace("BAO", "DAO", get_class($bao));
-  return CRM_Core_DAO_AllCoreTables::getBriefName($daoName);
+  return CRM_Core_DAO_AllCoreTables::getBriefName(get_class($bao));
 }

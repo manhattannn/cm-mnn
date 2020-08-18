@@ -63,15 +63,13 @@ class CRM_Utils_Request {
    *   Default value of the variable if not present.
    * @param string $method
    *   Where to look for the variable - 'GET', 'POST' or 'REQUEST'.
-   * @param bool $isThrowException
-   *   Should a an exception be thrown rather than a fatal.
    *
    * @return mixed
    *   The value of the variable
    *
    * @throws \CRM_Core_Exception
    */
-  public static function retrieve($name, $type, &$store = NULL, $abort = FALSE, $default = NULL, $method = 'REQUEST', $isThrowException = TRUE) {
+  public static function retrieve($name, $type, &$store = NULL, $abort = FALSE, $default = NULL, $method = 'REQUEST') {
 
     $value = NULL;
     switch ($method) {
@@ -97,10 +95,7 @@ class CRM_Utils_Request {
     }
 
     if (!isset($value) && $abort) {
-      if ($isThrowException) {
-        throw new CRM_Core_Exception(ts("Could not find valid value for %1", [1 => $name]));
-      }
-      CRM_Core_Error::fatal(ts("Could not find valid value for %1", [1 => $name]));
+      throw new CRM_Core_Exception(ts('Could not find valid value for %1', [1 => $name]));
     }
 
     if (!isset($value) && $default) {
@@ -108,7 +103,7 @@ class CRM_Utils_Request {
     }
 
     // minor hack for action
-    if ($name == 'action') {
+    if ($name === 'action') {
       if (!is_numeric($value) && is_string($value)) {
         $value = CRM_Core_Action::resolve($value);
       }
@@ -222,7 +217,7 @@ class CRM_Utils_Request {
    *   The desired value.
    */
   public static function retrieveComponent($attributes) {
-    $url = CRM_Utils_Array::value('action', $attributes);
+    $url = $attributes['action'] ?? NULL;
     // Whilst the following is a fallible universal test for urlencoded URLs,
     // thankfully the "action" URL has a limited and predictable form and
     // therefore this comparison is sufficient for our purposes.

@@ -22,7 +22,7 @@ namespace Civi\Api4\Generic;
  *       For example, BasicReplaceAction returns ReplaceResult which includes the additional $deleted property to list any items deleted by the operation.
  *  3. Provide convenience methods like `$result->first()` and `$result->indexBy($field)`.
  */
-class Result extends \ArrayObject {
+class Result extends \ArrayObject implements \JsonSerializable {
   /**
    * @var string
    */
@@ -40,6 +40,10 @@ class Result extends \ArrayObject {
    * @var int
    */
   public $version = 4;
+  /**
+   * @var int
+   */
+  public $rowCount;
 
   private $indexedBy;
 
@@ -107,11 +111,7 @@ class Result extends \ArrayObject {
    * @return int
    */
   public function count() {
-    $count = parent::count();
-    if ($count == 1 && is_array($this->first()) && array_keys($this->first()) == ['row_count']) {
-      return $this->first()['row_count'];
-    }
-    return $count;
+    return $this->rowCount ?? parent::count();
   }
 
   /**
@@ -122,6 +122,13 @@ class Result extends \ArrayObject {
    */
   public function column($name) {
     return array_column($this->getArrayCopy(), $name, $this->indexedBy);
+  }
+
+  /**
+   * @return array
+   */
+  public function jsonSerialize() {
+    return $this->getArrayCopy();
   }
 
 }

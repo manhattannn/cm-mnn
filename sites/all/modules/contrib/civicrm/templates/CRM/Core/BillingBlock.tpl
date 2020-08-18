@@ -20,9 +20,7 @@
         {foreach from=$paymentFields item=paymentField}
           {assign var='name' value=$form.$paymentField.name}
           <div class="crm-section {$form.$paymentField.name}-section">
-            <div class="label">{$form.$paymentField.label}
-              {if $requiredPaymentFields.$name}<span class="crm-marker" title="{ts}This field is required.{/ts}">*</span>{/if}
-            </div>
+            <div class="label">{$form.$paymentField.label}</div>
             <div class="content">
                 {$form.$paymentField.html}
               {if $paymentFieldsMetadata.$name.description}
@@ -51,9 +49,7 @@
         {foreach from=$billingDetailsFields item=billingField}
           {assign var='name' value=$form.$billingField.name}
           <div class="crm-section {$form.$billingField.name}-section">
-            <div class="label">{$form.$billingField.label}
-              {if $requiredPaymentFields.$name}<span class="crm-marker" title="{ts}This field is required.{/ts}">*</span>{/if}
-            </div>
+            <div class="label">{$form.$billingField.label}</div>
             {if $form.$billingField.type == 'text'}
               <div class="content">{$form.$billingField.html}</div>
             {else}
@@ -158,10 +154,18 @@
         });
       }
 
-
       // toggle show/hide
-      $('#billingcheckbox').click(function () {
-        if (this.checked) {
+      var billingCheckboxElement = $('#billingcheckbox');
+      billingCheckboxElement.click(function() {
+        billingCheckboxChanged(billingCheckboxElement);
+      });
+
+      billingCheckboxElement.change(function() {
+        billingCheckboxChanged(billingCheckboxElement);
+      });
+
+      function billingCheckboxChanged(billingCheckbox) {
+        if (billingCheckbox.prop('checked')) {
           if (!CRM.billing || CRM.billing.billingProfileIsHideable) {
             $('.billing_name_address-group').hide(200);
           }
@@ -180,7 +184,7 @@
         } else {
           $('.billing_name_address-group').show(200);
         }
-      });
+      }
 
       // remove spaces, dashes from credit card number
       $('#credit_card_number').change(function () {

@@ -133,8 +133,8 @@ class CRM_Utils_System_Joomla extends CRM_Utils_System_Base {
     }
 
     if (!empty($row)) {
-      $dbName = CRM_Utils_Array::value('username', $row);
-      $dbEmail = CRM_Utils_Array::value('email', $row);
+      $dbName = $row['username'] ?? NULL;
+      $dbEmail = $row['email'] ?? NULL;
       if (strtolower($dbName) == strtolower($name)) {
         $errors['cms_name'] = ts('The username %1 is already taken. Please select another username.',
           [1 => $name]
@@ -239,7 +239,8 @@ class CRM_Utils_System_Joomla extends CRM_Utils_System_Base {
     $absolute = FALSE,
     $fragment = NULL,
     $frontend = FALSE,
-    $forceBackend = FALSE
+    $forceBackend = FALSE,
+    $htmlize = TRUE
   ) {
     $config = CRM_Core_Config::singleton();
     $separator = '&';
@@ -606,7 +607,7 @@ class CRM_Utils_System_Joomla extends CRM_Utils_System_Base {
    */
   public function isUserLoggedIn() {
     $user = JFactory::getUser();
-    return ($user->guest) ? FALSE : TRUE;
+    return !$user->guest;
   }
 
   /**
@@ -693,7 +694,7 @@ class CRM_Utils_System_Joomla extends CRM_Utils_System_Base {
     foreach ($plugins as $plugin) {
       // question: is the folder really a critical part of the plugin's name?
       $name = implode('.', ['joomla', $plugin['type'], $plugin['folder'], $plugin['element']]);
-      $result[] = new CRM_Core_Module($name, $plugin['enabled'] ? TRUE : FALSE);
+      $result[] = new CRM_Core_Module($name, !empty($plugin['enabled']));
     }
 
     return $result;

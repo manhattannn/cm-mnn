@@ -134,7 +134,7 @@ class CRM_Event_BAO_Event extends CRM_Event_DAO_Event {
 
     $contactId = CRM_Core_Session::getLoggedInContactID();
     if (!$contactId) {
-      $contactId = CRM_Utils_Array::value('contact_id', $params);
+      $contactId = $params['contact_id'] ?? NULL;
     }
 
     // Log the information on successful add/edit of Event
@@ -846,10 +846,6 @@ WHERE civicrm_event.is_active = 1
     // be clearer & safer here
     $permissions = CRM_Core_Permission::event(CRM_Core_Permission::VIEW);
 
-    // check if we're in shopping cart mode for events
-    $enable_cart = Civi::settings()->get('enable_cart');
-    if ($enable_cart) {
-    }
     while ($dao->fetch()) {
       if (!empty($permissions) && in_array($dao->event_id, $permissions)) {
         $info = [];
@@ -891,7 +887,9 @@ WHERE civicrm_event.is_active = 1
         $info['location'] = $address;
         $info['url'] = CRM_Utils_System::url('civicrm/event/info', 'reset=1&id=' . $dao->event_id, TRUE, NULL, FALSE);
 
-        if ($enable_cart) {
+        // @todo Move to eventcart extension
+        // check if we're in shopping cart mode for events
+        if ((bool) Civi::settings()->get('enable_cart')) {
           $reg = CRM_Event_Cart_BAO_EventInCart::get_registration_link($dao->event_id);
           $info['registration_link'] = CRM_Utils_System::url($reg['path'], $reg['query'], TRUE);
           $info['registration_link_text'] = $reg['label'];
@@ -1104,8 +1102,8 @@ WHERE civicrm_event.is_active = 1
 
       //send email only when email is present
       if (isset($email) || $returnMessageText) {
-        $preProfileID = CRM_Utils_Array::value('custom_pre_id', $values);
-        $postProfileID = CRM_Utils_Array::value('custom_post_id', $values);
+        $preProfileID = $values['custom_pre_id'] ?? NULL;
+        $postProfileID = $values['custom_post_id'] ?? NULL;
 
         if (!empty($values['params']['additionalParticipant'])) {
           $preProfileID = CRM_Utils_Array::value('additional_custom_pre_id', $values, $preProfileID);
@@ -1147,10 +1145,10 @@ WHERE civicrm_event.is_active = 1
         }
         $tplParams = array_merge($values, $participantParams, [
           'email' => $email,
-          'confirm_email_text' => CRM_Utils_Array::value('confirm_email_text', $values['event']),
-          'isShowLocation' => CRM_Utils_Array::value('is_show_location', $values['event']),
+          'confirm_email_text' => $values['event']['confirm_email_text'] ?? NULL,
+          'isShowLocation' => $values['event']['is_show_location'] ?? NULL,
           // The concept of contributeMode is deprecated.
-          'contributeMode' => CRM_Utils_Array::value('contributeMode', $template->_tpl_vars),
+          'contributeMode' => $template->_tpl_vars['contributeMode'] ?? NULL,
           'customPre' => $profilePre[0],
           'customPre_grouptitle' => empty($profilePre[1]) ? NULL : [CRM_Core_BAO_UFGroup::getFrontEndTitle((int) $preProfileID)],
           'customPost' => $profilePost[0],
@@ -1233,7 +1231,7 @@ WHERE civicrm_event.is_active = 1
           );
           // append invoice pdf to email
           $prefixValue = Civi::settings()->get('contribution_invoice_settings');
-          $invoicing = CRM_Utils_Array::value('invoicing', $prefixValue);
+          $invoicing = $prefixValue['invoicing'] ?? NULL;
           if (isset($invoicing) && isset($prefixValue['is_email_pdf']) && !empty($values['contributionId'])) {
             $sendTemplateParams['isEmailPdf'] = TRUE;
             $sendTemplateParams['contributionId'] = $values['contributionId'];
@@ -1581,7 +1579,7 @@ WHERE civicrm_event.is_active = 1
         }
         elseif (substr($name, -11) == 'campaign_id') {
           $campaigns = CRM_Campaign_BAO_Campaign::getCampaigns($params[$name]);
-          $values[$index] = CRM_Utils_Array::value($params[$name], $campaigns);
+          $values[$index] = $campaigns[$params[$name]] ?? NULL;
         }
         elseif (strpos($name, '-') !== FALSE) {
           list($fieldName, $id) = CRM_Utils_System::explode('-', $name, 2);
@@ -1598,7 +1596,7 @@ WHERE civicrm_event.is_active = 1
           elseif ($fieldName == 'im') {
             $providerName = NULL;
             if ($providerId = $detailName . '-provider_id') {
-              $providerName = CRM_Utils_Array::value($params[$providerId], $imProviders);
+              $providerName = $imProviders[$params[$providerId]] ?? NULL;
             }
             if ($providerName) {
               $values[$index] = $params[$detailName] . " (" . $providerName . ")";
@@ -1638,8 +1636,8 @@ WHERE  id = $cfID
               $htmlType = $dao->html_type;
 
               if ($htmlType == 'File') {
-                $path = CRM_Utils_Array::value('name', $params[$name]);
-                $fileType = CRM_Utils_Array::value('type', $params[$name]);
+                $path = $params[$name]['name'] ?? NULL;
+                $fileType = $params[$name]['type'] ?? NULL;
                 $values[$index] = CRM_Utils_File::getFileURL($path, $fileType);
               }
               else {
@@ -1710,7 +1708,7 @@ WHERE  id = $cfID
               $values[$index] = CRM_Utils_Date::customFormat(CRM_Utils_Date::format($params[$name]));
             }
             else {
-              $values[$index] = CRM_Utils_Array::value($name, $params);
+              $values[$index] = $params[$name] ?? NULL;
             }
           }
         }
@@ -1780,8 +1778,8 @@ WHERE  id = $cfID
       return $additionalIDs;
     }
 
-    $preProfileID = CRM_Utils_Array::value('additional_custom_pre_id', $values);
-    $postProfileID = CRM_Utils_Array::value('additional_custom_post_id', $values);
+    $preProfileID = $values['additional_custom_pre_id'] ?? NULL;
+    $postProfileID = $values['additional_custom_post_id'] ?? NULL;
     //else build array of Additional participant's information.
     if (count($additionalIDs)) {
       if ($preProfileID || $postProfileID) {
@@ -2212,8 +2210,8 @@ WHERE  ce.loc_block_id = $locBlockId";
 
         $fromEmailValues['from_email_id'][$eventEmailId] = htmlspecialchars($eventEmailId);
         $fromEmailId = [
-          'cc' => CRM_Utils_Array::value('cc_confirm', $eventEmail),
-          'bcc' => CRM_Utils_Array::value('bcc_confirm', $eventEmail),
+          'cc' => $eventEmail['cc_confirm'] ?? NULL,
+          'bcc' => $eventEmail['bcc_confirm'] ?? NULL,
         ];
         $fromEmailValues = array_merge($fromEmailValues, $fromEmailId);
       }
@@ -2385,6 +2383,47 @@ LEFT  JOIN  civicrm_price_field_value value ON ( value.id = lineItem.price_field
         ],
       ],
     ];
+  }
+
+  /**
+   * Get the appropriate links to iCal pages/feeds.
+   *
+   * @param int $eventId
+   *
+   * @return array
+   *   All of the icons to show.
+   */
+  public static function getICalLinks($eventId = NULL) {
+    $return = $eventId ? [] : [
+      [
+        'url' => CRM_Utils_System::url('civicrm/event/ical', 'reset=1&list=1&html=1', TRUE, NULL, TRUE),
+        'text' => ts('HTML listing of current and future public events.'),
+        'icon' => 'fa-th-list',
+      ],
+      [
+        'url' => CRM_Utils_System::url('civicrm/event/ical', 'reset=1&list=1&rss=1', TRUE, NULL, TRUE),
+        'text' => ts('Get RSS 2.0 feed for current and future public events.'),
+        'icon' => 'fa-rss',
+      ],
+    ];
+    $query = [
+      'reset' => 1,
+    ];
+    if ($eventId) {
+      $query['id'] = $eventId;
+    }
+    $return[] = [
+      'url' => CRM_Utils_System::url('civicrm/event/ical', $query, TRUE, NULL, TRUE),
+      'text' => $eventId ? ts('Download iCalendar entry for this event.') : ts('Download iCalendar entry for current and future public events.'),
+      'icon' => 'fa-download',
+    ];
+    $query['list'] = 1;
+    $return[] = [
+      'url' => CRM_Utils_System::url('civicrm/event/ical', $query, TRUE, NULL, TRUE),
+      'text' => $eventId ? ts('iCalendar feed for this event.') : ts('iCalendar feed for current and future public events.'),
+      'icon' => 'fa-link',
+    ];
+    return $return;
   }
 
 }

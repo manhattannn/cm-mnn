@@ -110,7 +110,7 @@ class CRM_Core_BAO_Setting extends CRM_Core_DAO_Setting {
     foreach ($domains as $domainID) {
       $result[$domainID] = [];
       foreach ($fieldsToGet as $name => $value) {
-        $contactID = CRM_Utils_Array::value('contact_id', $params);
+        $contactID = $params['contact_id'] ?? NULL;
         $setting = CRM_Core_BAO_Setting::getItem(NULL, $name, NULL, NULL, $contactID, $domainID);
         if (!is_null($setting)) {
           // we won't return if not set - helps in return all scenario - otherwise we can't indentify the missing ones
@@ -515,7 +515,7 @@ class CRM_Core_BAO_Setting extends CRM_Core_DAO_Setting {
   public static function onChangeEnvironmentSetting($oldValue, $newValue, $metadata) {
     if ($newValue != 'Production') {
       $mailing = Civi::settings()->get('mailing_backend');
-      if ($mailing['outBound_option'] != 2) {
+      if ($mailing['outBound_option'] != CRM_Mailing_Config::OUTBOUND_OPTION_DISABLED) {
         Civi::settings()->set('mailing_backend_store', $mailing);
       }
       Civi::settings()->set('mailing_backend', ['outBound_option' => CRM_Mailing_Config::OUTBOUND_OPTION_DISABLED]);

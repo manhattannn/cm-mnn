@@ -85,7 +85,7 @@ class CRM_Core_Payment_BaseIPN {
    *
    * @return bool
    */
-  public function validateData(&$input, &$ids, &$objects, $required = TRUE, $paymentProcessorID = NULL) {
+  public function validateData($input, &$ids, &$objects, $required = TRUE, $paymentProcessorID = NULL) {
 
     // Check if the contribution exists
     // make sure contribution exists and is valid
@@ -158,7 +158,7 @@ class CRM_Core_Payment_BaseIPN {
    *
    * @return bool|array
    */
-  public function loadObjects(&$input, &$ids, &$objects, $required, $paymentProcessorID, $error_handling = NULL) {
+  public function loadObjects($input, &$ids, &$objects, $required, $paymentProcessorID, $error_handling = NULL) {
     if (empty($error_handling)) {
       // default options are that we log an error & echo it out
       // note that we should refactor this error handling into error code @ some point
@@ -175,7 +175,7 @@ class CRM_Core_Payment_BaseIPN {
     else {
       //legacy support - functions are 'used' to be able to pass in a DAO
       $contribution = new CRM_Contribute_BAO_Contribution();
-      $contribution->id = CRM_Utils_Array::value('contribution', $ids);
+      $contribution->id = $ids['contribution'] ?? NULL;
       $contribution->find(TRUE);
       $objects['contribution'] = &$contribution;
     }
@@ -274,15 +274,18 @@ class CRM_Core_Payment_BaseIPN {
   /**
    * Handled pending contribution status.
    *
+   * @deprecated
+   *
    * @param array $objects
    * @param object $transaction
    *
    * @return bool
    */
   public function pending(&$objects, &$transaction) {
+    CRM_Core_Error::deprecatedFunctionWarning('This function will be removed at some point');
     $transaction->commit();
-    Civi::log()->debug("Returning since contribution status is Pending");
-    echo "Success: Returning since contribution status is pending<p>";
+    Civi::log()->debug('Returning since contribution status is Pending');
+    echo 'Success: Returning since contribution status is pending<p>';
     return TRUE;
   }
 
@@ -322,7 +325,7 @@ class CRM_Core_Payment_BaseIPN {
     $contribution->receipt_date = CRM_Utils_Date::isoToMysql($contribution->receipt_date);
     $contribution->thankyou_date = CRM_Utils_Date::isoToMysql($contribution->thankyou_date);
     $contribution->cancel_date = self::$_now;
-    $contribution->cancel_reason = CRM_Utils_Array::value('reasonCode', $input);
+    $contribution->cancel_reason = $input['reasonCode'] ?? NULL;
     $contribution->save();
 
     // Add line items for recurring payments.
@@ -358,15 +361,18 @@ class CRM_Core_Payment_BaseIPN {
   /**
    * Rollback unhandled outcomes.
    *
+   * @deprecated
+   *
    * @param array $objects
    * @param CRM_Core_Transaction $transaction
    *
    * @return bool
    */
   public function unhandled(&$objects, &$transaction) {
+    CRM_Core_Error::deprecatedFunctionWarning('This function will be removed at some point');
     $transaction->rollback();
-    Civi::log()->debug("Returning since contribution status is not handled");
-    echo "Failure: contribution status is not handled<p>";
+    Civi::log()->debug('Returning since contribution status is not handled');
+    echo 'Failure: contribution status is not handled<p>';
     return FALSE;
   }
 
@@ -476,13 +482,12 @@ class CRM_Core_Payment_BaseIPN {
    * @throws \CRM_Core_Exception
    * @throws \CiviCRM_API3_Exception
    */
-  public function completeTransaction(&$input, &$ids, &$objects, &$transaction) {
-    $contribution = &$objects['contribution'];
-
-    CRM_Contribute_BAO_Contribution::completeOrder($input, $ids, $objects, $transaction, $contribution);
+  public function completeTransaction(&$input, &$ids, &$objects, $transaction = NULL) {
+    CRM_Contribute_BAO_Contribution::completeOrder($input, $ids, $objects, $transaction);
   }
 
   /**
+   * @deprecated
    * Get site billing ID.
    *
    * @param array $ids
@@ -490,6 +495,7 @@ class CRM_Core_Payment_BaseIPN {
    * @return bool
    */
   public function getBillingID(&$ids) {
+    CRM_Core_Error::deprecatedFunctionWarning('CRM_Core_BAO_LocationType::getBilling()');
     $ids['billing'] = CRM_Core_BAO_LocationType::getBilling();
     if (!$ids['billing']) {
       CRM_Core_Error::debug_log_message(ts('Please set a location type of %1', [1 => 'Billing']));

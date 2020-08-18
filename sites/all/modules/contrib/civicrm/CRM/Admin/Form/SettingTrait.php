@@ -162,9 +162,9 @@ trait CRM_Admin_Form_SettingTrait {
     foreach ($settingMetaData as $setting => $props) {
       $quickFormType = $this->getQuickFormType($props);
       if (isset($quickFormType)) {
-        $options = CRM_Utils_Array::value('options', $props);
+        $options = $props['options'] ?? NULL;
         if ($options) {
-          if ($props['html_type'] === 'Select' && isset($props['is_required']) && $props['is_required'] === FALSE && !isset($options[''])) {
+          if ($quickFormType === 'Select' && isset($props['is_required']) && $props['is_required'] === FALSE && !isset($options[''])) {
             // If the spec specifies the field is not required add a null option.
             // Why not if empty($props['is_required']) - basically this has been added to the spec & might not be set to TRUE
             // when it is true.
@@ -227,13 +227,13 @@ trait CRM_Admin_Form_SettingTrait {
           $this->addRadio($setting, $props['title'], [1 => ts('Yes'), 0 => ts('No')], CRM_Utils_Array::value('html_attributes', $props), '&nbsp;&nbsp;');
         }
         elseif ($add === 'add') {
-          $this->add($props['html_type'], $setting, $props['title'], $options);
+          $this->add($props['html_type'], $setting, $props['title'], $options, FALSE, $props['html_extra'] ?? NULL);
         }
         else {
           $this->$add($setting, $props['title'], $options);
         }
         // Migrate to using an array as easier in smart...
-        $description = CRM_Utils_Array::value('description', $props);
+        $description = $props['description'] ?? NULL;
         $descriptions[$setting] = $description;
         $this->assign("{$setting}_description", $description);
         if ($setting === 'max_attachments') {
@@ -290,7 +290,7 @@ trait CRM_Admin_Form_SettingTrait {
       'advmultiselect' => 'Element',
     ];
     $mapping += array_fill_keys(CRM_Core_Form::$html5Types, '');
-    return $mapping[$htmlType];
+    return $mapping[$htmlType] ?? '';
   }
 
   /**

@@ -258,14 +258,14 @@ class CRM_Core_Smarty extends Smarty {
   /**
    * Temporarily assign a list of variables.
    *
-   * @code
+   * ```
    * $smarty->pushScope(array(
    *   'first_name' => 'Alice',
    *   'last_name' => 'roberts',
    * ));
    * $html = $smarty->fetch('view-contact.tpl');
    * $smarty->popScope();
-   * @endcode
+   * ```
    *
    * @param array $vars
    *   (string $name => mixed $value).
@@ -276,7 +276,7 @@ class CRM_Core_Smarty extends Smarty {
     $oldVars = $this->get_template_vars();
     $backupFrame = [];
     foreach ($vars as $key => $value) {
-      $backupFrame[$key] = isset($oldVars[$key]) ? $oldVars[$key] : NULL;
+      $backupFrame[$key] = $oldVars[$key] ?? NULL;
     }
     $this->backupFrames[] = $backupFrame;
 

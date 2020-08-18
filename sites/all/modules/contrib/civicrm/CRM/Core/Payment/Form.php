@@ -100,7 +100,7 @@ class CRM_Core_Payment_Form {
   protected static function addCommonFields(&$form, $paymentFields) {
     $requiredPaymentFields = $paymentFieldsMetadata = [];
     foreach ($paymentFields as $name => $field) {
-      $field['extra'] = isset($field['extra']) ? $field['extra'] : NULL;
+      $field['extra'] = $field['extra'] ?? NULL;
       if ($field['htmlType'] == 'chainSelect') {
         $form->addChainSelect($field['name'], ['required' => FALSE]);
       }
@@ -109,7 +109,7 @@ class CRM_Core_Payment_Form {
           $field['name'],
           $field['title'],
           $field['attributes'],
-          FALSE,
+          $field['is_required'],
           $field['extra']
         );
       }
@@ -375,7 +375,7 @@ class CRM_Core_Payment_Form {
       return $month;
     }
 
-    return CRM_Utils_Array::value('m', $src['credit_card_exp_date']);
+    return $src['credit_card_exp_date']['m'] ?? NULL;
   }
 
   /**
@@ -388,7 +388,7 @@ class CRM_Core_Payment_Form {
    * @return int
    */
   public static function getCreditCardExpirationYear($src) {
-    return CRM_Utils_Array::value('Y', $src['credit_card_exp_date']);
+    return $src['credit_card_exp_date']['Y'] ?? NULL;
   }
 
   /**

@@ -61,7 +61,7 @@ class CRM_Price_BAO_PriceSet extends CRM_Price_DAO_PriceSet {
       $params['extends'] = CRM_Utils_Array::implodePadded($params['extends']);
     }
     else {
-      $priceSetID = CRM_Utils_Array::value('id', $params);
+      $priceSetID = $params['id'] ?? NULL;
     }
     $priceSetBAO = new CRM_Price_BAO_PriceSet();
     $priceSetBAO->copyValues($params);
@@ -71,6 +71,7 @@ class CRM_Price_BAO_PriceSet extends CRM_Price_DAO_PriceSet {
     $priceSetBAO->save();
 
     CRM_Utils_Hook::post($hook, 'PriceSet', $priceSetBAO->id, $priceSetBAO);
+    unset(\Civi::$statics['CRM_Core_PseudoConstant']);
     return $priceSetBAO;
   }
 
@@ -113,26 +114,22 @@ class CRM_Price_BAO_PriceSet extends CRM_Price_DAO_PriceSet {
    *
    */
   public static function getDefaultPriceSet($entity = 'contribution') {
-    if (!empty(self::$_defaultPriceSet[$entity])) {
-      return self::$_defaultPriceSet[$entity];
+    if (isset(\Civi::$statics[__CLASS__][$entity])) {
+      return \Civi::$statics[__CLASS__][$entity];
     }
-    $entityName = 'default_contribution_amount';
-    if ($entity == 'membership') {
-      $entityName = 'default_membership_type_amount';
-    }
+    $priceSetName = ($entity === 'membership') ? 'default_membership_type_amount' : 'default_contribution_amount';
 
     $sql = "
 SELECT      ps.id AS setID, pfv.price_field_id AS priceFieldID, pfv.id AS priceFieldValueID, pfv.name, pfv.label, pfv.membership_type_id, pfv.amount, pfv.financial_type_id
 FROM        civicrm_price_set ps
 LEFT JOIN   civicrm_price_field pf ON pf.`price_set_id` = ps.id
 LEFT JOIN   civicrm_price_field_value pfv ON pfv.price_field_id = pf.id
-WHERE       ps.name = '{$entityName}'
+WHERE       ps.name = '{$priceSetName}'
 ";
 
     $dao = CRM_Core_DAO::executeQuery($sql);
-    self::$_defaultPriceSet[$entity] = [];
     while ($dao->fetch()) {
-      self::$_defaultPriceSet[$entity][$dao->priceFieldValueID] = [
+      \Civi::$statics[__CLASS__][$entity][$dao->priceFieldValueID] = [
         'setID' => $dao->setID,
         'priceFieldID' => $dao->priceFieldID,
         'name' => $dao->name,
@@ -144,7 +141,7 @@ WHERE       ps.name = '{$entityName}'
       ];
     }
 
-    return self::$_defaultPriceSet[$entity];
+    return \Civi::$statics[__CLASS__][$entity];
   }
 
   /**
@@ -340,7 +337,7 @@ WHERE     cpf.price_set_id = %1";
       }
     }
     else {
-      $fid = CRM_Utils_Array::value('fid', $params);
+      $fid = $params['fid'] ?? NULL;
     }
 
     if (isset($fid)) {
@@ -603,8 +600,8 @@ WHERE  id = %1";
 
       $form->_priceSetId = $priceSetId;
       $priceSet = self::getSetDetail($priceSetId, $required, $validOnly);
-      $form->_priceSet = CRM_Utils_Array::value($priceSetId, $priceSet);
-      $form->_values['fee'] = CRM_Utils_Array::value('fields', $form->_priceSet);
+      $form->_priceSet = $priceSet[$priceSetId] ?? NULL;
+      $form->_values['fee'] = $form->_priceSet['fields'] ?? NULL;
 
       //get the price set fields participant count.
       if ($entityTable == 'civicrm_event') {
@@ -829,7 +826,7 @@ WHERE  id = %1";
     }
 
     $priceSet = self::getSetDetail($priceSetId, TRUE, $validFieldsOnly);
-    $form->_priceSet = CRM_Utils_Array::value($priceSetId, $priceSet);
+    $form->_priceSet = $priceSet[$priceSetId] ?? NULL;
     $validPriceFieldIds = array_keys($form->_priceSet['fields']);
     $form->_quickConfig = $quickConfig = 0;
     if (CRM_Core_DAO::getFieldValue('CRM_Price_DAO_PriceSet', $priceSetId, 'is_quick_config')) {
@@ -900,7 +897,7 @@ WHERE  id = %1";
         (CRM_Utils_Array::value('visibility', $field) == 'admin' && $adminFieldVisible == TRUE) ||
         !$validFieldsOnly
       ) {
-        $options = CRM_Utils_Array::value('options', $field);
+        $options = $field['options'] ?? NULL;
         if ($className == 'CRM_Contribute_Form_Contribution_Main' && $component = 'membership') {
           $userid = $form->getVar('_membershipContactID');
           $checklifetime = self::checkCurrentMembership($options, $userid);
@@ -1171,6 +1168,7 @@ WHERE  id = %1";
     $copy->save();
 
     CRM_Utils_Hook::copy('Set', $copy);
+    unset(\Civi::$statics['CRM_Core_PseudoConstant']);
     return $copy;
   }
 
@@ -1672,8 +1670,8 @@ WHERE     ct.id = cp.financial_type_id AND
           break;
 
         default:
-          CRM_Core_Error::fatal("$table is not supported in PriceSet::usedBy()");
-          break;
+          throw new CRM_Core_Exception("$table is not supported in PriceSet::usedBy()");
+
       }
     }
     return $usedBy;
@@ -1693,7 +1691,7 @@ WHERE     ct.id = cp.financial_type_id AND
    *
    * @return array
    */
-  protected static function getLine(&$params, &$lineItem, $priceSetID, $field, $id, $totalPrice): array {
+  public static function getLine(&$params, &$lineItem, $priceSetID, $field, $id, $totalPrice): array {
     $totalTax = 0;
     switch ($field['html_type']) {
       case 'Text':

@@ -90,12 +90,12 @@ WHERE  civicrm_pcp.contact_id = civicrm_contact.id
   public static function getPcpDashboardInfo($contactId) {
     $links = self::pcpLinks();
 
-    $query = "
+    $query = '
 SELECT pcp.*, block.is_tellfriend_enabled FROM civicrm_pcp pcp
 LEFT JOIN civicrm_pcp_block block ON block.id = pcp.pcp_block_id
 WHERE pcp.is_active = 1
   AND pcp.contact_id = %1
-ORDER BY page_type, page_id";
+ORDER BY page_type, page_id';
 
     $params = [1 => [$contactId, 'Integer']];
 
@@ -104,10 +104,7 @@ ORDER BY page_type, page_id";
     $hide = $mask = array_sum(array_keys($links['all']));
     $contactPCPPages = [];
 
-    $event = CRM_Event_PseudoConstant::event(NULL, FALSE, "( is_template IS NULL OR is_template != 1 )");
-    $contribute = CRM_Contribute_PseudoConstant::contributionPage();
-    $pcpStatus = CRM_Contribute_PseudoConstant::pcpStatus();
-    $approved = CRM_Utils_Array::key('Approved', $pcpStatus);
+    $approved = CRM_Core_PseudoConstant::getKey('CRM_PCP_BAO_PCP', 'status_id', 'Approved');
 
     while ($pcpInfoDao->fetch()) {
       $mask = $hide;
@@ -137,14 +134,14 @@ ORDER BY page_type, page_id";
       }
       $action = CRM_Core_Action::formLink($pcpLink, $mask, $replace, ts('more'),
         FALSE, 'pcp.dashboard.active', 'PCP', $pcpInfoDao->id);
-      $component = $pcpInfoDao->page_type;
-      $pageTitle = CRM_Utils_Array::value($pcpInfoDao->page_id, $$component);
+
+      $pageTitle = self::getPcpTitle($pcpInfoDao->page_type, (int) $pcpInfoDao->page_id);
 
       $pcpInfo[] = [
         'pageTitle' => $pageTitle,
         'pcpId' => $pcpInfoDao->id,
         'pcpTitle' => $pcpInfoDao->title,
-        'pcpStatus' => $pcpStatus[$pcpInfoDao->status_id],
+        'pcpStatus' => CRM_Core_PseudoConstant::getLabel('CRM_PCP_BAO_PCP', 'status_id', $pcpInfoDao->status_id),
         'action' => $action,
         'class' => $class,
       ];
@@ -185,8 +182,8 @@ ORDER BY target_entity_type, target_entity_id
       $pcpLink = $links['add'];
       $action = CRM_Core_Action::formLink($pcpLink, $mask, $replace, ts('more'),
         FALSE, 'pcp.dashboard.other', "{$pcpBlockDao->target_entity_type}_PCP", $pcpBlockDao->target_entity_id);
-      $component = $pcpBlockDao->target_entity_type;
-      if ($pageTitle = CRM_Utils_Array::value($pcpBlockDao->target_entity_id, $$component)) {
+      $pageTitle = self::getPcpTitle($pcpBlockDao->target_entity_type, (int) $pcpBlockDao->target_entity_id);
+      if ($pageTitle) {
         $pcpBlock[] = [
           'pageId' => $pcpBlockDao->target_entity_id,
           'pageTitle' => $pageTitle,
@@ -668,7 +665,7 @@ WHERE pcp.id = %1 AND cc.contribution_status_id = %2 AND cc.is_test = 0";
 
     if (!$domainEmailAddress || $domainEmailAddress == 'info@EXAMPLE.ORG') {
       $fixUrl = CRM_Utils_System::url("civicrm/admin/domain", 'action=update&reset=1');
-      CRM_Core_Error::fatal(ts('The site administrator needs to enter a valid \'FROM Email Address\' in <a href="%1">Administer CiviCRM &raquo; Communications &raquo; FROM Email Addresses</a>. The email address used may need to be a valid mail account with your email service provider.', [1 => $fixUrl]));
+      throw new CRM_Core_Exception(ts('The site administrator needs to enter a valid \'FROM Email Address\' in <a href="%1">Administer CiviCRM &raquo; Communications &raquo; FROM Email Addresses</a>. The email address used may need to be a valid mail account with your email service provider.', [1 => $fixUrl]));
     }
 
     $receiptFrom = '"' . $domainEmailName . '" <' . $domainEmailAddress . '>';
@@ -891,7 +888,7 @@ WHERE pcp.id = %1";
       'contribute' => 'civicrm_contribution_page',
       'civicrm_contribution_page' => 'civicrm_contribution_page',
     ];
-    return isset($entity_table_map[$component]) ? $entity_table_map[$component] : FALSE;
+    return $entity_table_map[$component] ?? FALSE;
   }
 
   /**
@@ -916,7 +913,7 @@ INNER JOIN civicrm_uf_group ufgroup
 
     $params = [1 => [$component_id, 'Integer'], 2 => [$entity_table, 'String']];
     if (!$supporterProfileId = CRM_Core_DAO::singleValueQuery($query, $params)) {
-      CRM_Core_Error::fatal(ts('Supporter profile is not set for this Personal Campaign Page or the profile is disabled. Please contact the site administrator if you need assistance.'));
+      throw new CRM_Core_Exception(ts('Supporter profile is not set for this Personal Campaign Page or the profile is disabled. Please contact the site administrator if you need assistance.'));
     }
     else {
       return $supporterProfileId;
@@ -939,11 +936,26 @@ INNER JOIN civicrm_uf_group ufgroup
          WHERE pb.entity_id = %1 AND pb.entity_table = %2";
     $params = [1 => [$component_id, 'Integer'], 2 => [$entity_table, 'String']];
     if (!$ownerNotificationId = CRM_Core_DAO::singleValueQuery($query, $params)) {
-      CRM_Core_Error::fatal(ts('Owner Notification is not set for this Personal Campaign Page. Please contact the site administrator if you need assistance.'));
+      throw new CRM_Core_Exception(ts('Owner Notification is not set for this Personal Campaign Page. Please contact the site administrator if you need assistance.'));
     }
     else {
       return $ownerNotificationId;
     }
+  }
+
+  /**
+   * Get the title of the pcp.
+   *
+   * @param string $component
+   * @param int $id
+   *
+   * @return bool|string|null
+   */
+  protected static function getPcpTitle(string $component, int $id) {
+    if ($component === 'contribute') {
+      return CRM_Core_PseudoConstant::getLabel('CRM_Contribute_BAO_Contribution', 'contribution_page_id', $id);
+    }
+    return CRM_Core_PseudoConstant::getLabel('CRM_Event_BAO_Participant', 'event_id', $id);
   }
 
 }

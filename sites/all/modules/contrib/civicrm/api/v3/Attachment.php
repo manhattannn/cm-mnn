@@ -15,7 +15,7 @@
  * file content.
  * For core fields use "entity_table", for custom fields use "field_name"
  *
- * @code
+ * ```
  * // Create an attachment for a core field
  * $result = civicrm_api3('Attachment', 'create', array(
  *   'entity_table' => 'civicrm_activity',
@@ -26,9 +26,9 @@
  * ));
  * $attachment = $result['values'][$result['id']];
  * echo sprintf("<a href='%s'>View %s</a>", $attachment['url'], $attachment['name']);
- * @endcode
+ * ```
  *
- * @code
+ * ```
  * // Create an attachment for a custom file field
  * $result = civicrm_api3('Attachment', 'create', array(
  *   'field_name' => 'custom_6',
@@ -39,9 +39,9 @@
  * ));
  * $attachment = $result['values'][$result['id']];
  * echo sprintf("<a href='%s'>View %s</a>", $attachment['url'], $attachment['name']);
- * @endcode
+ * ```
  *
- * @code
+ * ```
  * // Move an existing file and save as an attachment
  * $result = civicrm_api3('Attachment', 'create', array(
  *   'entity_table' => 'civicrm_activity',
@@ -54,7 +54,7 @@
  * ));
  * $attachment = $result['values'][$result['id']];
  * echo sprintf("<a href='%s'>View %s</a>", $attachment['url'], $attachment['name']);
- * @endcode
+ * ```
  *
  * Notes:
  *  - File content is not returned by default. One must specify 'return => content'.
@@ -338,7 +338,7 @@ function __civicrm_api3_attachment_find($params, $id, $file, $entityFile, $isTru
  * @throws API_Exception validation errors
  */
 function _civicrm_api3_attachment_parse_params($params) {
-  $id = CRM_Utils_Array::value('id', $params, NULL);
+  $id = $params['id'] ?? NULL;
   if ($id && !is_numeric($id)) {
     throw new API_Exception("Malformed id");
   }
@@ -385,7 +385,7 @@ function _civicrm_api3_attachment_parse_params($params) {
 
   $isTrusted = empty($params['check_permissions']);
 
-  $returns = isset($params['return']) ? $params['return'] : [];
+  $returns = $params['return'] ?? [];
   $returns = is_array($returns) ? $returns : [$returns];
   $returnContent = in_array('content', $returns);
 
