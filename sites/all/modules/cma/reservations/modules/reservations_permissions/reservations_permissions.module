@@ -1,0 +1,489 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen                                                |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
+ */
+
+function reservations_permissions_menu() {
+
+  // Interface for users to set permissions with only Administer Reservations perm
+  $items['admin/reservations/manage/permissions'] = array(
+    'title' => 'Permissions',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('reservations_permissions_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer reservations'),
+    'description' => 'Configure reservation permissions for Reservations.',
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 3,
+  );
+
+  // Configuration what roles show on the Reservations Permissions form.
+  $items['admin/config/reservations/permissions'] = array(
+    'title' => 'Permissions Configuration',
+    'description' => 'Configuration options for the Reservations Permissions.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('reservations_permissions_admin_settings'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Builds the admininstration settings form.
+ */
+function reservations_permissions_admin_settings($form, &$form_state) {
+  $roles = user_roles();
+
+  $form['instructions']['#markup'] = t('Select the roles to include in the Reservations Permissions interface.  <b>WARNING:</b> Users with the Administer Reservations permission can alter the <i>add own</i> and <i>delete own</i> permissions for reservable content types without the normal Manage Permissions permission.');
+
+  foreach ($roles as $rid => $name) {
+    // The form checkboxes.
+    $form['reservations_permissions_' . $rid] = array(
+      '#type' => 'checkbox',
+      '#title' => $name,
+      '#default_value' => variable_get('reservations_permissions_' . $rid, 0),
+      '#description' => t(''),
+    );
+    // The original value for the submit handler to check if the value has changed.
+    $form['original_val_' . $rid] = array(
+      '#type' => 'value',
+      '#value' => variable_get('reservations_permissions_' . $rid, 0),
+    );
+    $form['role_name_' . $rid] = array(
+      '#type' => 'value',
+      '#value' => $name,
+    );
+    $form['save'] = array(
+      '#type' => 'submit',
+      '#weight' => 99,
+      '#value' => t('Save Settings'),
+    );
+
+  }
+
+  return $form;
+}
+
+function reservations_permissions_admin_settings_submit($form, &$form_state) {
+
+  $values = $form_state['values'];
+  $compare = array();
+  foreach ($values as $key => $value) {
+    if (strpos($key, 'reservations_permissions_') === 0) {
+      $permissions_id = substr($key,25);
+      $compare[$permissions_id]['variable_name'] = $key;
+      $compare[$permissions_id]['new'] = $value;
+    }
+    elseif (strpos($key, 'original_val_') === 0) {
+      $permissions_id = substr($key,13);
+      $compare[$permissions_id]['old'] = $value;
+    }
+    elseif (strpos($key, 'role_name_') === 0) {
+      $permissions_id = substr($key,10);
+      $compare[$permissions_id]['role_name'] = $value;
+    }
+  }
+  foreach ($compare as $key => $value) {
+    if ($value['new'] != $value['old']) {
+      $old = $value['old'];
+      $new = $value['new'];
+      $variable_name = $value['variable_name'];
+      $role_name = $value['role_name'];
+      // If role was removed.
+      if (($old == 1) && ($new == 0)) {
+        // Revoke all its reservable content types permissions.
+        reservations_permissions_revoke_role($key);
+        drupal_set_message("Revoked reservable content types permissions for role: $role_name (ID: $key).");
+      }
+      else {
+        drupal_set_message("Turned on role: $role_name (ID: $key).");
+      }
+      // Only save value if changed and after successfully removing the
+      // permissions - this is safer and avoids possible race conditions.
+      variable_set($variable_name, $new);
+    }
+  }
+
+
+}
+
+
+function reservations_permissions_revoke_role($role_id) {
+  // Initialise the remove perms array.
+  $revoke_perms = array();
+  // Get a list of reservable content types.
+  $reservations_types = reservations_content_types();
+  // Cycle the reservable types.
+  foreach ($reservations_types as $key => $value) {
+
+    // Add all the permissions the config form controls.
+    $revoke_perms[] = "edit own $key content";
+    $revoke_perms[] = "delete own $key content";
+    $revoke_perms[] = "edit any $key content";
+    $revoke_perms[] = "delete any $key content";
+  }
+
+  user_role_revoke_permissions($role_id, $revoke_perms);
+}
+
+
+/**
+ * Implements hook_theme().
+ */
+function reservations_permissions_theme() {
+  return array(
+    'reservations_permissions_form' => array(
+      'render element' => 'form',
+    ),
+  );
+}
+
+/**
+ * Theming for reservations_permissions form
+ */
+function theme_reservations_permissions_form($variables) {
+
+  $roles = implode(", ", user_roles(FALSE, 'create reservations_reservation content'));
+
+  if (!$roles) {
+
+  }
+
+  // These links do not work with overlay because of a core bug http://drupal.org/node/1129578
+  // admin/people/permissions#module-reservations
+
+
+  $instructions = 'The Reservations API makes nodes in existing content types reservable.  To do that, roles are granted the <i>edit own</i> and <i>delete own</i> permissions for each type they can reserve.  The Reservations Permission module allows users who have permission to <i>manage reservations</i> to adjust those permissions for reservable content types without needing the full <i>administer permissions</i>.  Additional permissions are required to create a Reservation.  Users need BOTH the permission to create a Reservation AND to be able to reserve at least one Content Type.';
+
+  $instructions .= '<p><b>' . t("Roles that can create Reservations: ") . '</b>' .  $roles . '</p>';
+
+  if (user_access('administer permissions')) {
+    $instructions .= '<ul class="action-links"><li>';
+    $instructions .= l('Edit Create Reservation Permission', 'admin/people/permissions', array(
+  'fragment' => 'module-node')) . ' <div class="description"> found under Node in the permission grid</div>';
+    $instructions .= l('Edit Additional Reservation Related Permission', 'admin/people/permissions', array(
+  'fragment' => 'module-reservations')) . ' <div class="description"> found under Reservations in the permission grid</div>';
+  $instructions .= '</li></ul>';
+
+  } else {
+    $instructions .= 'Only users with access to <i>administer permissions</i> can enable additional role to make Reservations';
+  }
+
+  $form = $variables['form'];
+  $roles = user_roles();
+  foreach (element_children($form['permission']) as $key) {
+    // Don't take form control structures
+    if (is_array($form['permission'][$key])) {
+      // Module name
+      $row = array();
+      if (is_numeric($key)) {
+        $row[] = array(
+          'data' => drupal_render($form['permission'][$key]),
+          'class' => array('module'),
+          'id' => 'module-' . $form['permission'][$key]['#id'],
+          'colspan' => count($form['role_names']['#value']) + 1,
+        );
+      }
+      else {
+        $row[] = array(
+          'data' => drupal_render($form['permission'][$key]),
+          'class' => array('permission'),
+        );
+        foreach (element_children($form['checkboxes']) as $rid) {
+          if (is_array($form['checkboxes'][$rid])) {
+            $form['checkboxes'][$rid][$key]['#title'] = $roles[$rid] . ': ' . $form['permission'][$key]['#markup'];
+            $form['checkboxes'][$rid][$key]['#title_display'] = 'invisible';
+            $row[] = array(
+              'data' => drupal_render($form['checkboxes'][$rid][$key]),
+              'class' => array('checkbox'),
+            );
+          }
+        }
+      }
+      $rows[] = $row;
+    }
+  }
+  $header[] = (t('Reservable Content Type'));
+  foreach (element_children($form['role_names']) as $rid) {
+    if (is_array($form['role_names'][$rid])) {
+      $header[] = array(
+        'data' => drupal_render($form['role_names'][$rid]),
+        'class' => array('checkbox'),
+      );
+    }
+  }
+  $output = $instructions;
+  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
+  $output .= drupal_render_children($form);
+  return $output;
+}
+
+/**
+ * Form that allows users with just manage reservations to adjust permissions for
+ * how can edit own/delete own a content type
+ *
+ *  @param $status
+ *   An array of roles each holding an array of items that the role has both "delete own" and "edit own" permissions.
+ *
+ * reservations_permissions_{$rid} This is a drupal variable stored for each of the roles. If true then role should
+ * be displayed in the permissions table. The variables are set in by the "Permissions Configuration" page.
+ */
+function reservations_permissions_form($form, &$form_state) {
+  // Is the logged-in user an administrator.
+  global $user;
+  $admin_role = in_array('administrator', $user->roles);
+
+
+  //admin/reservations/manage/permissions/inventory/$tid
+  $inventory = (arg(4) == 'inventory') ? arg(5) : FALSE;
+
+  $role_names = user_roles();
+
+  // Retrieve role names for columns.
+  $role_names = user_roles();
+  // Fetch permissions for all roles or the one selected role.
+  $role_permissions = user_role_permissions($role_names);
+
+  $reservable_types = reservations_content_types();
+
+  if (empty($reservable_types)) {
+    drupal_set_message(t("You need to add some reservable content types to make this form useful."));
+    return;
+  }
+  $options = array();
+//        // @todo - not used remove.
+//  $admin = array();
+
+
+  // Cycle the reservable types.
+  foreach ($reservable_types as $reservable_type) {
+
+
+    $include = FALSE;  // Default to skipping the reservable type.
+
+    // Work out if the reservable type should be included (not skipped).
+    if ($inventory) {
+      if (isset($reservable_type['inventory_tids'])) {
+        foreach ($reservable_type['inventory_tids'] as $tid) {
+
+          if ($tid == $inventory) {
+            $include = TRUE;
+          }
+        }
+      }
+    } else {
+      // If there is no inventory, include everything.
+      $include = TRUE;
+    }
+
+    // If reservable type should be included.
+    if ($include) {
+
+      // Build an array of all the reservable types.
+      $perm = 'reserve ' . $reservable_type['type'];
+      $options[$perm] = '';
+
+      // Add reservable type to the form. This will be used for the first <td> of each row.
+      $form['permission'][$perm] = array('#markup' => t($reservable_type['type_name']));
+
+      // Cycle the roles.
+      foreach ($role_names as $rid => $name) {
+
+        // Does role have both "delete own" and "edit own" permissions for the reservable type.
+        if (
+          isset($role_permissions[$rid]['delete own ' . $reservable_type['type'] . ' content']) &&
+          isset($role_permissions[$rid]['edit own ' . $reservable_type['type'] . ' content'])
+        ) {
+          $status[$rid][] = $perm;
+        }
+
+//        // @todo - not used remove.
+//        // Work out if andim role (has delete/edit for all reservable types)
+//        if (
+//          isset($role_permissions[$rid]['delete any ' . $reservable_type['type'] . ' content']) &&
+//          isset($role_permissions[$rid]['edit any ' . $reservable_type['type']. ' content'])
+//        ) {
+//          if (!strstr($admin[$rid], 'false')) {
+//            $admin[$rid] = 'true';
+//          }
+//        }
+//        else {
+//          $admin[$rid] = 'false';
+//        }
+      }
+
+
+
+    }
+  }
+
+
+  // Build checkboxes for the roles.
+  foreach ($role_names as $rid => $name) {
+
+    // Should role be displayed in the permissions table?
+    if(variable_get('reservations_permissions_' . $rid, 0)) {
+
+    // Build the checkboxes data for the role:
+      // #option - An array of all the reservable types
+      // #default_value - An array of the reservable types the role has both "delete own" and "edit own" permissions.
+    $form['checkboxes'][$rid] = array(
+      '#type' => 'checkboxes',
+      '#options' => $options,
+      '#default_value' => isset($status[$rid]) ? $status[$rid] : array(),
+    );
+
+    // Build the roles.
+    $form['role_names']['#value'][] = $name;
+    $form['role_names'][$rid] = array(
+      '#markup' => $name,
+      '#tree' => TRUE,
+    );
+    }
+  }
+
+  // Only an admin can use the update all function.
+  if ($admin_role) {
+    $form['buttons']['update_all'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Update All'),
+      '#default_value' => FALSE,
+      '#description' => t('Force the update of all permissions instead of only the permissions edited. This will force the stored permissions to exactly reflect the settings on this page and will remove any changes made outside it.'),
+    );
+  }
+
+  $form['buttons']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save Permissions'),
+  );
+  $form['#submit'][] = 'reservations_permissions_settings_form_submit';
+
+  return $form;
+}
+
+
+/**
+ * Process permission changes
+ */
+function reservations_permissions_settings_form_submit($form, &$form_state) {
+
+  $result = db_query('SELECT * FROM {role}');
+
+  $reservations_types = reservations_content_types();
+//  // @todo - $reservations_perms code does not do anything, needs removing.
+//  $reservations_perms = reservations_permission();
+  $update_all = $form_state['values']['update_all'];
+
+  // Cycle the roles.
+  foreach ($result as $role) {
+    // If the role was added to the form.
+    if (isset($form_state['values'][$role->rid])) {
+      $permissions = user_role_permissions(array($role->rid => $role->name));
+      $admin_role = array_key_exists('administer reservations inventory', $permissions[$role->rid]);
+      $manager_role  = array_key_exists('manage reservations inventory', $permissions[$role->rid]);
+      // Init variables.
+      $add_perms = array();
+      $revoke_perms = array();
+      // Cycle the reservable types of the role.
+      foreach ($form_state['values'][$role->rid] as $key => $value) {
+        // Get the reservable $type name out of the key.
+        list($cruft, $type) = explode(' ', $key);
+        $perms = array();
+        // if it is in the list of reservable types.
+        if (array_key_exists($type, $reservations_types)) {
+          // Build the permission list.
+          // @todo - test this is used for making a reservation.
+          $perms[] = "edit own $type content";
+          $perms[] = "delete own $type content";
+          // Manager.
+          if ($manager_role) {
+            $perms[] = "edit any $type content";
+          }
+          // Admin.
+          if ($admin_role) {
+            $perms[] = "edit any $type content";
+            $perms[] = "delete any $type content";
+          }
+          // If the value is set (user has permission for the type).
+          if ($value) {
+            if ($update_all) {
+              // Add without checking.
+              $add_perms = array_merge($perms, $add_perms);
+            }
+            else {
+              // Before adding, check to see if the role has the permission.
+              $perm_exists_to_add = db_query('SELECT COUNT(rid) FROM {role_permission} WHERE rid = :rid and permission = :permission', array(':rid' => $role->rid, ':permission' => 'edit own ' . $type . ' content'))->fetchField();
+              if (!$perm_exists_to_add) {
+                $add_perms = array_merge($perms, $add_perms);
+              }
+            }
+          }
+          // If the value is 0/not set  (user does not have permission for the type).
+          else {
+            if ($update_all) {
+              // Add without checking.
+              $revoke_perms = array_merge($perms, $revoke_perms);
+              // Also add the $admin_role permission in case it was removed from the role.
+              if (!in_array("delete any $type content", $revoke_perms)) {
+                $revoke_perms[] = "delete any $type content";
+              }
+            }
+            else {
+              // before revoking, check to see if the role has the permission
+              // trying to revoke a permission the role doesn't have causes an error
+              $perm_exists_to_revoke = db_query('SELECT COUNT(rid) FROM {role_permission} WHERE rid = :rid and permission = :permission', array(':rid' => $role->rid, ':permission' => 'edit own ' . $type . ' content'))->fetchField();
+              if ($perm_exists_to_revoke) {
+                $revoke_perms = array_merge($perms, $revoke_perms);
+                // Also add the $admin_role permission in case it was removed from the role.
+                if (!in_array("delete any $type content", $revoke_perms)) {
+                  $revoke_perms[] = "delete any $type content";
+                }
+              }
+            }
+          }
+        }
+//        // @todo - $reservations_perms code does not do anything, needs removing.
+//        // if it is not in the list of reservable types and is in the perms.
+//        elseif (array_key_exists($key, $reservations_perms)) {
+//          if ($value) {
+//            $add_perms[] = $key;
+//          }
+//          else {
+//            $revoke_perms[] = $key;
+//          }
+//        }
+      }
+
+      if ($add_perms) {
+        user_role_grant_permissions($role->rid, $add_perms);
+        $message = 'Permissions added';
+      }
+
+      if ($revoke_perms) {
+        user_role_revoke_permissions($role->rid, $revoke_perms);
+        if (isset($message)) {
+          $message .= ' and revoked';
+        }  else {
+          $message = 'Permissions revoked';
+        }
+      }
+    }
+  }
+
+  if (!isset($message)) {
+    $message = t('No permission changes made');
+  }
+
+  drupal_set_message($message);
+}
+

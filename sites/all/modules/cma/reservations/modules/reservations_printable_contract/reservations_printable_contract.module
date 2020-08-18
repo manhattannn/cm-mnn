@@ -1,0 +1,453 @@
+<?php
+
+/**
+ * @file
+ * reservations_printable_contract functions
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen                                                |
+ |                                                                           |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function reservations_printable_contract_menu() {
+
+  $items['node/%node/contract'] = array(
+    'title' => 'Contract',
+    'description' => 'Takes a node object and returns a printable contract',
+    'page arguments' => array(1),
+    'page callback' => 'reservations_printable_contract',
+    'access callback' => 'reservations_printable_contract_content_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  // Standard Administration settings.
+  $items['admin/config/reservations/contract'] = array(
+    'title' => 'Printable Contract',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('reservations_printable_contract_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer reservations'),
+    'description' => 'Configure settings for Reservations Printable Contract.',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function reservations_printable_contract_permission() {
+  return array(
+   'view reservations contract' => array(
+      'title' => '<em class="placeholder">Reservations</em>: View Contract',
+      'description' => t('Allows users to access the Printable Contract tab added to Reservation nodes.'))
+  );
+}
+
+/**
+ * controls which users see the Printable Contract tab and the contract
+ */
+function reservations_printable_contract_content_access($node) {
+  return (user_access('view reservations contract') && $node->type == 'reservations_reservation');
+}
+
+/**
+ * Implements hook_theme().
+ */
+function reservations_printable_contract_theme() {
+
+  return array(
+    'reservations_printable_contract' => array(
+      'template' => 'reservations-printable-contract',
+      'variables' => array('node' => NULL),
+    ),
+  );
+}
+
+/**
+ * Helper function to get all the terms for  a department vocabulary
+ */
+function reservations_printable_contract_get_department_terms() {
+
+  $departments = array();
+  $department_vocabulary = taxonomy_vocabulary_machine_name_load('department');
+  if ($department_vocabulary) {
+    $tree = taxonomy_get_tree($department_vocabulary->vid);
+    foreach($tree as $term) {
+      $departments[$term->tid] = $term->name;
+    }
+    asort($departments);
+  }
+
+  return $departments;
+}
+
+/**
+ * Helper function that determines if an email should be sent based on
+ * reservation status and settings. If the department field exists, the
+ * settings will be department based.
+ */
+function reservations_printable_contract_should_send_email($reservation){
+  $status = $reservation->reservations_reservation_status;
+  if (isset($reservation->original)) {
+    $old_status = $reservation->original->reservations_reservation_status;
+  }
+  else {
+    $old_status = $status;
+  }
+
+  $should_email = FALSE;
+
+  //WE ONLY SEND EMAIL IF THE STATUS IS CHANGING TO CHECKED OUT
+  if ($status == RESERVATIONS_STATUS_CHECKED_OUT &&
+      $old_status != RESERVATIONS_STATUS_CHECKED_OUT) {
+
+    $departments = reservations_printable_contract_get_department_terms();
+    if ($departments) {
+      $field_name = 'field_reservations_department';
+      $tid =
+	reservations_printable_contract_get_single_field_value($reservation,
+							       $field_name,
+							       'tid');
+      if ($tid) {
+	$name = 'reservations_contract_send_upon_checkout_for_' . $tid;
+	$should_email = variable_get($name, NULL);
+      }
+    }
+    else {
+      $name = 'reservations_contract_send_upon_checkout';
+      $should_email = variable_get($name, NULL);
+    }
+  }
+
+  return $should_email;
+}
+
+
+/**
+ * Builds the admininstration settings form.
+ */
+function reservations_printable_contract_admin_settings($form, &$form_state) {
+
+  $form['reservations_contract_replace_cost_columns'] =
+  array(
+    '#type' => 'checkbox',
+    '#title' => '<strong>' . t('Replace Cost Columns with Accessories Column') . '</strong>',
+    '#default_value' =>
+      variable_get('reservations_contract_replace_cost_columns', 0),
+    '#description' =>
+    t('Checking this will cause the Commercial Cost and Member Cost columns to be replaced by the user-defined column on the contract. The text that is input in the field_reservable_contract_text field on the reservable item, will appear on the contract.'),
+  );
+  $form['reservations_contract_replacement_column_header'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Enter the name of the user-defined column.'),
+    '#default_value' => variable_get('reservations_contract_replacement_column_header', 'Accessories'),
+    '#description' => t('A column header with this name will appear on the contract in place of the Cost columns. The default value is Accessories.'),
+    '#states' => array(
+      // Only show this field when the 'reservations_contract_replace_cost_columns' checkbox is enabled.
+      'visible' => array(
+        ':input[name="reservations_contract_replace_cost_columns"]' => array('checked' => TRUE),
+      ),
+      'enabled' => array(
+        ':input[name="reservations_contract_replace_cost_columns"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['reservations_contract_replacement_field'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Enter the user-defined field name that contains the data that will replace the cost data.'),
+    '#default_value' => variable_get('reservations_contract_replacement_field', 'field_reservable_contract_text'),
+    '#description' => t(' This field should be added to the reservable content types so that it can be filled in for each reservable content type item. The default value is field_reservable_contract_text.'),
+    '#states' => array(
+      // Only show this field when the 'reservations_contract_replace_cost_columns' checkbox is enabled.
+      'visible' => array(
+        ':input[name="reservations_contract_replace_cost_columns"]' => array('checked' => TRUE),
+      ),
+      'enabled' => array(
+        ':input[name="reservations_contract_replace_cost_columns"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  $departments = reservations_printable_contract_get_department_terms();
+
+  if ($departments) {
+    $form['reservations_department_field_set'] =
+      array('#type' => 'fieldset',
+	    '#title' => t('Email Configuration for Departments'),
+	    );
+    foreach($departments as $tid=>$tname) {
+      $name = 'reservations_contract_send_upon_checkout_for_' . $tid;
+      $form['reservations_department_field_set'][$name] =
+	array(
+	      '#type' => 'checkbox',
+	      '#title' => '<strong>'.$tname.' </strong> '.
+	      t('Email Reserver Contract upon Checkout for '.
+		'!department department?',
+		array('!department'=>$tname)),
+	      '#default_value' => variable_get($name, ''),
+	      '#description' =>
+	      t('Checking this Will cause an email to get sent out when ' .
+		'reservations in this department gets saved with a new '.
+		'status of "Checked Out".'),
+	      );
+    }
+  }
+  else {
+   $name = 'reservations_contract_send_upon_checkout';
+   $form[$name] =
+     array(
+	   '#type' => 'checkbox',
+	   '#title' => t('Email Reserver Contract upon Checkout'),
+	   '#default_value' => variable_get($name, ''),
+	   '#description' =>
+	   t('Checking this Will cause an email to get sent out when ' .
+	     'reservations gets saved with a new status of "Checked Out".'),
+	   );
+
+  }
+
+  $form['reservations_contract_header'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Contract header'),
+    '#rows' => 10,
+    // TODO: this doesn't seem to work...
+    '#cols' => 5,
+    '#default_value' => variable_get('reservations_contract_header', ''),
+    '#description' => t('Header portion of printable contract.  Allows HTML.'),
+  );
+
+  $form['reservations_contract_boilerplate'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Contract boilerplate'),
+    '#rows' => 10,
+    // TODO: this doesn't seem to work...
+    '#cols' => 5,
+    '#default_value' => variable_get('reservations_contract_boilerplate', ''),
+    '#description' => t('Legalese that makes the contract legally binding.'),
+  );
+
+  $form['reservations_contract_footer'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Contract footer'),
+    '#rows' => 10,
+    // TODO: this doesn't seem to work...
+    '#cols' => 5,
+    '#default_value' => variable_get('reservations_contract_footer', ''),
+    '#description' => t('Footer portion of printable contract. Normally includes signature lines. HTML allowed.'),
+  );
+
+  $form['reservations_contract_mail_header'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Contract Email Header'),
+    '#rows' => 10,
+    '#default_value' => variable_get('reservations_contract_mail_header', ''),
+    '#description' =>
+    t('The header for contract emails sent out during checkout. HTML allowed.')
+  );
+
+  $form['reservations_contract_mail_footer'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Contract Email Footer'),
+    '#rows' => 10,
+    '#default_value' => variable_get('reservations_contract_mail_footer', ''),
+    '#description' =>
+    t('The footer for contract emails sent out during checkout. HTML allowed.')
+  );
+
+  $form['reservations_contract_mail_from_address'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Contract Email From Address'),
+    '#maxlength' => 50,
+    '#default_value' =>
+    variable_get('reservations_contract_mail_from_address', ''),
+    '#description' => t('The return address for contract emails sent out '.
+			'during checkout. HTML allowed.')
+  );
+
+  $form['reservations_contract_mail_subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Contract Email Subject'),
+    '#maxlength' => 50,
+    '#default_value' =>
+    variable_get('reservations_contract_mail_subject', ''),
+    '#description' => t('The subject for contract emails sent out '.
+			'during checkout. HTML allowed.')
+  );
+
+  if (module_exists('token')) {
+    $form['token_help'] = array(
+      '#title' => t('Replacement patterns'),
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+
+    // TODO Please change this theme call to use an associative array for the $variables parameter.
+    $form['token_help']['help'] = array(
+      '#value' => theme('token_help', 'node'),
+    );
+  }
+
+  return system_settings_form($form);
+}
+
+/**
+ * Returns contract with only the settings in reservations-printable-contract.tpl
+ */
+function reservations_printable_contract($node) {
+  print theme('reservations_printable_contract', array('node' => $node));
+}
+
+
+/**
+ * Variables sent to reservations-printable-contract.tpl
+ */
+function reservations_preprocess_reservations_printable_contract(&$variables) {
+  //dpm($variables, 'variables');
+
+  $node = $variables['node'];
+  setlocale(LC_MONETARY, 'en_US');
+
+  $user     = user_load($node->uid);
+  $username = $user->name;
+  $email    = $user->mail;
+
+  if (module_exists('civicrm')) {
+
+    civicrm_initialize();
+
+    //find the contact record
+    try
+    {
+      $userID = civicrm_api3( 'uf_match','getsingle', array(
+   	    'uf_id' => $user->uid,
+      ));
+
+	  $contacts = civicrm_api3('contact', 'getsingle', array(
+        'contact_id'  =>  $userID['contact_id'],
+      ));
+
+      // Set username and phone based on Civi information
+      $username = $contacts['display_name'];
+      $phone = $contacts['phone'];
+    }
+
+    catch (CiviCRM_API3_Exception $e)
+    {
+      $error = $e->getMessage();
+      drupal_set_message($error, 'error');
+    }
+
+  }
+
+  $items = $node->reservations_reservation_items;
+
+  $langcode = $node->language;
+  // Convert to site timezone.
+  $start_date       = reservations_create_local_date_object($node->field_reservations_date[$langcode][0]['value']);
+  $end_date         = reservations_create_local_date_object($node->field_reservations_date[$langcode][0]['value2']);
+
+  $hours = round((intval(date_format($end_date, "U")) - intval(date_format($start_date, "U"))) / 3600, 2);
+
+  $variables['start_date'] = format_date($start_date->format('U'));
+  $variables['end_date'] = format_date($end_date->format('U'));
+  $variables['hours'] = $hours;
+  $variables['username'] = $username;
+  $variables['email'] = $email;
+  $variables['phone'] = $phone;
+  $variables['items'] = $items;
+  $variables['should_send_email'] =
+    reservations_printable_contract_should_send_email($node);
+
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function reservations_printable_contract_node_update($node) {
+  reservations_printable_contract_node_post_save($node);
+}
+
+/**
+ * Implements hook_node_insert().
+ */
+function reservations_printable_contract_node_insert($node) {
+  reservations_printable_contract_node_post_save($node);
+}
+
+//function called by both insert and update
+function reservations_printable_contract_node_post_save(&$node) {
+  if ($node->type != 'reservations_reservation') {
+    return;
+  }
+
+  //should we send an email when checking out?
+  $send_email = FALSE;
+
+  $status = $node->reservations_reservation_status;
+  if (isset($node->original)) {
+    $old_status = $node->original->reservations_reservation_status;
+  }
+  else {
+    $old_status = $status;
+  }
+  $should_email = reservations_printable_contract_should_send_email($node);
+
+  if ($should_email) {
+    $html =  theme('reservations_printable_contract', array('node' => $node));
+    $sender = variable_get('reservations_contract_mail_from_address');
+    $reserver = user_load($node->uid);
+    if ($reserver) {
+      $to = $reserver->mail;
+    }
+    $subject = variable_get('reservations_contract_mail_subject');
+
+    if ($to) {
+      // Always set content-type when sending HTML email
+      $headers = "MIME-Version: 1.0" . "\r\n";
+      $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+
+      // More headers
+      $headers .= 'From: <' . $sender . '>' . "\r\n";
+
+      mail($to, $subject, $html, $headers);
+      $msg = t("An email with your contract was just sent to !email",
+	       array('!email'=>$to));
+
+      $msg .= "<br/><br/>".
+	t("If you do not receive the email please check your Spam folder.");
+
+      drupal_set_message($msg, 'warning');
+    }
+  }
+
+}
+
+/**
+ * Helper function to get a single value off of a entity
+ */
+function reservations_printable_contract_get_single_field_value($entity,
+								$field_name,
+								$index =
+								'value') {
+  if (isset($entity->{$field_name})) {
+    $field = $entity->{$field_name};
+    if (isset($field[LANGUAGE_NONE]) &&
+	isset($field[LANGUAGE_NONE][0]) &&
+	isset($field[LANGUAGE_NONE][0][$index])) {
+      return $field[LANGUAGE_NONE][0][$index];
+    }
+  }
+  return NULL;
+}
+

@@ -1,0 +1,26 @@
+; CMA Reservations - reservations system
+; +---------------------------------------------------------------------------+
+; | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+; | Additionally, Kevin Reynen                                  |
+; |                                                                           |
+; | This work is published under the GNU AGPLv3 license without any           |
+; | warranty. For full license and copyright information, see                 |
+; | https://www.gnu.org/licenses/agpl-3.0.html                                |
+; +---------------------------------------------------------------------------+
+name = Reservations FullCalendar
+package = CMA Reservations
+description = "Adds FullCalendar Views of Reservations"
+project = "reservations"
+
+core = 7.x
+version = "7.x-3.0"
+
+dependencies[] = reservations
+dependencies[] = reservations_ui
+dependencies[] = fullcalendar
+dependencies[] = views
+dependencies[] = date_views
+
+files[] = reservations_fullcalendar.module
+files[] = reservations_fullcalendar.views_default.inc
+

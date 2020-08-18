@@ -1,0 +1,73 @@
+<?php
+/*
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       ||
+ |                                                                           |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
+ */
+/**
+ * Implements hook_install().
+ */
+function inventory_item_operator_history_install() {
+  //DOES NOTHING FOR NOW, ASSUMES VIEW FIELDS WILL BE ADDED THROUGH IMPORTS
+}
+/**
+ * Implementation of hook_schema().
+ */
+function inventory_item_operator_history_schema() {
+  $schema['inventory_item_operator_history'] =
+    array(
+	  'description' => t('Stores operator actions on inventory items'),
+	  'fields' =>
+	  array(
+		'id' =>
+		array(
+		      'description' => 'Primary Key.',
+		      'type' => 'serial',
+		      'unsigned' => TRUE,
+		      'not null' => TRUE),
+		'uid' =>
+		array(
+		      'description' =>
+		      'Operator UID.',
+		      'type' => 'int',
+		      'not null' => TRUE),
+		'inventory_item_id'    =>
+		array(
+		      'description' => 'The Inventory Item ID.',
+		      'type' => 'int',
+		      ),
+		'beginning_status' =>
+		array(
+		      'description' =>  'Beginning Status',
+		      'type' => 'int',
+		      'not null' => TRUE),
+		'end_status' =>
+		array(
+		      'description' =>  'Ending Status',
+		      'type' => 'int',
+		      'not null' => TRUE),
+		'timestamp'    =>
+		array(
+		      'description'=>'The time the operator took the action.',
+		      'type' => 'int',
+		      'not null' => TRUE),
+		'notes'    =>
+		array(
+		      'description'=>'Inventory Item Operator History Notes',
+		      'type' => 'blob',
+		      'not null' => FALSE),
+		),
+
+	  'indexes' => array(
+			     'inventory_item_id' =>
+			     array('inventory_item_id'),
+			     'uid' => array('uid')),
+	  'primary key' => array('id'),
+	  );
+
+  return $schema;
+}

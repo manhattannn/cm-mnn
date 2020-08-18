@@ -1,0 +1,115 @@
+<?php
+
+/**
+ * @file
+ * Holds hooks for the Development Environment module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function development_environment_menu() {
+  $menu['admin/reports/email_log'] = array(
+    'title' => 'Suppressed Email Log',
+    'page callback' => 'development_environment_supressed_email_report_page',
+    'access arguments' => array('access development environment email logs'),
+    'file' => 'includes/development_environment.pages.inc',
+  );
+
+  $menu['admin/reports/email_log/%development_environment_log'] = array(
+    'title' => 'Suppressed Email',
+    'page callback' => 'development_environment_supressed_email_log_page',
+    'page arguments' => array(3),
+    'access arguments' => array('access development environment email logs'),
+    'file' => 'includes/development_environment.pages.inc',
+  );
+
+  $menu['admin/config/development/development_environment'] = array(
+    'title' => 'Suppressed Email Settings',
+    'description' => 'Administer settings for the Development Environment module',
+    'page callback' => 'development_environment_admin_page',
+    'access arguments' => array('administer development environment settings'),
+    'file' => 'includes/development_environment.pages.inc',
+  );
+
+  return $menu;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function development_environment_permission() {
+  return array(
+    'access development environment email logs' => array(
+      'title' => t('Access development environment mail logs'),
+      'description' => t('Allows administrators to view logs of emails that the development environment module has prevented from being sent'),
+    ),
+    'administer development environment settings' => array(
+      'title' => t('Administer development environment settings'),
+      'description' => t('Allows administrators to administer settings for the Development Environment module'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_init().
+ */
+function development_environment_init() {
+  if (isset($_SESSION['messages'], $_SESSION['messages']['status'])) {
+    for ($i = 0; $i < count($_SESSION['messages']['status']); $i++) {
+      if (strpos($_SESSION['messages']['status'][$i], 'A welcome message with further instructions has been e-mailed to the new user ') === 0) {
+        unset($_SESSION['messages']['status'][$i]);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_mail_alter().
+ */
+function development_environment_mail_alter(&$message) {
+  $log_emails = variable_get('development_environment.log_emails', FALSE);
+
+  if ($log_emails) {
+    // Stop emails from being sent.
+    $message['send'] = FALSE;
+
+    $lid = db_insert('development_environment_log')
+      ->fields([
+        'email_data' => serialize($message),
+        'timestamp' => REQUEST_TIME,
+        'recipient_email' => $message['to'],
+        'subject' => $message['subject'],
+      ])
+      ->execute();
+
+    if (user_access('access development environment email logs')) {
+      drupal_set_message(
+        t(
+          'The email to @email was not sent, as this is a development environment. The mail details can be viewed in the !log.',
+          array(
+            '@email' => $message['to'],
+            '!log' => l(t('log'), 'admin/reports/email_log/' . $lid),
+          )
+        )
+      );
+    }
+    else {
+      drupal_set_message(t('The email to @email was not sent, as this is a development environment', ['@email' => $message['to']]));
+    }
+  }
+}
+
+/**
+ * Loads the log data for a single development environment suppresed email.
+ *
+ * @param int $lid
+ *   The Log ID for the suppressed email data to be loaded.
+ *
+ * @return StdClass|bool
+ *   An object containing the suppressed email log data, or FALSE if no data
+ *   exists.
+ */
+function development_environment_log_load($lid) {
+  return db_query('SELECT timestamp, email_data FROM {development_environment_log} WHERE lid = :lid', [':lid' => $lid])->fetch();
+}

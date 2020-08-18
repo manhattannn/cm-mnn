@@ -1,0 +1,199 @@
+<?php
+/**
+ * @file
+ * Code for the Reservations Project Suggestor. This module will use AJAX to
+   populate a div of the user's projects upon selection fo the Admin project
+   field
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
+ */
+
+
+/**
+ * Implements hook_init().
+ */
+function reservations_project_suggestor_init() {
+  drupal_add_css(drupal_get_path('module', 'reservations_project_suggestor') .
+                 '/reservations_project_suggestor.css');
+}
+
+function reservations_project_suggestor_form_alter(&$form, &$form_state,
+						   $form_id) {
+  if ($form_id == 'reservations_reservation_node_form') {
+    $field_name = variable_get('reservations_project_suggestor_field_name');
+
+    //$("input[id^=edit-field-reservation-project-und").
+    //  $("input[id^=edit-og-group-ref-und-0-admin-0-target-id]").
+    $postfix =
+      variable_get("reservations_project_suggestor_field_type") == 'og' ?
+      "-und-0-admin-0-target-id" : "-und";
+
+    $field_selector = "edit-".str_replace('_', '-', $field_name).
+      $postfix;
+
+    $form['reservations_project_suggestor_field_selector'] =
+      array(
+	    '#type' => 'hidden',
+	    '#attributes' =>
+	    array('id' =>
+		  'reservations_project_suggestor_field_selector'),
+	    '#value' => $field_selector,
+	    );
+
+    if (user_access('manage reservations')) {
+      $html = '<input type="button" id="rps_button" '.
+	'value="Suggest Projects">'.
+      '<div id="project_suggestor_div"></div>';
+
+
+      $form[$field_name]['#prefix'] = $html;
+    }
+
+  }
+}
+
+
+/**
+ * Implements hook_menu()
+ */
+function reservations_project_suggestor_menu() {
+  $items['reservations_project_suggestor_detail/%'] = array(
+    'page callback' => 'reservations_project_suggestor_ajax_callback',
+    'page arguments' => array(1),
+    'access arguments' => array('create reservations_reservation content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/config/reservations/project_suggestor'] =
+    array(
+	  'title' => 'Reservations Project Suggestor',
+	  'description' =>
+	  'The config form for the Reservations Project Suggestor module',
+	 'page callback' => 'drupal_get_form',
+	 'page arguments' =>
+	  array('reservations_project_suggestor_settings_form'),
+	 'access arguments' => array('manage reservations'),
+	 'type' => MENU_NORMAL_ITEM,
+	 );
+
+  return $items;
+}
+
+function reservations_project_suggestor_settings_form() {
+  $form = array();
+  $form['reservations_project_suggestor_field_name'] =
+      array(
+	    '#type' => 'textfield',
+	    '#title' => "Field Name",
+	    '#description' =>
+	    "Add the field name you would like the suggestor to interact with",
+	    '#size' => 100,
+	    '#maxlength' => 100,
+	    '#required' => TRUE, //make this field required
+	    '#default_value' =>
+	    variable_get('reservations_project_suggestor_field_name'),
+	    );
+  $form['reservations_project_suggestor_field_type'] =
+    array(
+	  '#type' => 'select',
+	  '#title' => t('Field Type'),
+	  '#required' => TRUE, //make this field required
+	  '#options' => array('entity'=>t("Entity Reference"),
+			      'og'=>t("Organic Group Reference")),
+	  '#default_value' =>
+	  variable_get("reservations_project_suggestor_field_type"),
+	  '#description' => 'Check this box if you would like to open up '.
+	  'applications for series requests for the next season.',
+	  );
+
+  $form['reservations_project_suggestor_enforce_validation'] =
+    array(
+	  '#type' => 'checkboxes',
+	  '#options' => array('yes'=>"Validate Producer Project Membership?"),
+	  '#default_value' =>
+	  variable_get('reservations_project_suggestor_enforce_validation'),
+	  '#description' => 'Check this box if you want to validate that the '.
+          'producer is a member of the project',
+	  );
+
+  return system_settings_form($form);
+}
+function reservations_project_suggestor_ajax_callback($user_name) {
+  $js_settings =
+    drupal_add_js(drupal_get_path('module', 'reservations_project_suggestor')
+		  . '/reservations_project_suggestor.js');
+
+
+  $user = user_load_by_name($user_name);
+  if ($user) {
+    $uid = $user->uid;
+    $sql = "SELECT gid
+            FROM {og_membership} m
+            INNER JOIN {node} n ON n.nid=m.gid
+            WHERE entity_type = 'user'
+            AND etid= :uid
+            ORDER BY n.title
+            ";
+    $results = db_query($sql, array(':uid' => $uid));
+
+    $has_results = FALSE;
+    while ($result = $results->fetchObject()) {
+      $has_results = TRUE;
+      $gid = $result->gid;
+      $project = node_load($gid);
+      $status = $project->group_group[LANGUAGE_NONE][0]['value'];
+      $inactive_reason =
+	$project->field_reason_not_active[LANGUAGE_NONE][0]['tid'];
+
+      if ($project && $status && !$inactive_reason) {
+	$html .= '<input type="button" id="rps_proj_button_'.$gid.'" '.
+	  'class="rps_pick" value="Pick" name="'.$project->title.'"> ';
+	$html .= "<strong>".$project->title." ($gid) </strong><br/><br/>";
+
+      }
+    }
+    if ($has_results) {
+      $output = "<br/><h2>Projects for <strong>$user_name</strong></h2>";
+      $output .= $html;
+    }
+  }
+
+  if (!isset($output)) {
+    $output = "<br/>No projects found for <strong>$user_name</strong>";
+  }
+
+  return drupal_json_output(array('projects'=>$output));
+}
+
+function reservations_project_suggestor_node_validate($node) {
+  if ($node->type == 'reservations_reservation') {
+    $should_validate =
+      variable_get('reservations_project_suggestor_enforce_validation');
+
+    if ($should_validate) {
+      $should_validate = $should_validate['yes'];
+    }
+
+    if ($should_validate) {
+      $field_name = variable_get('reservations_project_suggestor_field_name');
+      $pid = $node->field_reservation_project[LANGUAGE_NONE][0]['target_id'];
+
+      $project = node_load($pid);
+      if ($project) {
+	$members =
+	  og_get_group_members_properties($project, array(),'members', 'node');
+
+	$user = user_load_by_name($node->name);
+	if (!in_array($user->uid, $members)) {
+	  $error_msg = $user->name . " is not a member of " . $project->title;
+	  form_set_error($field_name, $error_msg);
+	  return;
+	}
+      }
+    }
+  }
+}

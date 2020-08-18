@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * @file
+ * reservations_pricing functions
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen                                                |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function reservations_pricing_menu() {
+  $items = array();
+
+  // Standard Administration settings.
+  $items['admin/config/system/reservations/pricing'] = array(
+    'title' => 'Printable Contract',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('reservations_pricing_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer reservations'),
+    'description' => 'Configure settings for Reservations Pricing.',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+
+  return $items;
+}
+
+//returns a weighted array of rules
+function reservations_pricing_get_pricing_rules($type) {
+ dsm($type);
+}

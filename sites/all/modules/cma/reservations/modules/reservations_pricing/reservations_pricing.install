@@ -1,0 +1,60 @@
+<?php
+
+
+/**
+ * @file
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen                                                |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
+ */
+
+
+/**
+ * Implements hook_schema().
+ */
+function reservations_pricing_schema() {
+
+  $schema['reservations_pricing_node_type'] = array(
+    'description' => 'Stores reservation pricing settings for each content types.',
+    'fields' => array(
+      'type' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "Foreign key for {node_type}.type.",
+      ),
+      'rule_id' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "Rule ID",
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "Controls order rules are processed",
+      ),
+      'roles' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => "array of role ids",
+      ),
+    ),
+    'primary key' => array('type'),
+  );
+
+  return $schema;
+}
+
+
+
