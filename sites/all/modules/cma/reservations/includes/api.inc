@@ -313,6 +313,7 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
   // The state the reservation is in / (original state).
   $reservation_state = $node->reservations_original_reservation_status;
   $reservation_checked_out = ($reservation_state == RESERVATIONS_STATUS_CHECKED_OUT);
+  $new_status = $node->reservations_reservation_status;
 
   $langcode = $form_state['node']->language;
   $backtoback = variable_get('reservations_back_to_back_allowed', 0);
@@ -478,7 +479,7 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
     }
   }
   // Check for advance min hours restriction if set.
-  if ($min_hours) {
+  if ($min_hours && (in_array($new_status, [RESERVATIONS_STATUS_UNCONFIRMED, RESERVATIONS_STATUS_PENDING]))) {
     reservations_verbose_logging('CHECKING Min Hours');
     $min_date = new DateTime("+$min_hours hour");
     if ($start_object < $min_date) {
@@ -1156,7 +1157,7 @@ function reservations_record_status($code = NULL) {
     RESERVATIONS_STATUS_DENIED => t('Denied'),
     RESERVATIONS_STATUS_CANCELLED => t('Cancelled'),
   );
-  
+
   // allow UI reservation status to be altered with hook
   drupal_alter('reservation_record_status', $types);
 
