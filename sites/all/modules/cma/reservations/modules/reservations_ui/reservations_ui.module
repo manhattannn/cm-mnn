@@ -85,8 +85,20 @@ function reservations_ui_menu() {
   $items['admin/reservations/manage/current_inventory'] = array(
     'title' => 'Current Inventory',
     'description' => 'List Reservable Content Types with the number On Hand, Checked Out, Temporarily Unavailable, ',
-    'page callback' => 'theme',
-    'page arguments' => array('reservations_ui_current_inventory'),
+
+    // Original code - did not properly work.
+    //    'page callback' => 'theme',
+    //    'page arguments' => array('reservations_ui_current_inventory'),
+
+    // Fixed code - but with confusing overhead.
+    //    'page callback' => 'theme',
+    //    'page arguments' => array('reservations_ui_current_inventory', array()),
+
+    // Best way - but we should:
+    // @todo - rename the file to includes/current_inventory.inc
+    'page callback' => 'theme_reservations_ui_current_inventory',
+    'file' => 'theme.inc',
+    'file path' => drupal_get_path('module', 'reservations_ui') . '/theme',
     'access arguments' => array('manage reservations'),
     'type' => MENU_NORMAL_ITEM,
   );
