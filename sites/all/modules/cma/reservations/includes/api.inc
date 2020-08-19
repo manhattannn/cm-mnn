@@ -315,6 +315,8 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
   $reservation_checked_out = ($reservation_state == RESERVATIONS_STATUS_CHECKED_OUT);
   $new_status = $node->reservations_reservation_status;
 
+  $reservations_manager = user_access('manage reservations');
+
   $langcode = $form_state['node']->language;
   $backtoback = variable_get('reservations_back_to_back_allowed', 0);
   // Build date objects we'll need for our different validations.
@@ -479,7 +481,7 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
     }
   }
   // Check for advance min hours restriction if set.
-  if ($min_hours && (in_array($new_status, [RESERVATIONS_STATUS_UNCONFIRMED, RESERVATIONS_STATUS_PENDING]))) {
+  if ($min_hours && !$reservations_manager && (in_array($new_status, [RESERVATIONS_STATUS_UNCONFIRMED, RESERVATIONS_STATUS_PENDING]))) {
     reservations_verbose_logging('CHECKING Min Hours');
     $min_date = new DateTime("+$min_hours hour");
     if ($start_object < $min_date) {
