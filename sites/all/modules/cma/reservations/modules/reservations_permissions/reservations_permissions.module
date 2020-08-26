@@ -239,10 +239,8 @@ function theme_reservations_permissions_form($variables) {
  * be displayed in the permissions table. The variables are set in by the "Permissions Configuration" page.
  */
 function reservations_permissions_form($form, &$form_state) {
-  // Is the logged-in user an administrator.
-  global $user;
-  $admin_role = in_array('administrator', $user->roles);
-
+  // Is the logged-in user an administrator (Role ID 3).
+  $admin_role = user_has_role(3);
 
   //admin/reservations/manage/permissions/inventory/$tid
   $inventory = (arg(4) == 'inventory') ? arg(5) : FALSE;
