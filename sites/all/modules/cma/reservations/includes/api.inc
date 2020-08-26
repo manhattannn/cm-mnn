@@ -613,8 +613,16 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
     }
   }
   else {
+
+    // Get the end time - to be used for comparing against closing time.
     $end_time = date_format($end_object, 'H:i');
-    if ($end_time < $end_hours['open']) {
+
+    // Get the end time - to be used for comparing against opening time.
+    $end_object_for_open_time = clone $end_object;
+    // Add 2 Sec.
+    $end_object_for_open_time->add(new DateInterval('PT2S'));
+    $end_time_for_open_time = date_format($end_object_for_open_time, 'H:i');
+    if ($end_time_for_open_time < $end_hours['open']) {
       if (!$skip_hours_of_op) {
         form_set_error($end_fld_time, t('Reservations cannot end at a time before %start.',
           array('%start' => reservations_format_time($end_hours['open']))));
