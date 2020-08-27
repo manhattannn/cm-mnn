@@ -20,6 +20,7 @@ define('RESERVATIONS_AVA_T', 3); // Template Only.
 define('RESERVATIONS_UNA_S', 4); // No Longer in Inventory (edited).
 
 // Reservation status options.
+define('RESERVATIONS_STATUS_EMPTY', 0);
 define('RESERVATIONS_STATUS_UNCONFIRMED', 1);
 define('RESERVATIONS_STATUS_PENDING', 2);
 define('RESERVATIONS_STATUS_CHECKED_OUT', 3);
@@ -375,7 +376,8 @@ function reservations_validate($node, $form, &$form_state) {
       $deleted_items = FALSE;
       if (isset($form_state['values']['reservations_reservation_items'])) {
           foreach ($form_state['values']['reservations_reservation_items'] as $did => $item) {
-              if ($item['reservations_remove_item_checkbox']) {
+              if (isset($item['reservations_remove_item_checkbox'])  &&
+                $item['reservations_remove_item_checkbox']) {
                   if ($item['reservations_placeholder_nid']) {
                       // If dialog set to delete items.
                       if ($dialog_delete_items_confirmation_value) {
@@ -692,10 +694,6 @@ function reservations_form($node, &$form_state) {
     '#prefix' => '<div class="clear-block" id="reservations-choice-wrapper">',
     '#suffix' => '</div>',
   );
-
-  // Update the date labels.
-  // $form_state['values']['field_reservations_date'][$langcode][0]['value']['date']
-  $datef = $form_state['values']['field_reservations_date'];
 
   $form['initial_state'] = array(
     '#type' => 'hidden',
