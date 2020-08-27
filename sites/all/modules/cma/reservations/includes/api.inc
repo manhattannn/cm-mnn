@@ -76,8 +76,13 @@ function reservations_validate_reservations_selected_items($form, &$form_state) 
         $item['inventory_tid'] = $inventory_tid;
       }
       else {
-        $content_settings = reservations_load_item_settings($item['type']);
-        $item['item_title'] = $content_settings->type_name;
+        if (!empty($item['type'])) {
+          $content_settings = reservations_load_item_settings($item['type']);
+          $item['item_title'] = $content_settings->type_name;
+        }
+        else {
+          $item['item_title'] = NULL;
+        }
       }
     }
 
@@ -659,13 +664,14 @@ function  reservations_validate_checked_in_reservation_items($form, $form_state)
   $node = (object) $form_state['values'];
   $orig_status = $node->reservations_original_reservation_status;
   $new_status = $node->reservations_reservation_status;
+  $error = FALSE;
 
   $checked_items = $changed_status_items = $condition_notes_items = array();
 
   foreach ($node->reservations_reservation_items as $did => $item) {
 
 
-    if ($item['reservations_checkin_checkbox']) {
+    if (isset($item['reservations_checkin_checkbox']) && $item['reservations_checkin_checkbox']) {
       $checked_items[] = $item['reservations_checkin_checkbox'];
     }
     else {
@@ -1159,6 +1165,7 @@ function reservations_item_reservation_status($code = NULL) {
  */
 function reservations_record_status($code = NULL) {
   $types = array(
+    RESERVATIONS_STATUS_EMPTY  => t('Empty'),
     RESERVATIONS_STATUS_UNCONFIRMED => t('Unconfirmed'),
     RESERVATIONS_STATUS_PENDING => t('Confirmed'),
     RESERVATIONS_STATUS_CHECKED_OUT => t('Checked out'),
