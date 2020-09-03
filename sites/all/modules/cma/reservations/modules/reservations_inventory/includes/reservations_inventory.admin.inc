@@ -204,32 +204,6 @@ function reservations_inventory_admin_settings($form, &$form_state) {
 
     }
 
-    // Expanded Hours field.
-    $form['reservations_hours'][$term_tid]['hours']
-             ['reservations_inventory_hours_admin'. '_' . $term_tid] = array(
-      '#type' => 'textfield',
-      '#title' => t('Expanded Hours'),
-      '#default_value' => isset($hours_of_operation[$term_tid]['admin']) ?
-             implode('-', $hours_of_operation[$term_tid]['admin']) : '',
-      '#description' =>
-        t(
-          "This setting controls the hours shown on the conflict grid for " .
-          "users with 'Create new content (Outside Normal Hours of " .
-          "Operation)' permission.  Normally, the conflict grid is limited " .
-          "to the hours of operation set above for the days of the week. " .
-          "But user allowed to create reservations outside normal hours of " .
-          "operation, need to see conflicts during the expanded hours as well."
-        ),
-      '#size' => 11,
-      '#maxlength' => 11,
-      '#element_validate' =>
-         array(
-          'reservations_inventory_admin_validate_hours_of_operation'
-         ),
-      '#group' => 'reservations_hours',
-    );
-
-
     // Restrictions section of the inventory settings (in a collapsible fieldset).
 
     $form['reservations_hours'][$term_tid]['restrictions'] = array(
@@ -414,16 +388,7 @@ function reservations_inventory_admin_settings_submit($form, &$form_state) {
       }
     }
 
-    $expanded_hrs = $form_state['values']
-            ['reservations_inventory_hours_admin_' . $term_tid];
-    if (empty($expanded_hrs)) {
-      $hours_of_operation[$term_tid]['admin'] = NULL;
-    }
-    else {
-      list ($open, $close) = explode('-', $expanded_hrs);
-      $hours_of_operation[$term_tid]['admin']['open'] = trim($open);
-      $hours_of_operation[$term_tid]['admin']['close'] = trim($close);
-    }
+    $hours_of_operation[$term_tid]['admin'] = NULL;
 
     // Need to determine if the hours of operation have been
     // input for this tid

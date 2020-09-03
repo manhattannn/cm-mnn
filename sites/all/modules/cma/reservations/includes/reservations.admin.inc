@@ -124,9 +124,15 @@ function reservations_admin_settings($form, &$form_state) {
   }
 
   $form['reservations_hours']['reservations_hours_admin'] = array(
-    '#title' => t('Admin hours'),
+    '#title' => t('Expanded Hours'),
     '#default_value' => variable_get('reservations_hours_admin', '07:00-22:00'),
-    '#description' => t('This setting controls the hours shown on the conflict grid for users with create Reservations outside the normal hours of operation. The conflict grid is normally limited to the days and hours the set above. Because users with this permission can create Reservations outside the normal hours of operation, they need to see conflicts during those times as well.'),
+    '#description' => t(
+      "This setting controls the hours shown on the conflict grid for " .
+      "users with 'Create new content (Outside Normal Hours of " .
+      "Operation)' permission.  Normally, the conflict grid is limited " .
+      "to the hours of operation set above for the days of the week. " .
+      "But user allowed to create reservations outside normal hours of " .
+      "operation, need to see conflicts during the expanded hours as well."),
     '#type' => 'textfield',
     '#size' => 11,
     '#maxlength' => 11,

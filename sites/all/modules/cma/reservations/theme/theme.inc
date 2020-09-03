@@ -43,15 +43,14 @@ function template_preprocess_reservations_conflict_grid(&$variables) {
     if (isset($restrictions['cleaning_buffer'])) {
       $cleaning_buffer = $restrictions['cleaning_buffer'];
     }
+    $show_expanded_chart = user_access('create reservations outside hours of operation');
 
-
-    if ($exist_inventory_hrs
-            && user_access('create reservations outside hours of operation')) {
+    if ($exist_inventory_hrs && $show_expanded_chart) {
       // Use expanded (admin) hours.
-      $adminhours = $hours_of_operation_inv['admin'];
+      $adminhours = explode('-', variable_get('reservations_hours_admin', '07:00-22:00'));
       for ($day = 0; $day < 7; $day++) {
-        $hours[$day]['open'] = $adminhours['open'];
-        $hours[$day]['close'] = $adminhours['close'];
+        $hours[$day]['open'] = $adminhours[0];
+        $hours[$day]['close'] = $adminhours[1];
       }
     }
     else {
@@ -64,7 +63,7 @@ function template_preprocess_reservations_conflict_grid(&$variables) {
   }
 
   if (!$exist_inventory_hrs) {
-    if (user_access('create reservations outside hours of operation')) {
+    if ($show_expanded_chart) {
       $adminhours = explode('-', variable_get('reservations_hours_admin', '07:00-23:00'));
 
       for ($day = 0; $day < 7; $day++) {
@@ -87,7 +86,7 @@ function template_preprocess_reservations_conflict_grid(&$variables) {
 
   // Do we have restricted hours?
   if (isset($restrictions['restricted_hours_of_operations'])
-    && $restrictions['restricted_hours_of_operations']) {
+    && $restrictions['restricted_hours_of_operations'] && !$show_expanded_chart) {
     // Load the restricted hours.
     $restricted_hours = module_invoke(
       'reservations_inventory', 'get_restricted_hours_of_operation', $inventory_tid);
@@ -354,5 +353,3 @@ function theme_reservations_build_reservation_table_display($variables) {
 
   return $output;
 }
-
-
