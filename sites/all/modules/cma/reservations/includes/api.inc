@@ -376,7 +376,7 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
       'reservations_inventory', 'get_restrictions', $inventory_tid);
   }
 
-  // Get the next end day as it may be needed later.
+  // Get the next end day as it may be needed later. - @todo - does not work
   $nextday_end_number = ($end_day_of_week + 1 == 8) ? 0 : ($end_day_of_week + 1);
 
 
@@ -454,23 +454,6 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
     $max_booking_time = 0;
   }
 
-  // Users in role with Administer Reservations permssion or outside hours of
-  $skip_hours_of_op = user_access('create reservations outside hours of operation');
-  if ($skip_hours_of_op) {
-    //
-    // Operation skip these some checks.
-    reservations_verbose_logging('SKIP Hours of Operation Check because user has create reservations outside hours of operation permission');
-
-    // Check to see if warning should be displayed
-    if (!empty($start) && !empty($end)) {
-      if (
-        strtotime(date('G:i', strtotime($start . ' UTC'))) < strtotime($start_hours['open'])
-        || strtotime($start_hours['close']) < strtotime(date('G:i', strtotime($end . ' UTC')))
-      ) {
-        drupal_set_message(t('You are making a Reservation outside the normal hours of operation. This may impact access to the items you are reserving.'), 'warning');
-      }
-    }
-  }
   if (!$reservation_checked_out) {
     // Reservation start date cannot exceed the max advance
     reservations_verbose_logging('CHECKING Max Days');
@@ -559,10 +542,8 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
       $start_time = date_format($start_object, 'H:i');
       // Is checkout/start time before opening hours.
       if ($start_time < $start_hours['open']) {
-        if (!$skip_hours_of_op) {
-          form_set_error('field_reservations_date][und][0][value][time', t('Reservations cannot start at a time before %start.',
-            array('%start' => reservations_format_time($start_hours['open']))));
-        }
+        form_set_error('field_reservations_date][und][0][value][time', t('Reservations cannot start at a time before %start.',
+          array('%start' => reservations_format_time($start_hours['open']))));
       } // Is checkout/start time, is restricted to specific hours?
       elseif (isset($force_hours)) {
         reservations_verbose_logging('CHECKING restricted start time');
@@ -572,11 +553,9 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
         }
       } // Is checkout/start time after close time for that day.
       elseif ($start_time > $start_hours['close']) {
-        if (!$skip_hours_of_op) {
-          reservations_verbose_logging('CHECKING start time is not after close time');
-          form_set_error('field_reservations_date][und][0][value][time', t('Reservations cannot start at a time after %end.',
-            array('%end' => reservations_format_time($start_hours['close']))));
-        }
+        reservations_verbose_logging('CHECKING start time is not after close time');
+        form_set_error('field_reservations_date][und][0][value][time', t('Reservations cannot start at a time after %end.',
+          array('%end' => reservations_format_time($start_hours['close']))));
       }
     }
   }
@@ -628,20 +607,14 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
     $end_object_for_open_time->add(new DateInterval('PT2S'));
     $end_time_for_open_time = date_format($end_object_for_open_time, 'H:i');
     if ($end_time_for_open_time < $end_hours['open']) {
-      if (!$skip_hours_of_op) {
-        form_set_error($end_fld_time, t('Reservations cannot end at a time before %start.',
-          array('%start' => reservations_format_time($end_hours['open']))));
-      }
+      form_set_error($end_fld_time, t('Reservations cannot end at a time before %start.',
+        array('%start' => reservations_format_time($end_hours['open']))));
     }
     elseif ($end_time > $end_hours['close']) {
-      if (!$skip_hours_of_op) {
-        form_set_error($end_fld_time, t('Reservations cannot end at a time after %end.',
-          array('%end' => reservations_format_time($end_hours['close']))));
-      }
+      form_set_error($end_fld_time, t('Reservations cannot end at a time after %end.',
+        array('%end' => reservations_format_time($end_hours['close']))));
     }
   }
-
-
 }
 
 function reservations_get_user_account($username) {
@@ -685,7 +658,8 @@ function  reservations_validate_checked_in_reservation_items($form, $form_state)
           $changed_status_items[] = $item;
         }
         else {
-          if ($item['reservations_checkin_condition_notes']) {
+          if (isset($item['reservations_checkin_condition_notes']) &&
+            $item['reservations_checkin_condition_notes']) {
             $condition_notes_items[] = $item;
           }
         }

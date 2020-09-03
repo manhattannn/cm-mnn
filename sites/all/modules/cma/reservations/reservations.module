@@ -87,8 +87,8 @@ function reservations_permission() {
       'description' => t('This permission allows users to create/edit reservations with a status of unconfirmed or confirmed. It does not allow the user to change the status.  Users without this permission can NOT adjust the dates, times, or items in a Reservation after it has been confirmed.'),
     ),
     'create reservations outside hours of operation' => array(
-      'title' => '<em class="placeholder">Reservations</em>: Create new content (Outside Normal Hours of Operation)',
-      'description' => t('Does what it says. Allows users to create reservations with start and end times outside of the hours of operation without needing to have the Manage Reservations permission.'),
+      'title' => '<em class="placeholder">Reservations</em>: Show expanded conflict chart. (Outside Normal Hours of Operation)',
+      'description' => t('Will show the conflict chart for the hours defined by "Admin hours" of the Reservations API settings page.'),
     ),
     'push forward over closed days' => array(
       'title' => t('Push Forward Over Closed Days'),
