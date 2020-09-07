@@ -29,7 +29,7 @@ function cm_inventory_adder_form_alter(&$form, &$form_state, $form_id) {
     //check to see if node type is in facility types
     $types = cm_inventory_adder_get_content_types('resource');
     if (!array_key_exists($type, $types)) {
-      
+
       $types = cm_inventory_adder_get_content_types('bucket');
       if (!array_key_exists($type, $types)) {
 	$types = NULL;
@@ -38,9 +38,9 @@ function cm_inventory_adder_form_alter(&$form, &$form_state, $form_id) {
   }
   if ($types) {
     $nid = $form['nid']['#value'];
-    
+
     $default_value = isset($type) ? $type : "";
-    $form['mnn_inventory_content_type'] = 
+    $form['mnn_inventory_content_type'] =
       array(
 	    '#type' => 'select',
 	    '#options'=> $types,
@@ -50,7 +50,7 @@ function cm_inventory_adder_form_alter(&$form, &$form_state, $form_id) {
 	    '#weight'=> -10,
 	    );
     if ($default_value) {
-      $form['mnn_inventory_content_type']['#default_value'] = $default_value; 
+      $form['mnn_inventory_content_type']['#default_value'] = $default_value;
     }
   }
 }
@@ -63,7 +63,7 @@ function cm_inventory_adder_node_validate($node, $form, &$form_state) {
     $type_inventory = cm_inventory_adder_get_inventory_for_type($type);
     $type_inventory_term = taxonomy_term_load($type_inventory);
     //get inventory from submitted node
-    $node_inventory = 
+    $node_inventory =
       $node->field_reservations_inventory[LANGUAGE_NONE][0]['tid'];
     $node_inventory_term = taxonomy_term_load($node_inventory);
 
@@ -75,12 +75,12 @@ function cm_inventory_adder_node_validate($node, $form, &$form_state) {
                         @term1 inventory, but you selected @term2 as your
                         inventory. The inventories must match.",
 		       array('@type' => $type,
-			     '@term1' => $type_inventory_term->name, 
-			     '@term2' => $node_inventory_term->name))); 
+			     '@term1' => $type_inventory_term->name,
+			     '@term2' => $node_inventory_term->name)));
     }
 
     //get Inventory Number
-    $inventory_number = 
+    $inventory_number =
       $node->field_inventory_number[LANGUAGE_NONE][0]['value'];
     if ($inventory_number) {
       $duplicate_items =
@@ -90,11 +90,11 @@ function cm_inventory_adder_node_validate($node, $form, &$form_state) {
 	form_set_error('field_inventory_number',
 		       t("The inventory number @inventory_number is already
                           being used by !items. Click it to view it.",
-			 array('@inventory_number' => $inventory_number, 
-			       '!items' => $duplicate_items))); 
+			 array('@inventory_number' => $inventory_number,
+			       '!items' => $duplicate_items)));
       }
     }
-  }  
+  }
 }
 
 function cm_inventory_adder_node_presave($node) {
@@ -104,7 +104,8 @@ function cm_inventory_adder_node_presave($node) {
     $node->type = $type;
   }
 
-  $status = $node->field_equipment_item_status[LANGUAGE_NONE][0]['tid'];
+  $item_status_field_name = variable_get('reservable_item_status_field_name', 'field_reservable_item_status');
+  $status = $node->{$item_status_field_name}[LANGUAGE_NONE][0]['tid'];
   if ($status) {
     $term = taxonomy_term_load($status);
     $status = $term->name;
@@ -116,8 +117,8 @@ function cm_inventory_adder_node_presave($node) {
 
 function cm_inventory_adder_get_duplicate_inventory_items($inventory_number,
 							 $nid) {
-  $sql = 
-    "SELECT nid, title 
+  $sql =
+    "SELECT nid, title
      FROM {node} n
      INNER JOIN {field_data_field_inventory_number} i
      ON i.revision_id = n.vid
@@ -139,7 +140,7 @@ function cm_inventory_adder_get_duplicate_inventory_items($inventory_number,
     else {
       $sql .= ", ";
     }
-    $duplicate_items .= l($item->title, "node/".$item->nid); 
+    $duplicate_items .= l($item->title, "node/".$item->nid);
   }
 
   return $duplicate_items;
@@ -170,10 +171,10 @@ function cm_inventory_adder_get_content_types($type_type) {
 
   $types = array();
   if ($type_type == 'resource') {
-    $types['facility_non_reservable_'] = 'Facility (Non-Reservable)'; 
+    $types['facility_non_reservable_'] = 'Facility (Non-Reservable)';
   }
   else {
-    $types['equipment_non_reservable_'] = 'Equipment (Non-Reservable)'; 
+    $types['equipment_non_reservable_'] = 'Equipment (Non-Reservable)';
   }
 
   while ($type = $results->fetchObject()) {
