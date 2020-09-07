@@ -2264,10 +2264,9 @@ function reservations_build_reservation_table_form($form, &$form_state, $node, $
 
         $default = '';
         $inventory_item = node_load($item['reservations_item_nid']);
+        $item_status_field_name = variable_get('reservable_item_status_field_name', 'field_reservable_item_status');
         $default =
-          reservations_get_single_field_value($inventory_item,
-            'field_equipment_item_status',
-            'tid');
+          reservations_get_single_field_value($inventory_item, $item_status_field_name,'tid');
       }
       if (!in_array($header_label, $table['#header'])) {
         $header_label = t('Check In') . '<br/>' .
