@@ -48,8 +48,9 @@ function inventory_item_operator_history_node_delete($node) {
 
 function inventory_item_operator_history_node_post_save($inventory_item,
 							$deleting = FALSE) {
+  $item_status_field_name = variable_get('reservable_item_status_field_name', 'field_reservable_item_status');
 
-  if (!isset($inventory_item->field_reservable_item_status)) {
+  if (!isset($inventory_item->{$item_status_field_name})) {
     return;
   }
 
@@ -59,9 +60,7 @@ function inventory_item_operator_history_node_post_save($inventory_item,
   }
   else {
     $new_status =
-      inventory_item_operator_get_single_field_value($inventory_item,
-					       'field_reservable_item_status',
-						     'tid');
+      inventory_item_operator_get_single_field_value($inventory_item, $item_status_field_name,'tid');
     $new_status = $new_status ? $new_status : 0;
     $notes =
       inventory_item_operator_get_single_field_value($inventory_item,
@@ -77,9 +76,7 @@ function inventory_item_operator_history_node_post_save($inventory_item,
 
   $old_inventory_item = $inventory_item->original;
   $old_status =
-    inventory_item_operator_get_single_field_value($old_inventory_item,
-						'field_reservable_item_status',
-						   'tid');
+    inventory_item_operator_get_single_field_value($old_inventory_item, $item_status_field_name,'tid');
   $old_status = $old_status ? $old_status : 0;
 
 
