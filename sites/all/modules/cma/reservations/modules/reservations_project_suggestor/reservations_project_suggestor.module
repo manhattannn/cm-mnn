@@ -180,9 +180,12 @@ function reservations_project_suggestor_node_validate($node) {
 
     if ($should_validate) {
       $field_name = variable_get('reservations_project_suggestor_field_name');
-      $pid = $node->field_reservation_project[LANGUAGE_NONE][0]['target_id'];
-
-      $project = node_load($pid);
+      // Load the project if it is set.
+      $project = FALSE;
+      if (!empty($node->field_reservation_project[LANGUAGE_NONE])) {
+        $pid = $node->field_reservation_project[LANGUAGE_NONE][0]['target_id'];
+        $project = node_load($pid);
+      }
       if ($project) {
 	$members =
 	  og_get_group_members_properties($project, array(),'members', 'node');
