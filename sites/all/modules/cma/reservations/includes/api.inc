@@ -641,8 +641,9 @@ function  reservations_validate_checked_in_reservation_items($form, $form_state)
 
   $checked_items = $changed_status_items = $condition_notes_items = array();
 
-  foreach ($node->reservations_reservation_items as $did => $item) {
+  $item_status_field_name = variable_get('reservable_item_status_field_name', 'field_reservable_item_status');
 
+  foreach ($node->reservations_reservation_items as $did => $item) {
 
     if (isset($item['reservations_checkin_checkbox']) && $item['reservations_checkin_checkbox']) {
       $checked_items[] = $item['reservations_checkin_checkbox'];
@@ -650,10 +651,7 @@ function  reservations_validate_checked_in_reservation_items($form, $form_state)
     else {
       if ($item['reservations_item_nid']) {
         $item_node = node_load($item['reservations_item_nid']);
-        $tid = reservations_get_single_field_value($item_node,
-          'field_equipment_item_status',
-          'tid');
-
+        $tid = reservations_get_single_field_value($item_node, $item_status_field_name, 'tid');
         if ($tid && $tid != $item['reservations_checkin_item_condition']) {
           $changed_status_items[] = $item;
         }
@@ -1615,6 +1613,8 @@ function reservations_add_reservation_items($node) {
       $new_reservation = clone $node;
       $checked_items = $unchecked_items = $items_to_save = array();
 
+      $item_status_field_name = variable_get('reservable_item_status_field_name', 'field_reservable_item_status');
+
       foreach ($node->reservations_reservation_items as $did => $item) {
 
         if ($item['reservations_checkin_checkbox']) {
@@ -1628,9 +1628,7 @@ function reservations_add_reservation_items($node) {
         if ($item['reservations_item_nid']) {
           $item_node = node_load($item['reservations_item_nid']);
           $tid =
-            reservations_get_single_field_value($item_node,
-              'field_equipment_item_status',
-              'tid');
+            reservations_get_single_field_value($item_node, $item_status_field_name,'tid');
           $reservation_link =
             l(t("Updated via Reservation"), "node/" . $node->nid);
 
@@ -1658,7 +1656,7 @@ function reservations_add_reservation_items($node) {
       if ($items_to_save) {
         foreach ($items_to_save as $item) {
           $item_node = $item['node'];
-          $item_node->field_equipment_item_status[LANGUAGE_NONE][0]['tid'] =
+          $item_node->{$item_status_field_name}[LANGUAGE_NONE][0]['tid'] =
             $item['reservations_checkin_item_condition'];
           $item_node->field_reservable_condition_notes[LANGUAGE_NONE]
           [0]['value'] = $item['reservations_checkin_condition_notes'];

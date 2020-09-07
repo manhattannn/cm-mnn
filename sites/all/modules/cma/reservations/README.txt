@@ -1,11 +1,21 @@
  +---------------------------------------------------------------------------+
  | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
  | Additionally, Kevin Reynen + Dane Powell                                  |
- |                                                                           |  
+ |                                                                           |
  | This work is published under the GNU AGPLv3 license without any           |
  | warranty. For full license and copyright information, see                 |
  | https://www.gnu.org/licenses/agpl-3.0.html                                |
- +---------------------------------------------------------------------------+ 
+ +---------------------------------------------------------------------------+
+
+
+
+Hook for to set different reservations statuses
+  reservation:function reservations_record_status
+    contains a drupal_alter; add custom code
+
+    function hook_reservation_record_status_alter(&$types) {
+      $types[RESERVATIONS_STATUS_PENDING] = t('Reserved');
+    }
 
 
 How to Apply GNU AFFERO GENERAL PUBLIC LICENSE Terms to Your New Programs - see LICENSE.txt

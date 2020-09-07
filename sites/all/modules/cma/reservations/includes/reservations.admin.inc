@@ -193,6 +193,16 @@ function reservations_admin_settings($form, &$form_state) {
     '#collapsed' => TRUE,
   );
 
+  $field_list = _get_posible_status_fields();
+  $form['reservations_advanced']['reservable_item_status_field_name'] = array(
+    '#type' => 'select',
+    '#title' => t('Reservable item status field'),
+    '#options' => $field_list,
+    '#default_value' => variable_get('reservable_item_status_field_name', 'field_reservable_item_status'),
+    '#description' => t('This field to hold the status for the reservable item status.'),
+  );
+
+
   $form['reservations_advanced']['reservations_verbose_logging'] = array(
     '#type' => 'checkbox',
     '#title' => t('Verbose Logging Mode'),
@@ -363,3 +373,22 @@ function reservations_admin_staff_settings($form, &$form_state) {
   return (system_settings_form($form));
 }
 
+/**
+ * @return array
+ *   A list of option select fields as one of those will be the reservable tem status field.
+ */
+function _get_posible_status_fields() {
+  $instances = field_info_instances();
+
+  $field_list = array();
+  foreach ($instances as $entity_type => $type_bundles) {
+    foreach ($type_bundles as $bundle => $bundle_instances) {
+      foreach ($bundle_instances as $field_name => $instance) {
+        if ($instance['widget']['type'] == 'options_select') {
+          $field_list[$field_name] = $field_name;
+        }
+      }
+    }
+  }
+  return $field_list;
+}
