@@ -1133,9 +1133,14 @@ function reservations_item_reservation_status($code = NULL) {
  *  if int, will return translated name of the code.
  *  if NULL, returns array of codes as keys, and translated strings as value
  *
+ *  @param boolean $include_STATUS_EMPTY
+ *   If this is TRUE and the $code is not set then the Empty (0) status will be returned.
+ *   The Empty status is only needed for display purposes and should not present
+ *   it self as an option for the user.
+ *
  * @return string|int
  */
-function reservations_record_status($code = NULL) {
+function reservations_record_status($code = NULL, $include_STATUS_EMPTY = FALSE) {
   $types = array(
     RESERVATIONS_STATUS_EMPTY  => t('Empty'),
     RESERVATIONS_STATUS_UNCONFIRMED => t('Unconfirmed'),
@@ -1146,6 +1151,9 @@ function reservations_record_status($code = NULL) {
     RESERVATIONS_STATUS_DENIED => t('Denied'),
     RESERVATIONS_STATUS_CANCELLED => t('Cancelled'),
   );
+  if (!$include_STATUS_EMPTY &&  empty($code)) {
+    unset($types[RESERVATIONS_STATUS_EMPTY]);
+  }
 
   // allow UI reservation status to be altered with hook
   drupal_alter('reservation_record_status', $types);
