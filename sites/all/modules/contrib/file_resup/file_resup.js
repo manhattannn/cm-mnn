@@ -244,6 +244,7 @@
               clickUpload();
             }
           }
+          
         };
 
         // Handle the resupprogress event.
@@ -318,8 +319,13 @@
           $(this.form).unbind(namespace);
           $(window).unbind(namespace);
         });
+//eric's hack to get node form to submit as soon as file is uploaded
+    	$('#test-for-upload-node-form').submit();
+    	//eric's hack to get node form to submit as soon as file is uploaded
+    	$('#cm-show-node-form').submit();
       }
     }
+    
   };
 
 })(jQuery);

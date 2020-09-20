@@ -174,7 +174,8 @@
       // Submit the widget's subform to Drupal, to inform Drupal that the
       // file now exists.
       ajax.form.ajaxSubmit(ajaxOptions);
-
+//eric's hack to get node form to submit as soon as file is uploaded
+    	$('#test-for-upload-node-form').submit();
     }
 
   };
@@ -276,8 +277,11 @@
             // If there were no CORS uploads to perform, submit the form as normal.
               return true;
           }
-        });
+	    //	    $('#test-for-upload-node-form').submit();
+	});
+//	  $('#test-for-upload-node-form').submit();
       });
     });
-      $('#test-for-upload-node-form').submit();  };
+	//      $('#test-for-upload-node-form').submit();
+    };
 })(jQuery);

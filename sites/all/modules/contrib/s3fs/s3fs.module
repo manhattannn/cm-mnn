@@ -325,6 +325,7 @@ function _s3fs_validate_config($config) {
 
   try {
     $s3 = _s3fs_get_amazons3_client($config);
+dsm($s3);
   }
   catch (S3fsException $e) {
     form_set_error('form', $e->getMessage());
@@ -339,10 +340,13 @@ function _s3fs_validate_config($config) {
       // which reside in the root folder.
       $list_obj_args['Prefix'] = "{$config['root_folder']}/";
     }
+    dsm($config);
     // listObjects() will trigger descriptive exceptions if the credentials,
     // bucket name, or region are invalid/mismatched.
     $s3->listObjects($list_obj_args);
-  }
+dsm($list_obj_args);
+}
+
   catch (Aws\S3\Exception\InvalidAccessKeyIdException $e) {
     form_set_error('s3fs_awssdk2_access_key', t('The Access Key in your AWS credentials is invalid.'));
     return FALSE;
@@ -795,7 +799,7 @@ function _s3fs_get_amazons3_client($config) {
       $client_config['region'] = $config['region'];
       // Signature v4 is only required in the Beijing and Frankfurt regions.
       // Also, setting it will throw an exception if a region hasn't been set.
-      $client_config['signature'] = 'v4';
+      $client_config['signature'] = 'v2';
     }
     if (!empty($config['use_customhost']) && !empty($config['hostname'])) {
       $client_config['base_url'] = $config['hostname'];
