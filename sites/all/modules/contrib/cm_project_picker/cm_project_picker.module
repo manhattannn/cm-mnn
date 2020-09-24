@@ -111,6 +111,7 @@ function cm_project_picker_form_alter(&$form, &$form_state, $form_id) {
     }
   }						
   if ($form_id == 'cm_airing_form') {
+dsm($form);
     $project_id = filter_input(INPUT_GET, CM_PROJECT_ID_QUERY_ARGUMENT_NAME);
     $project = node_load($project_id);
     if (!$project && !$form['#entity']->airing_id) {

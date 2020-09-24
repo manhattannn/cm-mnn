@@ -1,0 +1,99 @@
+<?php
+
+
+function mnn_adult_content_scheduling_restriction_menu() {
+
+  $items = array();
+
+  $items['admin/config/mnn/mnn_adult_content_scheduling_restriction'] = array(
+    'title' => 'mnn_adult_content_scheduling_restriction module settings',
+    'description' => 'set start and end time for restricted/no adult content hours',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mnn_adult_content_scheduling_restriction_form'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+   );
+
+  return $items;
+}
+
+
+// add our validation function to the airing form 
+function mnn_adult_content_scheduling_restriction_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'cm_airing_form') {
+    $form['#validate'][] = 'mnn_adult_content_scheduling_restriction_form_validate';
+    $project = node_load($project_id);
+ // if ($node->type=='cm_project') {
+//     dsm($project_id, "form id");
+//     dsm($form, "form");
+//     dsm($form_state, "form state");
+  }  
+}
+
+
+
+function mnn_adult_content_scheduling_restriction_form_validate($form, &$form_state) {
+  // get the project id; find out if it is tagged as adult content; 
+//dsm($form_state);
+  $project_id = $form_state['values']['field_airing_project_ref']['und'][0]['target_id']; 
+  $project_node = node_load($project_id);
+//  dsm($project_node->field_pbcore_fcc_ratings['und'][0]['tid']);
+  if ($project_node->field_pbcore_fcc_ratings['und'][0]['tid'] == 751) {
+    //TODO pull this from a settings page
+    // n 
+//    $no_adult_content_start_time = date("H:i:s",strtotime("08:00:00"));
+//    $no_adult_content_end_time = date("H:i:s",strtotime("21:00:00"));
+    $no_adult_content_start_time = variable_get('mnn_adult_content_scheduling_restriction_start');
+    $no_adult_content_end_time = variable_get('mnn_adult_content_scheduling_restriction_end');
+    $airing_start_time = $form_state['values']['field_airing_date']['und'][0]['value'];
+    $airing_end_time = $form_state['values']['field_airing_date']['und'][0]['value2'];
+    dsm(date("H:i:s",strtotime($no_adult_content_start_time)));
+    dsm(date("H:i:s",strtotime($no_adult_content_end_time)));
+    dsm(date("H:i:s",strtotime($airing_start_time)));
+    dsm(date("H:i:s",strtotime($airing_end_time)));
+        
+    if (date("H:i:s",strtotime($airing_start_time))  >= $no_adult_content_start_time && date("H:i:s",strtotime($airing_start_time)) <= $no_adult_content_end_time) {
+ //     dsm("This project has adult content and this airing starts during restricted time period");
+      form_set_error('field_airing_date','This project has adult content and this airing starts during restricted time period');
+    }  
+    if (date("H:i:s",strtotime($airing_end_time))  >= $no_adult_content_start_time && date("H:i:s",strtotime($airing_end_time)) <= $no_adult_content_end_time) {
+//      dsm("This project has adult content and airing ends during restricted time period");
+      form_set_error('field_airing_date','This project has adult content and this airing ends during restricted time period');
+    }      
+    
+  }
+}
+
+
+function mnn_adult_content_scheduling_restriction_form() {
+  $form = array();
+
+  $form['mnn_adult_content_scheduling_restriction_start'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Start of restricted hours/no adult content (use 24hour time format)'),
+    '#default_value' => variable_get('mnn_adult_content_scheduling_restriction_start'),
+    '#size' => 6,
+    '#maxlength' => 6,
+    '#description' => t("Start of restricted hours/no adult content (use 24hour time format)"),
+    '#required' => TRUE,
+  );
+  $form['mnn_adult_content_scheduling_restriction_end'] = array(
+    '#type' => 'textfield',
+    '#title' => t('End of restricted hours/no adult content (use 24hour time format)'),
+    '#default_value' => variable_get('mnn_adult_content_scheduling_restriction_end'),
+    '#size' => 6,
+    '#maxlength' => 6,
+    '#description' => t("Start of restricted hours/no adult content (use 24hour time format)"),
+    '#required' => TRUE,
+  );  
+
+  return system_settings_form($form);
+}
+
+
+function mnn_adult_content_scheduling_restriction_admin_validate($form, &$form_state) {
+  $starttime = $form_state['values']['mnn_adult_content_scheduling_restriction_start'];
+  $endtime = $form_state['values']['mnn_adult_content_scheduling_restriction_end'];
+  // validate that this is in correct time format 
+  
+}
