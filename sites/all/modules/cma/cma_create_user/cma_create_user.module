@@ -1,0 +1,420 @@
+<?php
+/**
+//new user creation functions for PCM
+This module creates drupal accounts based on and
+linked to existing CiviCRM contact records 
+
+user creation is triggered by either an activity
+of type NPO 
+or a participation record 
+with participant status of 'passed certification'
+ 
+ */
+
+// define menu for admin/settings page 
+
+function cma_create_user_menu() {
+
+  $items = array();
+
+  $items['admin/config/cma/cma_create_user'] = array(
+    'title' => 'CMA User Create module settings',
+    'description' => 'Define what triggers user account creation and other variables',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cma_create_user_admin_form'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+   );
+
+  return $items;
+}
+
+// define admin/settings page 
+
+function cma_create_user_admin_form() {
+  $form = array();
+
+  $form['cma_create_user_trigger'] = array(
+    '#type' => 'textfield',
+    '#title' => t('What triggers user account creation? [current options are "Activity" or "Participant"'),
+    '#default_value' => variable_get('cma_create_user_trigger'),
+    '#size' => 36,
+    '#maxlength' => 36,
+    '#description' => t('What triggers user account creation? [current options are "Activity" or "Participant"'),
+    '#required' => TRUE,
+  );
+  $form['cma_create_user_op'] = array(
+    '#type' => 'textfield',
+    '#title' => t('operation used in trigger [for Activity this is usually "create"; for Event Participant it is usually "edit"'),
+    '#default_value' => variable_get('cma_create_user_op'),
+    '#size' => 36,
+    '#maxlength' => 36,
+    '#description' => t('operation used in trigger [for Activity this is usually "create"; for Event Participant it is usually "edit"'),
+    '#required' => TRUE,
+  );    
+  $form['cma_create_user_type_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('id of the trigger Event Status or Activity Type'),
+    '#default_value' => variable_get('cma_create_user_type_id'),
+    '#size' => 36,
+    '#maxlength' => 36,
+    '#description' => t('id of the trigger Event Status or Activity Type'),
+    '#required' => TRUE,
+  );  
+  $form['cma_create_user_group'] = array(
+    '#type' => 'textfield',
+    '#title' => t('id of the group to add the contact to'),
+    '#default_value' => variable_get('cma_create_user_group'),
+    '#size' => 36,
+    '#maxlength' => 36,
+    '#description' => t('id of the group to add the contact to'),
+    '#required' => TRUE,
+  );   
+
+  return system_settings_form($form);
+}
+
+
+// this function is used to limit the type
+// of entity that can be acted on 
+function _cma_create_user_enabled_entities() {
+  $whitelist = array(
+    'civicrm_address' => 'address',
+    'civicrm_event' => 'event',
+    'civicrm_contact' => 'contact',
+    'civicrm_contribution' => 'contribution',
+    'civicrm_participant' => 'participant',
+    'civicrm_relationship' => 'relationship',
+    'civicrm_relationship_type' => 'relationship_type',
+    'civicrm_activity' => 'activity',
+    'civicrm_entity_tag' => 'entity_tag',
+    'civicrm_membership' => 'membership',
+    'civicrm_membership_type' => 'membership_type',
+    'civicrm_group' => 'group',
+    'civicrm_grant' => 'grant',
+    'civicrm_tag' => 'tag',
+  );
+  
+    return $whitelist;
+}
+
+
+//helper function to convert CamelCase entity names to 
+// lower case for matching to existing data
+
+function _cma_create_user_get_entity_name_from_camel($entity) {
+  if ($entity == strtolower($entity)) {
+    return $entity;
+  }
+  else {
+    $entity = ltrim(strtolower(
+      str_replace('U_F', 'uf',
+        // That's CamelCase, beside an odd UFCamel that is expected as uf_camel
+        preg_replace('/(?=[A-Z])/', '_$0', $entity)
+      )), '_');
+  }
+  return $entity;
+}
+
+function cma_create_user_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
+
+//// dsm($formName,"form name");
+//// dsm($fields,"form fields");
+/**
+  if ($formName == "CRM_Event_Form_Participant") {
+    if ($fields['status_id'] == 2) {
+//      // dsm($form,"the form");
+
+      $contact = civicrm_api3('Contact', 'get', array(
+        'sequential' => 1,
+        'id' => $form->_contactId,
+      ));
+//      // dsm($contact,"the contact");
+      $contact_email = $contact['values'][0]['email'];
+      $drupal_user = user_load_by_mail($contact_email);
+//      // dsm($drupal_user,"drupal user");
+      if (isset($drupal_user) && $drupal_user->uid >=2) {
+//        // dsm("drupal account exists");
+        $errors = array();
+        $errors['user'] = ts( 'This contact already has a drupal account' );
+             drupal_set_message( "<strong><p class='error'>" . 
+                                t("This contact already has a drupal account") .". </p><p class='error'>" .
+                                $errorMsgAdd . '</p></strong>' );
+
+        return $errors;
+
+      }
+    }
+  }
+*/
+}
+
+function cma_create_user_civicrm_post($op, $object_name, $object_id, &$object_ref) {
+
+// get the variables from settings
+
+  $trigger_object_name = variable_get('cma_create_user_trigger');
+  $trigger_op = variable_get('cma_create_user_op');
+  $trigger_type_id = variable_get('cma_create_user_type_id');
+  $group_toadd = variable_get('cma_create_user_group');
+
+//if activity of type NPO is created
+//load contact, check birthday
+//put in right group (producer or youth producer)
+//check to see if they have a drupal account
+//if not call user create function 
+  if ($object_name == $trigger_object_name){
+    if ($op ==  $trigger_op) {
+    // dsm($object_ref,"activity");
+
+// if the activity is of type NPO
+      if ($object_ref->activity_type_id == $trigger_type_id) || ($object_ref->status_id == $trigger_type_id) {
+        if ($trigger_object_name == "Activity") {
+// load the activity contact record of the "target" (the producer)
+          $activity_contact = civicrm_api3('ActivityContact', 'get', array(
+            'sequential' => 1,
+            'activity_id' => $object_ref->id,
+            'record_type_id' => "Activity Targets",
+          ));
+          // dsm($activity_contact,"activity contact");
+          $student_cid = $activity_contact['values'][0]['contact_id'];
+          // dsm($student_cid,"cid");
+        }
+        if ($trigger_object_name == "Participant") {
+// load the participant record of the "target" (the producer)
+          $student_cid = $object_ref->contact_id;
+          // dsm($student_cid,"cid");
+        }       
+	//TODO: we need to check for email address before moving ahead and
+	//throw and error to the operator if the contact has no email address
+
+
+
+// is there a drupal account for this contact record?
+        $student_uid = CRM_Core_BAO_UFMatch::getUFId($student_cid);
+        // dsm($student_uid,"uid");
+          if (isset($student_uid)) {
+            // dsm($student_cid,"cid to attach user to");
+            $contact = civicrm_api3('Contact', 'get', array(
+              'sequential' => 1,
+              'id' => $student_cid,
+            ));
+
+            $result = civicrm_api3('GroupContact', 'create', array(
+								   'sequential' => 1,
+								   'group_id' => $group_toadd,
+								   'contact_id' => $student_cid,
+								   ));
+// Load a user (admin in this case).
+            $account = user_load($student_uid);
+
+// Invoke the email. It will be queued along with other system mail to be sent during cron
+//_user_mail_notify('password_reset', $account);
+//dsm($result, "uid");
+//dsm($contact, "uid");
+
+	    return;
+	  }
+
+// TODO add this as an option in the admin screen so it can be disabled 
+
+// add to producer group
+            $contact = civicrm_api3('Contact', 'get', array(
+              'sequential' => 1,
+              'id' => $student_cid,
+            ));
+
+
+            $result = civicrm_api3('GroupContact', 'create', array(
+              'sequential' => 1,
+              'group_id' => $group_toadd,
+              'contact_id' => $student_cid,
+            ));
+
+//dsm($result, "no uid");
+//dsm($contact, "no uid");
+
+            cma_create_user_action_create_user($contact['values'][0],1);
+
+      
+    }
+  }
+  }
+//if a participant record is saved
+//and it is marked as 
+//participant status of "passed certification"
+//put in right group (producer or youth)
+//check to see if they have drupal account
+// if not call user create function 
+
+/**
+  if ($object_name == "Participant"){
+    // dsm($object_ref,"participant2");
+    if($object_ref->status_id == 2) {
+      $student_cid = $object_ref->contact_id;
+      $student_uid = CRM_Core_BAO_UFMatch::getUFId($student_cid);
+      // dsm($student_uid,"uid");
+      
+      	
+
+    $result = civicrm_api3('GroupContact', 'create', array(
+      'sequential' => 1,
+      'group_id' => 147,
+      'contact_id' => $student_cid,
+    ));
+      
+        if (!isset($student_uid)) {
+          // dsm($student_cid,"cid to attach user to");
+          $contact = civicrm_api3('Contact', 'get', array(
+            'sequential' => 1,
+            'id' => $student_cid,
+          ));
+          cma_create_user_action_create_user($contact['values'][0]);
+        }
+    }    
+  }
+*/
+}
+
+
+
+
+
+
+//user create function 
+//this makes a drupal account linked
+//to the contact passed to it
+
+ 
+function cma_create_user_action_create_user($contact, $is_active, $notify = TRUE, $signin = FALSE) {
+//  if (!is_array($contact)) {
+    // Perhaps we should be accepting object rather than array here?
+//    $contact = (array) $contact;
+//  }
+  // dsm($contact,"contact");
+  
+  // We'll use the civicrm sync mechanism to see if Civi can match the
+  // contact to an existing user.
+  //
+  // Don't think this is a great approach but will use for now - could
+  // just create the user but no great support for that yet.
+
+
+  if (empty($contact['display_name']) || empty($contact['email'])) {
+    $contact = civicrm_api('contact', 'getsingle', array(
+      'version' => 3,
+      'id' => $contact['id'],
+      'sequential' => 1,
+//      'status' => 1,
+      'return' => 'email,display_name',
+      'roles' => array(
+      DRUPAL_AUTHENTICATED_RID => 'authenticated user',
+//             9 => 'HELP Student',
+            ),
+    ));
+  }
+  if (!is_string($contact['email']) && isset($contact['email'][0]->email)) {
+    $contact['email'] = $contact['email'][0]->email;
+  }
+  // @TODO What happens if they don't have an email at this point?
+  // An email is a pre-requisite for a Drupal account, so the action
+  // fails if they don't have an email.
+//dsm($contact['id'], "ID");
+//dsm($contact['display_name'], "NAME");
+//dsm($contact);
+//$parts = explode("@", $contact['email'] );
+//$login_name = $parts[0];
+
+// TODO this logic needs to move into a function in an include
+// so the module can be generic and flexible. 
+
+// get first 2 of first name and last 4 of last name 
+
+
+  $params = array(
+    'name' => $contact['display_name']." ".$contact['id'],
+//    'name' => $login_name,
+    'mail' => $contact['email'],
+    'email' => $contact['email'],
+    'init' => $contact['email'],
+  );
+  // set a number to be iterated if username exists 
+  $user_suffix = 2;
+  // Check if the requested username is available.
+  $errors = array();
+  $config = CRM_Core_Config::singleton();
+  $config->userSystem->checkUserNameEmailExists($params, $errors);
+  if (!empty($errors)) {
+//     foreach ($errors as $error) {
+//       drupal_set_message(t($error), 'error');
+//     }
+//TODO URGENT figure out how to do this as a proper loop!
+    //try again until we get a success, iterating our number along the way
+    $params['name'] = $params['name']."-".$user_suffix;
+    $user_suffix ++;
+    $config->userSystem->checkUserNameEmailExists($params, $errors);
+    if (!empty($errors)) {
+      $params['name'] = $params['name']."-".$user_suffix;
+      $user_suffix ++;
+      $config->userSystem->checkUserNameEmailExists($params, $errors);
+    }
+    
+//    return FALSE;
+  }
+  $params['cms_name'] = $params['name'];
+//  $params['cms_name'] = $params['name'] = $user['name'] = !empty($contact['display_name']) ? $contact['display_name'] : $params['mail'];
+
+//set a random password
+
+  $params['cms_pass'] = $user['pass'] = substr(str_shuffle("abcefghijklmnopqrstuvwxyz"), 0, 8);
+  $params['status'] = $is_active;
+
+
+  if ($notify) {
+    $params['notify'] = TRUE;
+  }
+
+//TODO this probably does not need to be set twice
+// here and in the initial user array declaration above 
+  $params['roles'] = array(
+  
+//  TODO: make this a config
+    DRUPAL_AUTHENTICATED_RID => 'authenticated user',
+//           9 => 'HELP Student',
+  );
+
+  // Set $config->inCiviCRM = TRUE to prevent creating a duplicate
+  // contact from user_save().
+  $config = CRM_Core_Config::singleton();
+  $config->inCiviCRM = TRUE;
+//// dsm($params);
+  $user_object = user_save('', $params);
+  $user_object->password = $user['pass'];
+
+  $config->inCiviCRM = FALSE;
+
+  // If selected in action configuration, notify the newly created
+  // user & send registration link. Does not contain password in D7.
+  if ($notify) {
+    drupal_mail('user', 'register_no_approval_required', $params['mail'], NULL, array('account' => $user_object), variable_get('site_mail'));
+  }
+
+  // CiviCRM doesn't do this when created off CiviCRM Form.
+  //
+  // Note that we 'pretend' to be logging in to make it do a ufmatch
+  // on just the email.
+  CRM_Core_BAO_UFMatch::synchronizeUFMatch($user_object, $user_object->uid, $contact['email'], 'drupal', NULL, NULL, TRUE);
+
+  // If selected in action configuration, automatically sign in the
+  // current user.
+  if ($signin) {
+    global $user;
+    $user = user_load($user_object->uid);
+    watchdog('cma_create_user', 'User %name automatically logged in during account creation process.', array('%name' => $user->name), WATCHDOG_INFO);
+    $form_values = array('uid' => $user->uid);
+    user_login_finalize($form_values);
+  }
+// dsm($user,"created account");
+  return array('civicrm_user' => $user_object);
+  
+}

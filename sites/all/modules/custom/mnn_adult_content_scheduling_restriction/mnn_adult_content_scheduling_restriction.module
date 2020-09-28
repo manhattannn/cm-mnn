@@ -37,8 +37,10 @@ function mnn_adult_content_scheduling_restriction_form_validate($form, &$form_st
 //dsm($form_state);
   $project_id = $form_state['values']['field_airing_project_ref']['und'][0]['target_id']; 
   $project_node = node_load($project_id);
+  $episode_id = $form_state['values']['field_airing_project_ref']['und'][0]['target_id']; 
+  $episode_node = node_load($episode_id);
 //  dsm($project_node->field_pbcore_fcc_ratings['und'][0]['tid']);
-  if ($project_node->field_pbcore_fcc_ratings['und'][0]['tid'] == 751) {
+  if ($project_node->field_pbcore_fcc_ratings['und'][0]['tid'] == 751) || ($episode_node->field_pbcore_fcc_ratings['und'][0]['tid'] == 751) {
     //TODO pull this from a settings page
     // n 
 //    $no_adult_content_start_time = date("H:i:s",strtotime("08:00:00"));
@@ -63,7 +65,14 @@ function mnn_adult_content_scheduling_restriction_form_validate($form, &$form_st
     
   }
 }
+function mnn_adult_content_scheduling_restriction_civicrm_post($op, $object_name, $object_id, &$object_ref) {
 
+dsm($object_name);
+dsm($op);
+dsm($object_id);
+dsm($object_ref);
+
+}
 
 function mnn_adult_content_scheduling_restriction_form() {
   $form = array();
