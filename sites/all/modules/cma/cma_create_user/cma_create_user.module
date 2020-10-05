@@ -168,7 +168,7 @@ function cma_create_user_civicrm_post($op, $object_name, $object_id, &$object_re
     // dsm($object_ref,"activity");
 
 // if the activity is of type NPO
-      if ($object_ref->activity_type_id == $trigger_type_id) || ($object_ref->status_id == $trigger_type_id) {
+      if ($object_ref->activity_type_id == $trigger_type_id || $object_ref->status_id == $trigger_type_id) {
         if ($trigger_object_name == "Activity") {
 // load the activity contact record of the "target" (the producer)
           $activity_contact = civicrm_api3('ActivityContact', 'get', array(
@@ -329,18 +329,23 @@ function cma_create_user_action_create_user($contact, $is_active, $notify = TRUE
 // so the module can be generic and flexible. 
 
 // get first 2 of first name and last 4 of last name 
-
+// get first 4 of first name if needed later to create a unique username
+  $username_first_part = substr($contact['first_name'], 0, 2);
+  $username_first_part_fallback = substr($contact['first_name'], 0, 4);
+  $username_second_part = substr($contact['last_name'], 0, 4);
+  $username_part_seperator = "_";
+  $username_optional_seperator = "-";
 
   $params = array(
-    'name' => $contact['display_name']." ".$contact['id'],
+    'name' => strtoupper($username_first_part.$username_second_part),
 //    'name' => $login_name,
     'mail' => $contact['email'],
     'email' => $contact['email'],
     'init' => $contact['email'],
   );
   // set a number to be iterated if username exists 
-  $user_suffix = 2;
   // Check if the requested username is available.
+  $user_suffix = 2;
   $errors = array();
   $config = CRM_Core_Config::singleton();
   $config->userSystem->checkUserNameEmailExists($params, $errors);
@@ -348,16 +353,15 @@ function cma_create_user_action_create_user($contact, $is_active, $notify = TRUE
 //     foreach ($errors as $error) {
 //       drupal_set_message(t($error), 'error');
 //     }
-//TODO URGENT figure out how to do this as a proper loop!
-    //try again until we get a success, iterating our number along the way
-    $params['name'] = $params['name']."-".$user_suffix;
-    $user_suffix ++;
-    $config->userSystem->checkUserNameEmailExists($params, $errors);
-    if (!empty($errors)) {
-      $params['name'] = $params['name']."-".$user_suffix;
-      $user_suffix ++;
+    //try with the optional first part. 
+      $params['name'] = strtoupper($username_first_part_fallback.$username_second_part);
       $config->userSystem->checkUserNameEmailExists($params, $errors);
-    }
+      while (!empty($errors)) {
+      
+        $params['name'] = $params['name']."-".$user_suffix;
+        $user_suffix ++;
+        $config->userSystem->checkUserNameEmailExists($params, $errors);
+      }
     
 //    return FALSE;
   }
@@ -387,7 +391,7 @@ function cma_create_user_action_create_user($contact, $is_active, $notify = TRUE
   // contact from user_save().
   $config = CRM_Core_Config::singleton();
   $config->inCiviCRM = TRUE;
-//// dsm($params);
+dsm($params);
   $user_object = user_save('', $params);
   $user_object->password = $user['pass'];
 
@@ -396,7 +400,7 @@ function cma_create_user_action_create_user($contact, $is_active, $notify = TRUE
   // If selected in action configuration, notify the newly created
   // user & send registration link. Does not contain password in D7.
   if ($notify) {
-    drupal_mail('user', 'register_no_approval_required', $params['mail'], NULL, array('account' => $user_object), variable_get('site_mail'));
+//    drupal_mail('user', 'register_no_approval_required', $params['mail'], NULL, array('account' => $user_object), variable_get('site_mail'));
   }
 
   // CiviCRM doesn't do this when created off CiviCRM Form.
