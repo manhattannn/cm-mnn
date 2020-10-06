@@ -16,7 +16,7 @@ function cm_airing_grid_grid_header_form ($form, &$form_state, $channel,
 					  $grid_mode = "filter_end") {
 	
   global $base_url;
-
+//dsm($form_state);
   $form['#action'] = url($base_url.'/admin/manage/scheduling');
   	
   $form['collapsed_grid_header'] = array(

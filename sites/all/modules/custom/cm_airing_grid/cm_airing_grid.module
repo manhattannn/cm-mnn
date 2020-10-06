@@ -86,10 +86,40 @@ function cm_airing_grid_set_show_for_airing($airing_id, $show_nid) {
 	$show_nid;
       $airing->cm_use_auto_title = TRUE;
       $airing->cm_use_auto_endtime = TRUE;
+      $show_node = node_load($show_nid);
+    //  dsm($show_node);
+//      $airing_node = entity_load("airing",$airing_id);
+     // dsm($airing);
+      if ($show_node->field_pbcore_fcc_ratings['und'][0]['tid'] == 751) {
+      // do validation
+     // dsm("validation");
+        $no_adult_content_start_time = variable_get('mnn_adult_content_scheduling_restriction_start');
+	$no_adult_content_end_time = variable_get('mnn_adult_content_scheduling_restriction_end');
+	$airing_start_time = $airing->field_airing_date['und'][0]['value'];
+	$airing_end_time = $airing->field_airing_date['und'][0]['value2'];
+//	dsm(date("H:i:s",strtotime($no_adult_content_start_time)));
+//	dsm(date("H:i:s",strtotime($no_adult_content_end_time)));
+//	dsm(date("H:i:s",strtotime($airing_start_time)));
+//	dsm(date("H:i:s",strtotime($airing_end_time)));
+        if (date("H:i:s",strtotime($airing_start_time))  >= $no_adult_content_start_time && date("H:i:s",strtotime($airing_start_time)) <= $no_adult_content_end_time) {
+           //     dsm("This project has adult content and this airing starts during restricted time period");
+          drupal_set_message(t('AIRING NOT UPDATED! The selected episode has adult content and this airing starts during restricted time period'),'error');
+	  $donotsave="yes";
+	}
+	if (date("H:i:s",strtotime($airing_end_time))  >= $no_adult_content_start_time && date("H:i:s",strtotime($airing_end_time)) <= $no_adult_content_end_time) {
+	  //      dsm("AIRING NOT UPDATED! The selected episode has adult content and airing ends during restricted time period");
+	    drupal_set_message(t('AIRING NOT UPDATED! The selected episode has adult content and this airing ends during restricted time period'), 'error');
+           $donotsave="yes";
+	}
+       			     
+     }
+//     dsm($airing);
+      if ($donotsave != "yes") {
       entity_save('airing', $airing);
+      }
     }
   }
-
+//    dsm($airing);
   drupal_set_message("Successfully added show to ".
 		     $airing->field_airing_title[LANGUAGE_NONE][0]['value']);
 
