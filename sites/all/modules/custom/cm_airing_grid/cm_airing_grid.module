@@ -105,17 +105,21 @@ function cm_airing_grid_set_show_for_airing($airing_id, $show_nid) {
            //     dsm("This project has adult content and this airing starts during restricted time period");
           drupal_set_message(t('AIRING NOT UPDATED! The selected episode has adult content and this airing starts during restricted time period'),'error');
 	  $donotsave="yes";
-	}
-	if (date("H:i:s",strtotime($airing_end_time))  >= $no_adult_content_start_time && date("H:i:s",strtotime($airing_end_time)) <= $no_adult_content_end_time) {
-	  //      dsm("AIRING NOT UPDATED! The selected episode has adult content and airing ends during restricted time period");
-	    drupal_set_message(t('AIRING NOT UPDATED! The selected episode has adult content and this airing ends during restricted time period'), 'error');
-           $donotsave="yes";
-	}
+	      }
+       	if (date("H:i:s",strtotime($airing_end_time))  >= $no_adult_content_start_time && date("H:i:s",strtotime($airing_end_time)) <= $no_adult_content_end_time) {
+// 	  //      dsm("AIRING NOT UPDATED! The selected episode has adult content and airing ends during restricted time period");
+          dsm($airing_start_time);
+          dsm($airing_end_time);
+          dsm($no_adult_content_start_time);
+          dsm($no_adult_content_end_time);
+     	    drupal_set_message(t('AIRING NOT UPDATED! The selected episode has adult content and this airing ends during restricted time period'), 'error');
+          $donotsave="yes";
+      	}
        			     
-     }
+      }
 //     dsm($airing);
       if ($donotsave != "yes") {
-      entity_save('airing', $airing);
+        entity_save('airing', $airing);
       }
     }
   }
