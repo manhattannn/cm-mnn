@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 class CRM_Mailing_BAO_Query {
 
@@ -122,7 +106,7 @@ class CRM_Mailing_BAO_Query {
       }
     }
 
-    if (CRM_Utils_Array::value('mailing_campaign_id', $query->_returnProperties)) {
+    if (!empty($query->_returnProperties['mailing_campaign_id'])) {
       $query->_select['mailing_campaign_id'] = 'civicrm_mailing.campaign_id as mailing_campaign_id';
       $query->_element['mailing_campaign_id'] = 1;
       $query->_tables['civicrm_campaign'] = 1;
@@ -138,7 +122,7 @@ class CRM_Mailing_BAO_Query {
    * rather than a static function.
    */
   public static function getSearchFieldMetadata() {
-    $fields = ['mailing_job_start_date'];
+    $fields = ['mailing_job_start_date', 'is_archived'];
     $metadata = civicrm_api3('Mailing', 'getfields', [])['values'];
     $metadata = array_merge($metadata, civicrm_api3('MailingJob', 'getfields', [])['values']);
     return array_intersect_key($metadata, array_flip($fields));

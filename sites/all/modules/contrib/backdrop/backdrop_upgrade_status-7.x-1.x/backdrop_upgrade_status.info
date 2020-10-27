@@ -1,0 +1,7 @@
+name = Backdrop upgrade status
+description = Checks to see if the installed modules are ready for upgrade to Backdrop CMS.
+core = 7.x
+dependencies[] = update
+
+configure = admin/reports/updates/backdrop-upgrade
+

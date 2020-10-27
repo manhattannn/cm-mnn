@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 class CRM_Contact_Form_Search_Criteria {
 
@@ -260,7 +244,13 @@ class CRM_Contact_Form_Search_Criteria {
    */
   public static function getSearchFieldMetadata() {
     $fields = [
-      'sort_name' => ['title' => ts('Complete OR Partial Name'), 'template_grouping' => 'basic'],
+      'sort_name' => [
+        'title' => ts('Complete OR Partial Name'),
+        'template_grouping' => 'basic',
+        'template' => 'CRM/Contact/Form/Search/Criteria/Fields/sort_name.tpl',
+      ],
+      'first_name' => ['template_grouping' => 'basic'],
+      'last_name' => ['template_grouping' => 'basic'],
       'email' => ['title' => ts('Complete OR Partial Email'), 'entity' => 'Email', 'template_grouping' => 'basic'],
       'contact_tags' => ['name' => 'contact_tags', 'type' => CRM_Utils_Type::T_INT, 'is_pseudofield' => TRUE, 'template_grouping' => 'basic'],
       'created_date' => ['name' => 'created_date', 'template_grouping' => 'changeLog'],
@@ -428,7 +418,7 @@ class CRM_Contact_Form_Search_Criteria {
       'street_unit' => [ts('Apt/Unit/Suite'), $attributes['street_unit'], NULL, NULL],
     ];
 
-    $parseStreetAddress = CRM_Utils_Array::value('street_address_parsing', $addressOptions, 0);
+    $parseStreetAddress = $addressOptions['street_address_parsing'] ?? 0;
     $form->assign('parseStreetAddress', $parseStreetAddress);
     foreach ($elements as $name => $v) {
       list($title, $attributes, $select, $multiSelect) = $v;
@@ -621,7 +611,6 @@ class CRM_Contact_Form_Search_Criteria {
 
     foreach ($groupDetails as $key => $group) {
       $_groupTitle[$key] = $group['name'];
-      CRM_Core_ShowHideBlocks::links($form, $group['name'], '', '');
 
       foreach ($group['fields'] as $field) {
         $fieldId = $field['id'];

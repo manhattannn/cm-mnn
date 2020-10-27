@@ -3,7 +3,7 @@
  +--------------------------------------------------------------------+
  | CiviCRM version 5                                                  |
  +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
+ | Copyright CiviCRM LLC (c) 2004-2020                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -31,7 +31,7 @@
  * Ckeditor and tinyMCE
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC (c) 2004-2020
  * $Id$
  *
  */
@@ -71,7 +71,7 @@ function checkAuthentication() {
       break;
     }
     if(!$auth_function($config)) {
-      CRM_Core_Error::fatal(ts("You must be logged in with proper permissions to edit, add, or delete uploaded images."));
+      throw new CRM_Core_Exception(ts("You must be logged in with proper permissions to edit, add, or delete uploaded images."));
     }
 
     $_SESSION['KCFINDER']['disabled'] = false;

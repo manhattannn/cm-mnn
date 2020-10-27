@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 
 /**
@@ -61,7 +45,7 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
    * Prefix for the controller.
    * @var string
    */
-  protected $_prefix = "contribute_";
+  protected $_prefix = 'contribute_';
 
   /**
    * Explicitly declare the entity api name.
@@ -79,19 +63,11 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
   public function preProcess() {
     $this->set('searchFormName', 'Search');
 
-    $this->_searchButtonName = $this->getButtonName('refresh');
     $this->_actionButtonName = $this->getButtonName('next', 'action');
 
     $this->_done = FALSE;
 
     parent::preProcess();
-
-    $sortID = NULL;
-    if ($this->get(CRM_Utils_Sort::SORT_ID)) {
-      $sortID = CRM_Utils_Sort::sortIDValue($this->get(CRM_Utils_Sort::SORT_ID),
-        $this->get(CRM_Utils_Sort::SORT_DIRECTION)
-      );
-    }
 
     $this->_queryParams = CRM_Contact_BAO_Query::convertFormValues($this->_formValues);
     $selector = new CRM_Contribute_Selector_Search($this->_queryParams,
@@ -102,7 +78,7 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
       $this->_context
     );
     $prefix = NULL;
-    if ($this->_context == 'user') {
+    if ($this->_context === 'user') {
       $prefix = $this->_prefix;
     }
 
@@ -111,7 +87,7 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
 
     $controller = new CRM_Core_Selector_Controller($selector,
       $this->get(CRM_Utils_Pager::PAGE_ID),
-      $sortID,
+      $this->getSortID(),
       CRM_Core_Action::VIEW,
       $this,
       CRM_Core_Selector_Controller::TRANSFER,
@@ -131,16 +107,7 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
    * @throws \Exception
    */
   public function setDefaultValues() {
-    $lowReceiveDate = CRM_Utils_Request::retrieve('start', 'Timestamp');
-    if (!empty($lowReceiveDate)) {
-      $this->_formValues['receive_date_low'] = date('Y-m-d H:i:s', strtotime($lowReceiveDate));
-      CRM_Core_Error::deprecatedFunctionWarning('pass receive_date_low not start');
-    }
-    $highReceiveDate = CRM_Utils_Request::retrieve('end', 'Timestamp');
-    if (!empty($highReceiveDate)) {
-      $this->_formValues['receive_date_high'] = date('Y-m-d H:i:s', strtotime($highReceiveDate));
-      CRM_Core_Error::deprecatedFunctionWarning('pass receive_date_high not end');
-    }
+    $this->setDeprecatedDefaults();
     $this->_defaults = parent::setDefaultValues();
 
     $this->_defaults = array_merge($this->getEntityDefaults('ContributionRecur'), $this->_defaults);
@@ -156,9 +123,9 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
 
     // The membership or contribution id could be set on the form if viewing
     // an embedded block on ParticipantView or MembershipView.
-    $memberShipId = CRM_Utils_Request::retrieve('memberId', 'Positive', $this);
-    if (isset($memberShipId)) {
-      $this->_defaults['contribution_membership_id'] = $memberShipId;
+    $membershipId = CRM_Utils_Request::retrieve('memberId', 'Positive', $this);
+    if (isset($membershipId)) {
+      $this->_defaults['contribution_membership_id'] = $membershipId;
     }
     $participantId = CRM_Utils_Request::retrieve('participantId', 'Positive', $this);
     if (isset($participantId)) {
@@ -264,6 +231,8 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
    *        done.
    * The processing consists of using a Selector / Controller framework for getting the
    * search results.
+   *
+   * @throws \CRM_Core_Exception
    */
   public function postProcess() {
     if ($this->_done) {
@@ -277,9 +246,9 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
     $this->fixFormValues();
 
     // We don't show test records in summaries or dashboards
-    if (empty($this->_formValues['contribution_test']) && $this->_force && !empty($this->_context) && $this->_context == 'dashboard') {
+    if (empty($this->_formValues['contribution_test']) && $this->_force && !empty($this->_context) && $this->_context === 'dashboard') {
       // @todo - stop changing formValues - respect submitted form values, change a working array.
-      $this->_formValues["contribution_test"] = 0;
+      $this->_formValues['contribution_test'] = 0;
     }
 
     foreach ([
@@ -298,7 +267,6 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
         'contribution_soft_credit_type_id',
         'contribution_status_id',
         'contribution_trxn_id',
-        'contribution_page_id',
         'contribution_product_id',
         'invoice_id',
         'payment_instrument_id',
@@ -308,7 +276,7 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
       CRM_Contact_BAO_Query::processSpecialFormValue($this->_formValues, $specialParams);
 
       // @todo - stop changing formValues - respect submitted form values, change a working array.
-      $tags = CRM_Utils_Array::value('contact_tags', $this->_formValues);
+      $tags = $this->_formValues['contact_tags'] ?? NULL;
       if ($tags && !is_array($tags)) {
         // @todo - stop changing formValues - respect submitted form values, change a working array.
         unset($this->_formValues['contact_tags']);
@@ -323,7 +291,7 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
         }
       }
 
-      $group = CRM_Utils_Array::value('group', $this->_formValues);
+      $group = $this->_formValues['group'] ?? NULL;
       if ($group && !is_array($group)) {
         // @todo - stop changing formValues - respect submitted form values, change a working array.
         unset($this->_formValues['group']);
@@ -358,14 +326,6 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
       return;
     }
 
-    $sortID = NULL;
-    if ($this->get(CRM_Utils_Sort::SORT_ID)) {
-      $sortID = CRM_Utils_Sort::sortIDValue($this->get(CRM_Utils_Sort::SORT_ID),
-        $this->get(CRM_Utils_Sort::SORT_DIRECTION)
-      );
-    }
-
-    // @todo - stop changing formValues - respect submitted form values, change a working array.
     $this->_queryParams = CRM_Contact_BAO_Query::convertFormValues($this->_formValues);
     $selector = new CRM_Contribute_Selector_Search($this->_queryParams,
       $this->_action,
@@ -377,13 +337,13 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
     $selector->setKey($this->controller->_key);
 
     $prefix = NULL;
-    if ($this->_context == 'basic' || $this->_context == 'user') {
+    if ($this->_context === 'basic' || $this->_context === 'user') {
       $prefix = $this->_prefix;
     }
 
     $controller = new CRM_Core_Selector_Controller($selector,
       $this->get(CRM_Utils_Pager::PAGE_ID),
-      $sortID,
+      $this->getSortID(),
       CRM_Core_Action::VIEW,
       $this,
       CRM_Core_Selector_Controller::SESSION,
@@ -392,7 +352,7 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
     $controller->setEmbedded(TRUE);
 
     $query = &$selector->getQuery();
-    if ($this->_context == 'user') {
+    if ($this->_context === 'user') {
       $query->setSkipPermission(TRUE);
     }
 
@@ -403,6 +363,8 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
    * Use values from $_GET if force is set to TRUE.
    *
    * Note that this means that GET over-rides POST. This was a historical decision & the reasoning is not explained.
+   *
+   * @throws \CRM_Core_Exception
    */
   public function fixFormValues() {
     if (!$this->_force) {
@@ -481,6 +443,30 @@ class CRM_Contribute_Form_Search extends CRM_Core_Form_Search {
   protected function setSearchMetadata() {
     $this->addSearchFieldMetadata(['Contribution' => CRM_Contribute_BAO_Query::getSearchFieldMetadata()]);
     $this->addSearchFieldMetadata(['ContributionRecur' => CRM_Contribute_BAO_ContributionRecur::getContributionRecurSearchFieldMetadata()]);
+  }
+
+  /**
+   * Handling for url params that are deprecated.
+   *
+   * @throws \CRM_Core_Exception
+   */
+  protected function setDeprecatedDefaults() {
+    $lowReceiveDate = CRM_Utils_Request::retrieve('start', 'Timestamp');
+    if (!empty($lowReceiveDate)) {
+      $this->_formValues['receive_date_low'] = date('Y-m-d H:i:s', strtotime($lowReceiveDate));
+      CRM_Core_Error::deprecatedFunctionWarning('pass receive_date_low not start');
+    }
+    $highReceiveDate = CRM_Utils_Request::retrieve('end', 'Timestamp');
+    if (!empty($highReceiveDate)) {
+      $this->_formValues['receive_date_high'] = date('Y-m-d H:i:s', strtotime($highReceiveDate));
+      CRM_Core_Error::deprecatedFunctionWarning('pass receive_date_high not end');
+    }
+    //check for contribution page id.
+    $contribPageId = CRM_Utils_Request::retrieve('pid', 'Positive', $this);
+    if ($contribPageId) {
+      CRM_Core_Error::deprecatedFunctionWarning('pass contribution_page_id');
+      $this->_formValues['contribution_page_id'] = $contribPageId;
+    }
   }
 
 }

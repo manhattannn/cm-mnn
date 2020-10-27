@@ -1,0 +1,61 @@
+diff --git a/file_resup.module b/file_resup.module
+index cb4b8e7..f2855ca 100644
+--- a/file_resup.module
++++ b/file_resup.module
+@@ -94,8 +94,8 @@ function file_resup_upload() {
+       drupal_exit();
+     }
+ 
+-    // Retrieve the upload location scheme from the form element.
+-    $scheme = file_uri_scheme($element['#upload_location']);
++    // Upload as a temporary file.
++    $scheme = 'temporary';
+     if (!$scheme || !file_stream_wrapper_valid_scheme($scheme)) {
+       drupal_exit();
+     }
+@@ -171,7 +171,7 @@ function file_resup_upload() {
+   }
+ 
+   // Acquire an exclusive lock.
+-  if (!flock($fp, LOCK_EX)) {
++  if (stream_supports_lock($fp) && !flock($fp, LOCK_EX)) {
+     fclose($fp);
+     drupal_exit();
+   }
+@@ -203,7 +203,9 @@ function file_resup_upload() {
+ 
+   // Flush the output then unlock and close the file.
+   fflush($fp);
+-  flock($fp, LOCK_UN);
++  if (stream_supports_lock($fp)) {
++    flock($fp, LOCK_UN);
++  }
+   fclose($fp);
+ 
+   // Return the updated number of uploaded chunks.
+@@ -250,7 +252,7 @@ function file_resup_save_upload($element, $resup_file_id) {
+   // Ensure the destination is still valid.
+   $destination = $element['#upload_location'];
+   $destination_scheme = file_uri_scheme($destination);
+-  if (!$destination_scheme || $destination_scheme != $upload->scheme) {
++  if (!$destination_scheme) {
+     return FALSE;
+   }
+ 
+@@ -342,7 +344,7 @@ function file_resup_save_upload($element, $resup_file_id) {
+ 
+   // Move the uploaded file.
+   $file->uri = $destination;
+-  if (!rename($upload_uri, $file->uri)) {
++  if (!file_unmanaged_move($upload_uri, $file->uri)) {
+     form_set_error($form_field_name, t('File upload error. Could not move uploaded file.'));
+     watchdog('file_resup', 'Upload error. Could not move uploaded file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->uri));
+     return FALSE;
+@@ -365,6 +367,7 @@ function file_resup_save_upload($element, $resup_file_id) {
+ 
+   // Update the upload record.
+   $upload->fid = $file->fid;
++  $upload->scheme = $destination_scheme;
+   drupal_write_record('file_resup', $upload, 'upload_id');
+ 
+   return $file;

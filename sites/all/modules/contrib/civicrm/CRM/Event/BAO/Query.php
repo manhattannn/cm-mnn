@@ -1,36 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
- * $Id$
- *
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 class CRM_Event_BAO_Query extends CRM_Core_BAO_Query {
 
@@ -67,25 +49,25 @@ class CRM_Event_BAO_Query extends CRM_Core_BAO_Query {
     if (($query->_mode & CRM_Contact_BAO_Query::MODE_EVENT) ||
       CRM_Contact_BAO_Query::componentPresent($query->_returnProperties, 'participant_')
     ) {
-      $query->_select['participant_id'] = "civicrm_participant.id as participant_id";
+      $query->_select['participant_id'] = 'civicrm_participant.id as participant_id';
       $query->_element['participant_id'] = 1;
       $query->_tables['civicrm_participant'] = $query->_whereTables['civicrm_participant'] = 1;
 
       //add fee level
       if (!empty($query->_returnProperties['participant_fee_level'])) {
-        $query->_select['participant_fee_level'] = "civicrm_participant.fee_level as participant_fee_level";
+        $query->_select['participant_fee_level'] = 'civicrm_participant.fee_level as participant_fee_level';
         $query->_element['participant_fee_level'] = 1;
       }
 
       //add participant contact ID
       if (!empty($query->_returnProperties['participant_contact_id'])) {
-        $query->_select['participant_contact_id'] = "civicrm_participant.contact_id as participant_contact_id";
+        $query->_select['participant_contact_id'] = 'civicrm_participant.contact_id as participant_contact_id';
         $query->_element['participant_contact_id'] = 1;
       }
 
       //add fee amount
       if (!empty($query->_returnProperties['participant_fee_amount'])) {
-        $query->_select['participant_fee_amount'] = "civicrm_participant.fee_amount as participant_fee_amount";
+        $query->_select['participant_fee_amount'] = 'civicrm_participant.fee_amount as participant_fee_amount';
         $query->_element['participant_fee_amount'] = 1;
       }
 
@@ -226,10 +208,11 @@ class CRM_Event_BAO_Query extends CRM_Core_BAO_Query {
   }
 
   /**
-   * @param $query
+   * Get event related where clauses.
+   *
+   * @param \CRM_Contact_BAO_Query $query
    */
   public static function where(&$query) {
-    $grouping = NULL;
     foreach (array_keys($query->_params) as $id) {
       if (empty($query->_params[$id][0])) {
         continue;
@@ -240,7 +223,6 @@ class CRM_Event_BAO_Query extends CRM_Core_BAO_Query {
         if ($query->_mode == CRM_Contact_BAO_Query::MODE_CONTACTS) {
           $query->_useDistinct = TRUE;
         }
-        $grouping = $query->_params[$id][3];
         self::whereClauseSingle($query->_params[$id], $query);
       }
     }
@@ -249,11 +231,14 @@ class CRM_Event_BAO_Query extends CRM_Core_BAO_Query {
   /**
    * @param $values
    * @param \CRM_Contact_BAO_Query $query
+   *
+   * @throws \CRM_Core_Exception
    */
   public static function whereClauseSingle(&$values, &$query) {
     $checkPermission = empty($query->_skipPermission);
     list($name, $op, $value, $grouping, $wildcard) = $values;
     $fields = array_merge(CRM_Event_BAO_Event::fields(), CRM_Event_BAO_Participant::exportableFields());
+    $fieldSpec = $fields[$values[0]] ?? [];
 
     switch ($name) {
       case 'event_low':
@@ -362,9 +347,9 @@ class CRM_Event_BAO_Query extends CRM_Core_BAO_Query {
         return;
 
       case 'participant_status_id':
-        if ($value && is_array($value) && strpos($op, 'IN') === FALSE) {
-          $op = 'IN';
-        }
+        $query->handleWhereFromMetadata($fieldSpec, $name, $value, $op);
+        return;
+
       case 'participant_status':
       case 'participant_source':
       case 'participant_id':
@@ -377,7 +362,6 @@ class CRM_Event_BAO_Query extends CRM_Core_BAO_Query {
 
         $qillName = $name;
         if (in_array($name, [
-          'participant_status_id',
           'participant_source',
           'participant_id',
           'participant_contact_id',
@@ -487,12 +471,12 @@ class CRM_Event_BAO_Query extends CRM_Core_BAO_Query {
     $from = NULL;
     switch ($name) {
       case 'civicrm_participant':
-        $from = " LEFT JOIN civicrm_participant ON civicrm_participant.contact_id = contact_a.id ";
+        $from = ' LEFT JOIN civicrm_participant ON civicrm_participant.contact_id = contact_a.id ';
         break;
 
       case 'civicrm_event':
         //CRM-17121
-        $from = " LEFT JOIN civicrm_event ON civicrm_participant.event_id = civicrm_event.id ";
+        $from = ' LEFT JOIN civicrm_event ON civicrm_participant.event_id = civicrm_event.id ';
         break;
 
       case 'event_type':

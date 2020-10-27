@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 class CRM_Core_Payment_PayPalProIPN extends CRM_Core_Payment_BaseIPN {
 
@@ -92,7 +76,7 @@ class CRM_Core_Payment_PayPalProIPN extends CRM_Core_Payment_BaseIPN {
       throw new CRM_Core_Exception("Failure: Missing Parameter $name");
     }
     else {
-      return CRM_Utils_Array::value($name, $this->_invoiceData);
+      return $this->_invoiceData[$name] ?? NULL;
     }
   }
 
@@ -367,16 +351,16 @@ class CRM_Core_Payment_PayPalProIPN extends CRM_Core_Payment_BaseIPN {
       $this->failed($objects, $transaction);
       return;
     }
-    elseif ($status == 'Pending') {
-      $this->pending($objects, $transaction);
+    if ($status === 'Pending') {
+      Civi::log()->debug('Returning since contribution status is Pending');
       return;
     }
     elseif ($status == 'Refunded' || $status == 'Reversed') {
       $this->cancelled($objects, $transaction);
       return;
     }
-    elseif ($status != 'Completed') {
-      $this->unhandled($objects, $transaction);
+    elseif ($status !== 'Completed') {
+      Civi::log()->debug('Returning since contribution status is not handled');
       return;
     }
 
@@ -385,7 +369,7 @@ class CRM_Core_Payment_PayPalProIPN extends CRM_Core_Payment_BaseIPN {
     if ($contribution->contribution_status_id == $completedStatusId) {
       $transaction->commit();
       Civi::log()->debug('PayPalProIPN: Returning since contribution has already been handled.');
-      echo "Success: Contribution has already been handled<p>";
+      echo 'Success: Contribution has already been handled<p>';
       return;
     }
 
@@ -473,7 +457,10 @@ INNER JOIN civicrm_membership_payment mp ON m.id = mp.membership_id AND mp.contr
       }
     }
 
-    $paymentProcessorID = self::getPayPalPaymentProcessorID();
+    $paymentProcessorID = CRM_Utils_Array::value('processor_id', $this->_inputParameters);
+    if (!$paymentProcessorID) {
+      $paymentProcessorID = self::getPayPalPaymentProcessorID();
+    }
 
     if (!$this->validateData($input, $ids, $objects, TRUE, $paymentProcessorID)) {
       return;
@@ -506,9 +493,7 @@ INNER JOIN civicrm_membership_payment mp ON m.id = mp.membership_id AND mp.contr
    * @throws CRM_Core_Exception
    */
   public function getInput(&$input, &$ids) {
-    if (!$this->getBillingID($ids)) {
-      return;
-    }
+    $billingID = $ids['billing'] = CRM_Core_BAO_LocationType::getBilling();
 
     $input['txnType'] = self::retrieve('txn_type', 'String', 'POST', FALSE);
     $input['paymentStatus'] = self::retrieve('payment_status', 'String', 'POST', FALSE);
@@ -516,7 +501,6 @@ INNER JOIN civicrm_membership_payment mp ON m.id = mp.membership_id AND mp.contr
     $input['amount'] = self::retrieve('mc_gross', 'Money', 'POST', FALSE);
     $input['reasonCode'] = self::retrieve('ReasonCode', 'String', 'POST', FALSE);
 
-    $billingID = $ids['billing'];
     $lookup = [
       "first_name" => 'first_name',
       "last_name" => 'last_name',
@@ -601,7 +585,7 @@ INNER JOIN civicrm_membership_payment mp ON m.id = mp.membership_id AND mp.contr
     // & suspec main function may be a victom of copy & paste
     // membership would be an easy add - but not relevant to my customer...
     $this->_component = $input['component'] = 'contribute';
-    $input['trxn_date'] = date('Y-m-d-H-i-s', strtotime(self::retrieve('time_created', 'String')));
+    $input['trxn_date'] = date('Y-m-d H:i:s', strtotime(self::retrieve('time_created', 'String')));
     $paymentProcessorID = $contributionRecur['payment_processor_id'];
 
     if (!$this->validateData($input, $ids, $objects, TRUE, $paymentProcessorID)) {

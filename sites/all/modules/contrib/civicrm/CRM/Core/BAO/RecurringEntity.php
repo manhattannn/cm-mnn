@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 
 use When\When;
@@ -150,37 +134,17 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
   }
 
   /**
-   * Save records in civicrm_recurring_entity table.
+   * Create or update a RecurringEntity.
    *
    * @param array $params
-   *   Reference array contains the values submitted by the form.
-   *
-   * @return object
+   * @return CRM_Core_DAO_RecurringEntity
    */
-  public static function add(&$params) {
-    if (!empty($params['id'])) {
-      CRM_Utils_Hook::pre('edit', 'RecurringEntity', $params['id'], $params);
-    }
-    else {
-      CRM_Utils_Hook::pre('create', 'RecurringEntity', NULL, $params);
-    }
-
-    $daoRecurringEntity = new CRM_Core_DAO_RecurringEntity();
-    $daoRecurringEntity->copyValues($params);
-    $daoRecurringEntity->find(TRUE);
-    $result = $daoRecurringEntity->save();
-
-    if (!empty($params['id'])) {
-      CRM_Utils_Hook::post('edit', 'RecurringEntity', $daoRecurringEntity->id, $daoRecurringEntity);
-    }
-    else {
-      CRM_Utils_Hook::post('create', 'RecurringEntity', $daoRecurringEntity->id, $daoRecurringEntity);
-    }
-    return $result;
+  public static function add($params) {
+    return self::writeRecord($params);
   }
 
   /**
-   * Wrapper for the function add() to add entry in recurring entity
+   * Convenience wrapper for self::writeRecord
    *
    * @param int $parentId
    *   Parent entity id .
@@ -189,17 +153,15 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
    * @param string $entityTable
    *   Name of the entity table .
    *
-   *
-   * @return object
+   * @return CRM_Core_DAO_RecurringEntity
    */
   public static function quickAdd($parentId, $entityId, $entityTable) {
-    $params
-      = [
-        'parent_id' => $parentId,
-        'entity_id' => $entityId,
-        'entity_table' => $entityTable,
-      ];
-    return self::add($params);
+    $params = [
+      'parent_id' => $parentId,
+      'entity_id' => $entityId,
+      'entity_table' => $entityTable,
+    ];
+    return self::writeRecord($params);
   }
 
   /**
@@ -262,6 +224,7 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
    * Generate new DAOs and along with entries in civicrm_recurring_entity table.
    *
    * @return array
+   * @throws CRM_Core_Exception
    */
   public function generateEntities() {
     self::setStatus(self::RUNNING);
@@ -279,7 +242,7 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
         }
       }
       if (empty($findCriteria)) {
-        CRM_Core_Error::fatal("Find criteria missing to generate form. Make sure entity_id and table is set.");
+        throw new CRM_Core_Exception("Find criteria missing to generate form. Make sure entity_id and table is set.");
       }
 
       $count = 0;
@@ -335,7 +298,7 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
 
     $recursionDates = [];
     if (is_a($this->recursion, 'When\When')) {
-      $initialCount = CRM_Utils_Array::value('start_action_offset', $this->schedule);
+      $initialCount = $this->schedule['start_action_offset'] ?? NULL;
 
       $exRangeStart = $exRangeEnd = NULL;
       if (!empty($this->excludeDateRangeColumns)) {
@@ -585,11 +548,12 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
    *
    *
    * @return object
+   * @throws new CRM_Core_Exception
    */
   public static function copyCreateEntity($entityTable, $fromCriteria, $newParams, $createRecurringEntity = TRUE) {
     $daoName = self::$_tableDAOMapper[$entityTable];
     if (!$daoName) {
-      CRM_Core_Error::fatal("DAO Mapper missing for $entityTable.");
+      throw new CRM_Core_Exception("DAO Mapper missing for $entityTable.");
     }
     $newObject = CRM_Core_DAO::copyGeneric($daoName, $fromCriteria, $newParams);
 
@@ -602,6 +566,8 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
 
       CRM_Core_BAO_RecurringEntity::quickAdd($object->id, $newObject->id, $entityTable);
     }
+
+    CRM_Utils_Hook::copy(CRM_Core_DAO_AllCoreTables::getBriefName($daoName), $newObject);
     return $newObject;
   }
 
@@ -667,7 +633,7 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
         $updateDAO = CRM_Core_DAO::cascadeUpdate($daoName, $obj->id, $entityID, $skipData);
       }
       else {
-        CRM_Core_Error::fatal("DAO Mapper missing for $entityTable.");
+        throw new CRM_Core_Exception("DAO Mapper missing for $entityTable.");
       }
     }
     // done with processing. lets unset static var.
@@ -721,7 +687,7 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
     if (empty($hasaRecurringRecord)) {
       // check if its a linked entity
       if (array_key_exists($obj->__table, self::$_linkedEntitiesInfo) &&
-        !CRM_Utils_Array::value('is_multirecord', self::$_linkedEntitiesInfo[$obj->__table])
+        empty(self::$_linkedEntitiesInfo[$obj->__table]['is_multirecord'])
       ) {
         $linkedDAO = new self::$_tableDAOMapper[$obj->__table]();
         $linkedDAO->id = $obj->id;
@@ -847,7 +813,7 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
         foreach (self::$_linkedEntitiesInfo as $linkedTable => $linfo) {
           $daoName = self::$_tableDAOMapper[$linkedTable];
           if (!$daoName) {
-            CRM_Core_Error::fatal("DAO Mapper missing for $linkedTable.");
+            throw new CRM_Core_Exception("DAO Mapper missing for $linkedTable.");
           }
 
           $linkedDao = new $daoName();
@@ -908,7 +874,7 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
     //For Repeats on:(weekly case)
     if ($formParams['repetition_frequency_unit'] == 'week') {
       if (!empty($formParams['start_action_condition'])) {
-        $repeats_on = CRM_Utils_Array::value('start_action_condition', $formParams);
+        $repeats_on = $formParams['start_action_condition'] ?? NULL;
         $dbParams['start_action_condition'] = implode(",", array_keys($repeats_on));
       }
     }
@@ -1160,7 +1126,7 @@ class CRM_Core_BAO_RecurringEntity extends CRM_Core_DAO_RecurringEntity {
   public static function updateModeLinkedEntity($entityId, $linkedEntityTable, $mainEntityTable) {
     $result = [];
     if ($entityId && $linkedEntityTable && $mainEntityTable) {
-      if (CRM_Utils_Array::value($linkedEntityTable, self::$_tableDAOMapper)) {
+      if (!empty(self::$_tableDAOMapper[$linkedEntityTable])) {
         $dao = self::$_tableDAOMapper[$linkedEntityTable];
       }
       else {

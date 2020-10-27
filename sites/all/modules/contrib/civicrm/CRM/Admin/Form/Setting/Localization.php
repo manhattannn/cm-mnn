@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 
 /**
@@ -54,13 +38,6 @@ class CRM_Admin_Form_Setting_Localization extends CRM_Admin_Form_Setting {
     'provinceLimit' => CRM_Core_BAO_Setting::LOCALIZATION_PREFERENCES_NAME,
     'uiLanguages' => CRM_Core_BAO_Setting::LOCALIZATION_PREFERENCES_NAME,
   ];
-
-  public function preProcess() {
-    if (!CRM_Core_I18n::isMultiLingual()) {
-      CRM_Core_Resources::singleton()
-        ->addScriptFile('civicrm', 'templates/CRM/Admin/Form/Setting/Localization.js', 1, 'html-header');
-    }
-  }
 
   /**
    * Build the form object.
@@ -184,29 +161,12 @@ class CRM_Admin_Form_Setting_Localization extends CRM_Admin_Form_Setting {
 
     //cache contact fields retaining localized titles
     //though we changed localization, so reseting cache.
-    Civi::cache('fields')->flush();
+    Civi::cache('fields')->clear();
 
     //CRM-8559, cache navigation do not respect locale if it is changed, so reseting cache.
-    Civi::cache('navigation')->flush();
+    Civi::cache('navigation')->clear();
     // reset ACL and System caches
     CRM_Core_BAO_Cache::resetCaches();
-
-    // we do this only to initialize monetary decimal point and thousand separator
-    $config = CRM_Core_Config::singleton();
-
-    // save enabled currencies and default currency in option group 'currencies_enabled'
-    // CRM-1496
-    if (empty($values['currencyLimit'])) {
-      $values['currencyLimit'] = [$values['defaultCurrency']];
-    }
-    elseif (!in_array($values['defaultCurrency'], $values['currencyLimit'])) {
-      $values['currencyLimit'][] = $values['defaultCurrency'];
-    }
-
-    self::updateEnabledCurrencies($values['currencyLimit'], $values['defaultCurrency']);
-
-    // unset currencyLimit so we dont store there
-    unset($values['currencyLimit']);
 
     // make the site multi-lang if requested
     if (!empty($values['makeMultilingual'])) {
@@ -236,6 +196,21 @@ class CRM_Admin_Form_Setting_Localization extends CRM_Admin_Form_Setting {
 
     // if we manipulated the language list, return to the localization admin screen
     $return = (bool) (CRM_Utils_Array::value('makeMultilingual', $values) or CRM_Utils_Array::value('addLanguage', $values));
+
+    // Update enabled currencies
+    // we do this only to initialize monetary decimal point and thousand separator
+    $config = CRM_Core_Config::singleton();
+    // save enabled currencies and default currency in option group 'currencies_enabled'
+    // CRM-1496
+    if (empty($values['currencyLimit'])) {
+      $values['currencyLimit'] = [$values['defaultCurrency']];
+    }
+    elseif (!in_array($values['defaultCurrency'], $values['currencyLimit'])) {
+      $values['currencyLimit'][] = $values['defaultCurrency'];
+    }
+    self::updateEnabledCurrencies($values['currencyLimit'], $values['defaultCurrency']);
+    // unset currencyLimit so we dont store there
+    unset($values['currencyLimit']);
 
     $filteredValues = $values;
     unset($filteredValues['makeMultilingual']);

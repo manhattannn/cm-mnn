@@ -1,27 +1,11 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
@@ -29,9 +13,41 @@
  * Just another collection of static utils functions.
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 class CRM_Utils_SQL {
+
+  /**
+   * Given a string like "UPDATE some_table SET !field = @value", replace "!field" and "@value".
+   *
+   * This is syntactic sugar for using CRM_Utils_SQL_*::interpolate() without an OOP representation of the query.
+   *
+   * @param string $expr SQL expression
+   * @param null|array $args a list of values to insert into the SQL expression; keys are prefix-coded:
+   *   prefix '@' => escape SQL
+   *   prefix '#' => literal number, skip escaping but do validation
+   *   prefix '!' => literal, skip escaping and validation
+   *   if a value is an array, then it will be imploded
+   *
+   * PHP NULL's will be treated as SQL NULL's. The PHP string "null" will be treated as a string.
+   *
+   * @return string
+   */
+  public static function interpolate($expr, $args) {
+    if (!isset(Civi::$statics[__CLASS__][__FUNCTION__])) {
+      Civi::$statics[__CLASS__][__FUNCTION__] = new class extends CRM_Utils_SQL_BaseParamQuery {
+
+        public function __construct() {
+          $this->mode = CRM_Utils_SQL_BaseParamQuery::INTERPOLATE_INPUT;
+          $this->strict();
+        }
+
+      };
+    }
+    /** @var \CRM_Utils_SQL_BaseParamQuery $qb */
+    $qb = Civi::$statics[__CLASS__][__FUNCTION__];
+    return $qb->strict()->interpolate($expr, $args);
+  }
 
   /**
    * Helper function for adding the permissioned subquery from one entity onto another

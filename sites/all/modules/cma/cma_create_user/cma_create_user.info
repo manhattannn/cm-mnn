@@ -1,0 +1,10 @@
+name = CMA Create User
+description = This module creates drupal user accounts based on existing CiviCRM contact records based on various factors (group, activity, etc.)
+core = 7.x
+package = CMA
+version = 7.x-1.0
+project = cma
+
+
+files[] = cma_create_user.module
+configure = admin/config/cma/cma_create_user

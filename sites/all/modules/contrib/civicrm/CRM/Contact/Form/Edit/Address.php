@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 
 /**
@@ -74,6 +58,7 @@ class CRM_Contact_Form_Edit_Address {
     $form->addField(
       "address[$blockId][is_primary]", [
         'entity' => 'address',
+        'type' => 'CheckBox',
         'label' => ts('Primary location for this contact'),
         'text' => ts('Primary location for this contact'),
       ] + $js);
@@ -172,7 +157,9 @@ class CRM_Contact_Form_Edit_Address {
       $form->addEntityRef("address[$blockId][master_contact_id]", ts('Share With'), ['create' => $profileLinks, 'api' => ['extra' => ['contact_type']]]);
 
       // do we want to update employer for shared address
-      $form->addElement('checkbox', "address[$blockId][update_current_employer]", NULL, ts('Set this organization as current employer'));
+      $employer_label = '<span class="addrel-employer">' . ts('Set this organization as current employer') . '</span>';
+      $household_label = '<span class="addrel-household">' . ts('Create a household member relationship with this contact') . '</span>';
+      $form->addElement('checkbox', "address[$blockId][add_relationship]", NULL, $employer_label . $household_label);
     }
   }
 
@@ -300,7 +287,7 @@ class CRM_Contact_Form_Edit_Address {
               $streetAddress .= ' ';
             }
             // CRM-17619 - if the street number suffix begins with a number, add a space
-            $numsuffix = CRM_Utils_Array::value($fld, $address);
+            $numsuffix = $address[$fld] ?? NULL;
             if ($fld === 'street_number_suffix' && !empty($numsuffix)) {
               if (ctype_digit(substr($numsuffix, 0, 1))) {
                 $streetAddress .= ' ';
@@ -314,7 +301,7 @@ class CRM_Contact_Form_Edit_Address {
           }
           if (isset($address['street_number'])) {
             // CRM-17619 - if the street number suffix begins with a number, add a space
-            $thesuffix = CRM_Utils_Array::value('street_number_suffix', $address);
+            $thesuffix = $address['street_number_suffix'] ?? NULL;
             if ($thesuffix) {
               if (ctype_digit(substr($thesuffix, 0, 1))) {
                 $address['street_number'] .= " ";
@@ -324,7 +311,7 @@ class CRM_Contact_Form_Edit_Address {
           }
           // build array for set default.
           foreach ($parseFields as $field) {
-            $addressValues["{$field}_{$cnt}"] = CRM_Utils_Array::value($field, $address);
+            $addressValues["{$field}_{$cnt}"] = $address[$field] ?? NULL;
           }
           // don't load fields, use js to populate.
           foreach (['street_number', 'street_name', 'street_unit'] as $f) {
@@ -351,7 +338,7 @@ class CRM_Contact_Form_Edit_Address {
           }
         }
         $form->assign('showHideAddressFields', $parsedAddress);
-        $form->assign('loadShowHideAddressFields', empty($parsedAddress) ? FALSE : TRUE);
+        $form->assign('loadShowHideAddressFields', !empty($parsedAddress));
       }
       // end of parse address functionality
     }

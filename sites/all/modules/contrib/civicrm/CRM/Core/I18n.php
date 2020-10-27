@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 class CRM_Core_I18n {
 
@@ -54,18 +38,26 @@ class CRM_Core_I18n {
   public static $SQL_ESCAPER = NULL;
 
   /**
-   * Encode a string for use in SQL.
+   * Escape a string if a mode is specified, otherwise return string unmodified.
    *
    * @param string $text
+   * @param string $mode
    * @return string
    */
-  protected static function escapeSql($text) {
-    if (self::$SQL_ESCAPER == NULL) {
-      return CRM_Core_DAO::escapeString($text);
+  protected static function escape($text, $mode) {
+    switch ($mode) {
+      case 'sql':
+        if (self::$SQL_ESCAPER == NULL) {
+          return CRM_Core_DAO::escapeString($text);
+        }
+        else {
+          return call_user_func(self::$SQL_ESCAPER, $text);
+        }
+
+      case 'js':
+        return substr(json_encode($text, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT), 1, -1);
     }
-    else {
-      return call_user_func(self::$SQL_ESCAPER, $text);
-    }
+    return $text;
   }
 
   /**
@@ -209,7 +201,7 @@ class CRM_Core_I18n {
           if (preg_match('/^[a-z][a-z]_[A-Z][A-Z]$/', $filename)) {
             $codes[] = $filename;
             if (!isset($all[$filename])) {
-              $all[$filename] = $labels[$filename];
+              $all[$filename] = $labels[$filename] ?? "($filename)";
             }
           }
         }
@@ -298,11 +290,7 @@ class CRM_Core_I18n {
    * @return string
    */
   public static function getResourceDir() {
-    static $dir = NULL;
-    if ($dir === NULL) {
-      $dir = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR . 'l10n' . DIRECTORY_SEPARATOR;
-    }
-    return $dir;
+    return CRM_Utils_File::addTrailingSlash(\Civi::paths()->getPath('[civicrm.l10n]/.'));
   }
 
   /**
@@ -332,23 +320,15 @@ class CRM_Core_I18n {
    *   the translated string
    */
   public function crm_translate($text, $params = []) {
-    if (isset($params['escape'])) {
-      $escape = $params['escape'];
-      unset($params['escape']);
-    }
+    $escape = $params['escape'] ?? NULL;
+    unset($params['escape']);
 
     // sometimes we need to {ts}-tag a string, but don’t want to
     // translate it in the template (like civicrm_navigation.tpl),
     // because we handle the translation in a different way (CRM-6998)
     // in such cases we return early, only doing SQL/JS escaping
     if (isset($params['skip']) and $params['skip']) {
-      if (isset($escape) and ($escape == 'sql')) {
-        $text = self::escapeSql($text);
-      }
-      if (isset($escape) and ($escape == 'js')) {
-        $text = addcslashes($text, "'");
-      }
-      return $text;
+      return self::escape($text, $escape);
     }
 
     $plural = $count = NULL;
@@ -405,17 +385,7 @@ class CRM_Core_I18n {
       $text = $this->strarg($text, $params);
     }
 
-    // escape SQL if we were asked for it
-    if (isset($escape) and ($escape == 'sql')) {
-      $text = self::escapeSql($text);
-    }
-
-    // escape for JavaScript (if requested)
-    if (isset($escape) and ($escape == 'js')) {
-      $text = addcslashes($text, "'");
-    }
-
-    return $text;
+    return self::escape($text, $escape);
   }
 
   /**
@@ -440,17 +410,7 @@ class CRM_Core_I18n {
 
     // do all wildcard translations first
 
-    // FIXME: Is there a constant we can reference instead of hardcoding en_US?
-    $replacementsLocale = $this->locale ? $this->locale : 'en_US';
-    if (!isset(Civi::$statics[__CLASS__]) || !array_key_exists($replacementsLocale, Civi::$statics[__CLASS__])) {
-      if (defined('CIVICRM_DSN') && !CRM_Core_Config::isUpgradeMode()) {
-        Civi::$statics[__CLASS__][$replacementsLocale] = CRM_Core_BAO_WordReplacement::getLocaleCustomStrings($replacementsLocale);
-      }
-      else {
-        Civi::$statics[__CLASS__][$replacementsLocale] = [];
-      }
-    }
-    $stringTable = Civi::$statics[__CLASS__][$replacementsLocale];
+    $stringTable = $this->getWordReplacements();
 
     $exactMatch = FALSE;
     if (isset($stringTable['enabled']['exactMatch'])) {
@@ -478,7 +438,7 @@ class CRM_Core_I18n {
       if (isset($count) && isset($plural)) {
 
         if ($this->_phpgettext) {
-          $text = $this->_phpgettext->ngettext($text, $plural, $count);
+          $text = $this->_phpgettext->ngettext($text, $plural, (int) $count);
         }
         else {
           // if the locale's not set, we do ngettext work by hand
@@ -624,15 +584,14 @@ class CRM_Core_I18n {
   }
 
   /**
-   * Is the CiviCRM in multilingual mode.
+   * Is the current CiviCRM domain in multilingual mode.
    *
    * @return Bool
    *   True if CiviCRM is in multilingual mode.
    */
   public static function isMultilingual() {
-    $domain = new CRM_Core_DAO_Domain();
-    $domain->find(TRUE);
-    return (bool) $domain->locales;
+    $domainId = CRM_Core_Config::domainID();
+    return (bool) CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Domain', $domainId, 'locales');
   }
 
   /**
@@ -652,6 +611,17 @@ class CRM_Core_I18n {
   }
 
   /**
+   * If you switch back/forth between locales/drivers, it may be necessary
+   * to reset some options.
+   */
+  protected function reactivate() {
+    if ($this->_nativegettext) {
+      $this->setNativeGettextLocale($this->locale);
+    }
+
+  }
+
+  /**
    * Change the processing language without changing the current user language
    *
    * @param $locale
@@ -663,15 +633,6 @@ class CRM_Core_I18n {
     // Change the language of the CMS as well, for URLs.
     CRM_Utils_System::setUFLocale($locale);
 
-    // change the gettext ressources
-    if ($this->_nativegettext) {
-      $this->setNativeGettextLocale($locale);
-    }
-    else {
-      // phpgettext
-      $this->setPhpGettextLocale($locale);
-    }
-
     // For sql queries, if running in DB multi-lingual mode.
     global $dbLocale;
 
@@ -682,6 +643,8 @@ class CRM_Core_I18n {
     // For self::getLocale()
     global $tsLocale;
     $tsLocale = $locale;
+
+    CRM_Core_I18n::singleton()->reactivate();
   }
 
   /**
@@ -757,6 +720,28 @@ class CRM_Core_I18n {
     return $tsLocale ? $tsLocale : 'en_US';
   }
 
+  /**
+   * @return array
+   *   Ex: $stringTable['enabled']['wildcardMatch']['foo'] = 'bar';
+   */
+  private function getWordReplacements() {
+    if (isset(Civi::$statics['testPreInstall'])) {
+      return [];
+    }
+
+    // FIXME: Is there a constant we can reference instead of hardcoding en_US?
+    $replacementsLocale = $this->locale ? $this->locale : 'en_US';
+    if ((!isset(Civi::$statics[__CLASS__]) || !array_key_exists($replacementsLocale, Civi::$statics[__CLASS__]))) {
+      if (defined('CIVICRM_DSN') && !CRM_Core_Config::isUpgradeMode()) {
+        Civi::$statics[__CLASS__][$replacementsLocale] = CRM_Core_BAO_WordReplacement::getLocaleCustomStrings($replacementsLocale);
+      }
+      else {
+        Civi::$statics[__CLASS__][$replacementsLocale] = [];
+      }
+    }
+    return Civi::$statics[__CLASS__][$replacementsLocale];
+  }
+
 }
 
 /**
@@ -789,10 +774,6 @@ function ts($text, $params = []) {
       if (isset($config->customTranslateFunction) and function_exists($config->customTranslateFunction)) {
         $function = $config->customTranslateFunction;
       }
-    }
-    else {
-      // don't _translate_ anything until bootstrap has progressed enough
-      $params['skip_translation'] = 1;
     }
   }
 

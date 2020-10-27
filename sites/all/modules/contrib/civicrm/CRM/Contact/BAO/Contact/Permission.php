@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 class CRM_Contact_BAO_Contact_Permission {
 
@@ -286,19 +270,18 @@ AND    $operationClause
     WHERE    $permission
     AND ac.user_id IS NULL
     ";*/
-    $sql = "SELECT DISTINCT $userID as user_id, contact_a.id as contact_id, '{$operation}' as operation
-         $from
-WHERE    $permission";
+    $sql = " $from WHERE    $permission";
     $useTempTable = self::getUseTemporaryTable();
     if ($useTempTable) {
       $aclContactsTempTable = CRM_Utils_SQL_TempTable::build()->setCategory('aclccache')->setMemory();
       $tempTable = $aclContactsTempTable->getName();
-      $aclContactsTempTable->createWithColumns('user_id int, contact_id int, operation varchar(255), UNIQUE UI_user_contact_operation (user_id,contact_id,operation)');
-      CRM_Core_DAO::executeQuery("INSERT INTO {$tempTable} (user_id, contact_id, operation) {$sql}");
-      CRM_Core_DAO::executeQuery("INSERT IGNORE INTO civicrm_acl_contact_cache (user_id, contact_id, operation) SELECT user_id, contact_id, operation FROM {$tempTable}");
+      $aclContactsTempTable->createWithColumns('contact_id int, UNIQUE INDEX UI_contact (contact_id)');
+      CRM_Core_DAO::executeQuery("INSERT INTO {$tempTable} (contact_id) SELECT DISTINCT contact_a.id {$sql}");
+      CRM_Core_DAO::executeQuery("INSERT IGNORE INTO civicrm_acl_contact_cache (user_id, contact_id, operation) SELECT {$userID}, contact_id, '{$operation}' FROM {$tempTable}");
       $aclContactsTempTable->drop();
     }
     else {
+      $sql = "SELECT DISTINCT $userID as user_id, contact_a.id as contact_id, '{$operation}' as operation" . $sql;
       CRM_Core_DAO::executeQuery("INSERT IGNORE INTO civicrm_acl_contact_cache (user_id, contact_id, operation) {$sql}");
     }
 

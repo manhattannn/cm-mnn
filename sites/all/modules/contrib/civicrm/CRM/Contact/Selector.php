@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 
 /**
@@ -77,6 +61,7 @@ class CRM_Contact_Selector extends CRM_Core_Selector_Base implements CRM_Core_Se
     'status',
     'do_not_email',
     'do_not_phone',
+    'do_not_sms',
     'do_not_mail',
   ];
 
@@ -195,7 +180,7 @@ class CRM_Contact_Selector extends CRM_Core_Selector_Base implements CRM_Core_Se
 
     $this->_searchContext = $searchContext;
 
-    $this->_ufGroupID = CRM_Utils_Array::value('uf_group_id', $this->_formValues);
+    $this->_ufGroupID = $this->_formValues['uf_group_id'] ?? NULL;
 
     if ($this->_ufGroupID) {
       $this->_fields = CRM_Core_BAO_UFGroup::getListingFields(CRM_Core_Action::VIEW,
@@ -211,9 +196,16 @@ class CRM_Contact_Selector extends CRM_Core_Selector_Base implements CRM_Core_Se
       $this->_returnProperties['contact_type'] = 1;
       $this->_returnProperties['contact_sub_type'] = 1;
       $this->_returnProperties['sort_name'] = 1;
+      if (!empty($this->_returnProperties['location']) && is_array($this->_returnProperties['location'])) {
+        foreach ($this->_returnProperties['location'] as $key => $property) {
+          if (!empty($property['email'])) {
+            $this->_returnProperties['location'][$key]['on_hold'] = 1;
+          }
+        }
+      }
     }
 
-    $displayRelationshipType = CRM_Utils_Array::value('display_relationship_type', $this->_formValues);
+    $displayRelationshipType = $this->_formValues['display_relationship_type'] ?? NULL;
     $operator = CRM_Utils_Array::value('operator', $this->_formValues, 'AND');
 
     // rectify params to what proximity search expects if there is a value for prox_distance
@@ -317,7 +309,7 @@ class CRM_Contact_Selector extends CRM_Core_Selector_Base implements CRM_Core_Se
             'qs' => $qs,
             'title' => $value['title'],
             'ref' => $value['ref'],
-            'class' => CRM_Utils_Array::value('class', $value),
+            'class' => $value['class'] ?? NULL,
           ];
         }
       }
@@ -621,7 +613,7 @@ class CRM_Contact_Selector extends CRM_Core_Selector_Base implements CRM_Core_Se
               $locationTypeName = "website-{$id}";
             }
             else {
-              $locationTypeName = CRM_Utils_Array::value($id, $locationTypes);
+              $locationTypeName = $locationTypes[$id] ?? NULL;
               if (!$locationTypeName) {
                 continue;
               }
@@ -662,7 +654,7 @@ class CRM_Contact_Selector extends CRM_Core_Selector_Base implements CRM_Core_Se
     $links = self::links($this->_context, $this->_contextMenu, $this->_key);
 
     //check explicitly added contact to a Smart Group.
-    $groupID = CRM_Utils_Array::value('group', $this->_formValues);
+    $groupID = $this->_formValues['group'] ?? NULL;
 
     $pseudoconstants = [];
     // for CRM-3157 purposes
@@ -724,8 +716,17 @@ class CRM_Contact_Selector extends CRM_Core_Selector_Base implements CRM_Core_Se
           }
           $row[$property] = $websiteUrl;
         }
+        elseif (strpos($property, '-email') !== FALSE) {
+          list($locType) = explode("-email", $property);
+          $onholdProperty = "{$locType}-on_hold";
+
+          $row[$property] = $result->$property ?? NULL;
+          if (!empty($row[$property]) && !empty($result->$onholdProperty)) {
+            $row[$property] .= " (On Hold)";
+          }
+        }
         else {
-          $row[$property] = isset($result->$property) ? $result->$property : NULL;
+          $row[$property] = $result->$property ?? NULL;
         }
       }
 
@@ -805,9 +806,7 @@ class CRM_Contact_Selector extends CRM_Core_Selector_Base implements CRM_Core_Se
           );
         }
         elseif ((is_numeric(CRM_Utils_Array::value('geo_code_1', $row))) ||
-          (!empty($row['city']) &&
-            CRM_Utils_Array::value('state_province', $row)
-          )
+          (!empty($row['city']) && !empty($row['state_province']))
         ) {
           $row['action'] = CRM_Core_Action::formLink(
             $links,
@@ -935,9 +934,7 @@ class CRM_Contact_Selector extends CRM_Core_Selector_Base implements CRM_Core_Se
       }
 
       if ((!is_numeric(CRM_Utils_Array::value('geo_code_1', $row))) &&
-        (empty($row['city']) ||
-          !CRM_Utils_Array::value('state_province', $row)
-        )
+        (empty($row['city']) || empty($row['state_province']))
       ) {
         $mask = $mask & 4095;
       }

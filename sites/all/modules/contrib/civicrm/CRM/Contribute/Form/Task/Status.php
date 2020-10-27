@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 
 /**
@@ -99,6 +83,8 @@ AND    {$this->_componentClause}";
       $status,
       TRUE
     );
+    $this->add('checkbox', 'is_email_receipt', ts('Send e-mail receipt'));
+    $this->setDefaults(['is_email_receipt' => 1]);
 
     $contribIDs = implode(',', $this->_contributionIds);
     $query = "
@@ -226,10 +212,8 @@ AND    co.id IN ( $contribIDs )";
    * @throws \Exception
    */
   public static function processForm($form, $params) {
-    $statusID = CRM_Utils_Array::value('contribution_status_id', $params);
+    $statusID = $params['contribution_status_id'] ?? NULL;
     $baseIPN = new CRM_Core_Payment_BaseIPN();
-
-    $transaction = new CRM_Core_Transaction();
 
     // get the missing pieces for each contribution
     $contribIDs = implode(',', $form->_contributionIds);
@@ -245,12 +229,12 @@ AND    co.id IN ( $contribIDs )";
       $ids['contribution'] = $row['contribution_id'];
       $ids['contributionRecur'] = NULL;
       $ids['contributionPage'] = NULL;
-      $ids['membership'] = CRM_Utils_Array::value('membership', $details[$row['contribution_id']]);
-      $ids['participant'] = CRM_Utils_Array::value('participant', $details[$row['contribution_id']]);
-      $ids['event'] = CRM_Utils_Array::value('event', $details[$row['contribution_id']]);
+      $ids['membership'] = $details[$row['contribution_id']]['membership'] ?? NULL;
+      $ids['participant'] = $details[$row['contribution_id']]['participant'] ?? NULL;
+      $ids['event'] = $details[$row['contribution_id']]['event'] ?? NULL;
 
       if (!$baseIPN->validateData($input, $ids, $objects, FALSE)) {
-        CRM_Core_Error::fatal();
+        CRM_Core_Error::statusBounce('Supplied data was not able to be validated');
       }
 
       $contribution = &$objects['contribution'];
@@ -260,11 +244,13 @@ AND    co.id IN ( $contribIDs )";
       );
 
       if ($statusID == array_search('Cancelled', $contributionStatuses)) {
+        $transaction = new CRM_Core_Transaction();
         $baseIPN->cancelled($objects, $transaction);
         $transaction->commit();
         continue;
       }
       elseif ($statusID == array_search('Failed', $contributionStatuses)) {
+        $transaction = new CRM_Core_Transaction();
         $baseIPN->failed($objects, $transaction);
         $transaction->commit();
         continue;
@@ -275,7 +261,6 @@ AND    co.id IN ( $contribIDs )";
           $contributionStatuses
         )
       ) {
-        $transaction->commit();
         continue;
       }
 
@@ -294,9 +279,10 @@ AND    co.id IN ( $contribIDs )";
         $input['trxn_id'] = $contribution->invoice_id;
       }
       $input['trxn_date'] = $params["trxn_date_{$row['contribution_id']}"] . ' ' . date('H:i:s');
+      $input['is_email_receipt'] = !empty($params['is_email_receipt']);
 
-      // @todo calling baseIPN like this is a pattern in it's last gasps. Call contribute.completetransaction api.
-      $baseIPN->completeTransaction($input, $ids, $objects, $transaction, FALSE);
+      // @todo calling CRM_Contribute_BAO_Contribution::completeOrder like this is a pattern in it's last gasps. Call contribute.completetransaction api.
+      CRM_Contribute_BAO_Contribution::completeOrder($input, $ids, $objects);
 
       // reset template values before processing next transactions
       $template->clearTemplateVars();

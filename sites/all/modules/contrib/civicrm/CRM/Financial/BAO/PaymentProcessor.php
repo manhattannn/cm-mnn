@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 
 /**
@@ -51,6 +35,13 @@ class CRM_Financial_BAO_PaymentProcessor extends CRM_Financial_DAO_PaymentProces
    * @throws Exception
    */
   public static function create($params) {
+    // If we are creating a new PaymentProcessor and have not specified the payment instrument to use, get the default from the Payment Processor Type.
+    if (empty($params['id']) && empty($params['payment_instrument_id'])) {
+      $params['payment_instrument_id'] = civicrm_api3('PaymentProcessorType', 'getvalue', [
+        'id' => $params['payment_processor_type_id'],
+        'return' => 'payment_instrument_id',
+      ]);
+    }
     $processor = new CRM_Financial_DAO_PaymentProcessor();
     $processor->copyValues($params);
 
@@ -58,7 +49,7 @@ class CRM_Financial_BAO_PaymentProcessor extends CRM_Financial_DAO_PaymentProces
       $ppTypeDAO = new CRM_Financial_DAO_PaymentProcessorType();
       $ppTypeDAO->id = $params['payment_processor_type_id'];
       if (!$ppTypeDAO->find(TRUE)) {
-        CRM_Core_Error::fatal(ts('Could not find payment processor meta information'));
+        throw new CRM_Core_Exception(ts('Could not find payment processor meta information'));
       }
 
       // also copy meta fields from the info DAO
@@ -203,7 +194,7 @@ class CRM_Financial_BAO_PaymentProcessor extends CRM_Financial_DAO_PaymentProces
    */
   public static function del($paymentProcessorID) {
     if (!$paymentProcessorID) {
-      CRM_Core_Error::fatal(ts('Invalid value passed to delete function.'));
+      throw new CRM_Core_Exception(ts('Invalid value passed to delete function.'));
     }
 
     $dao = new CRM_Financial_DAO_PaymentProcessor();
@@ -271,8 +262,8 @@ class CRM_Financial_BAO_PaymentProcessor extends CRM_Financial_DAO_PaymentProces
    * @return int
    */
   public static function defaultComparison($processor1, $processor2) {
-    $p1 = CRM_Utils_Array::value('is_default', $processor1);
-    $p2 = CRM_Utils_Array::value('is_default', $processor2);
+    $p1 = $processor1['is_default'] ?? NULL;
+    $p2 = $processor2['is_default'] ?? NULL;
     if ($p1 == $p2) {
       return 0;
     }
@@ -344,7 +335,7 @@ class CRM_Financial_BAO_PaymentProcessor extends CRM_Financial_DAO_PaymentProces
         }
       }
       $processors['values'][$processor['id']]['payment_processor_type'] = $processor['payment_processor_type'] = $processors['values'][$processor['id']]['api.payment_processor_type.getsingle']['name'];
-      $processors['values'][$processor['id']]['object'] = Civi\Payment\System::singleton()->getByProcessor($processor);
+      $processors['values'][$processor['id']]['object'] = Civi\Payment\System::singleton()->getByProcessor($processors['values'][$processor['id']]);
     }
 
     // Add the pay-later pseudo-processor.
@@ -388,8 +379,8 @@ class CRM_Financial_BAO_PaymentProcessor extends CRM_Financial_DAO_PaymentProces
    *   available processors
    */
   public static function getPaymentProcessors($capabilities = [], $ids = FALSE) {
-    $testProcessors = in_array('TestMode', $capabilities) ? self::getAllPaymentProcessors('test') : [];
     if (is_array($ids)) {
+      $testProcessors = in_array('TestMode', $capabilities) ? self::getAllPaymentProcessors('test') : [];
       $processors = self::getAllPaymentProcessors('all', FALSE, FALSE);
       if (in_array('TestMode', $capabilities)) {
         $possibleLiveIDs = array_diff($ids, array_keys($testProcessors));
@@ -457,7 +448,7 @@ class CRM_Financial_BAO_PaymentProcessor extends CRM_Financial_DAO_PaymentProces
     $capabilitiesString = implode('', $capabilities);
     if (!isset(\Civi::$statics[__CLASS__]['supported_capabilities'][$capabilitiesString])) {
       $result = self::getPaymentProcessors($capabilities);
-      \Civi::$statics[__CLASS__]['supported_capabilities'][$capabilitiesString] = (!empty($result) && array_keys($result) !== [0]) ? TRUE : FALSE;
+      \Civi::$statics[__CLASS__]['supported_capabilities'][$capabilitiesString] = (!empty($result) && array_keys($result) !== [0]);
     }
     return \Civi::$statics[__CLASS__]['supported_capabilities'][$capabilitiesString];
   }
@@ -541,7 +532,7 @@ INNER JOIN civicrm_contribution       con ON ( mp.contribution_id = con.id )
 
     }
 
-    $ppID = (isset($dao->ppID1) && $dao->ppID1) ? $dao->ppID1 : (isset($dao->ppID2) ? $dao->ppID2 : NULL);
+    $ppID = (isset($dao->ppID1) && $dao->ppID1) ? $dao->ppID1 : ($dao->ppID2 ?? NULL);
     $mode = (isset($dao->is_test) && $dao->is_test) ? 'test' : 'live';
     if (!$ppID || $type == 'id') {
       $result = $ppID;

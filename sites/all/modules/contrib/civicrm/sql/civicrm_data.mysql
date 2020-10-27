@@ -1,25 +1,9 @@
 -- +--------------------------------------------------------------------+
--- | CiviCRM version 5                                                  |
--- +--------------------------------------------------------------------+
--- | Copyright CiviCRM LLC (c) 2004-2019                                |
--- +--------------------------------------------------------------------+
--- | This file is a part of CiviCRM.                                    |
+-- | Copyright CiviCRM LLC. All rights reserved.                        |
 -- |                                                                    |
--- | CiviCRM is free software; you can copy, modify, and distribute it  |
--- | under the terms of the GNU Affero General Public License           |
--- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
--- |                                                                    |
--- | CiviCRM is distributed in the hope that it will be useful, but     |
--- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
--- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
--- | See the GNU Affero General Public License for more details.        |
--- |                                                                    |
--- | You should have received a copy of the GNU Affero General Public   |
--- | License and the CiviCRM Licensing Exception along                  |
--- | with this program; if not, contact CiviCRM LLC                     |
--- | at info[AT]civicrm[DOT]org. If you have questions about the        |
--- | GNU Affero General Public License or the licensing of CiviCRM,     |
--- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+-- | This work is published under the GNU AGPLv3 license with some      |
+-- | permitted exceptions and without any warranty. For full license    |
+-- | and copyright information, see https://civicrm.org/licensing       |
 -- +--------------------------------------------------------------------+
 --
 -- Generated from civicrm_country.tpl
@@ -169,7 +153,7 @@ INSERT INTO civicrm_country (id, name,iso_code,region_id,is_province_abbreviated
 INSERT INTO civicrm_country (id, name,iso_code,region_id,is_province_abbreviated) VALUES("1125", "Lithuania", "LT", "1", "0");
 INSERT INTO civicrm_country (id, name,iso_code,region_id,is_province_abbreviated) VALUES("1126", "Luxembourg", "LU", "1", "0");
 INSERT INTO civicrm_country (id, name,iso_code,region_id,is_province_abbreviated) VALUES("1127", "Macao", "MO", "4", "0");
-INSERT INTO civicrm_country (id, name,iso_code,region_id,is_province_abbreviated) VALUES("1128", "Macedonia, Republic of", "MK", "1", "0");
+INSERT INTO civicrm_country (id, name,iso_code,region_id,is_province_abbreviated) VALUES("1128", "North Macedonia", "MK", "1", "0");
 INSERT INTO civicrm_country (id, name,iso_code,region_id,is_province_abbreviated) VALUES("1129", "Madagascar", "MG", "5", "0");
 INSERT INTO civicrm_country (id, name,iso_code,region_id,is_province_abbreviated) VALUES("1130", "Malawi", "MW", "5", "0");
 INSERT INTO civicrm_country (id, name,iso_code,region_id,is_province_abbreviated) VALUES("1131", "Malaysia", "MY", "4", "0");
@@ -295,27 +279,11 @@ INSERT INTO civicrm_country (id, name,iso_code,region_id,is_province_abbreviated
 INSERT INTO civicrm_country (id, name,iso_code,region_id,is_province_abbreviated) VALUES("1252", "Saint Barthélemy", "BL", "2", "0");
 INSERT INTO civicrm_country (id, name,iso_code,region_id,is_province_abbreviated) VALUES("1253", "Saint Martin (French part)", "MF", "2", "0");
 -- +--------------------------------------------------------------------+
--- | CiviCRM version 5                                                  |
--- +--------------------------------------------------------------------+
--- | Copyright CiviCRM LLC (c) 2004-2019                                |
--- +--------------------------------------------------------------------+
--- | This file is a part of CiviCRM.                                    |
+-- | Copyright CiviCRM LLC. All rights reserved.                        |
 -- |                                                                    |
--- | CiviCRM is free software; you can copy, modify, and distribute it  |
--- | under the terms of the GNU Affero General Public License           |
--- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
--- |                                                                    |
--- | CiviCRM is distributed in the hope that it will be useful, but     |
--- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
--- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
--- | See the GNU Affero General Public License for more details.        |
--- |                                                                    |
--- | You should have received a copy of the GNU Affero General Public   |
--- | License and the CiviCRM Licensing Exception along                  |
--- | with this program; if not, contact CiviCRM LLC                     |
--- | at info[AT]civicrm[DOT]org. If you have questions about the        |
--- | GNU Affero General Public License or the licensing of CiviCRM,     |
--- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+-- | This work is published under the GNU AGPLv3 license with some      |
+-- | permitted exceptions and without any warranty. For full license    |
+-- | and copyright information, see https://civicrm.org/licensing       |
 -- +--------------------------------------------------------------------+
 --
 -- Generated from civicrm_state_province.tpl
@@ -431,6 +399,7 @@ INSERT INTO civicrm_state_province (id, country_id, abbreviation, name) VALUES
 (1231, 1101, "DL", "Delhi"),
 (1232, 1101, "LD", "Lakshadweep"),
 (1233, 1101, "PY", "Pondicherry"),
+-- Note we believe all lower-case is correct for Poland. See https://github.com/civicrm/civicrm-core/pull/17107
 (1300, 1172, "MZ", "mazowieckie"),
 (1301, 1172, "PM", "pomorskie"),
 (1302, 1172, "DS", "dolnośląskie"),
@@ -2878,23 +2847,23 @@ INSERT INTO civicrm_state_province (id, country_id, abbreviation, name) VALUES
 (4126, 1173, "01", "Aveiro"),
 (4127, 1173, "02", "Beja"),
 (4128, 1173, "03", "Braga"),
-(4129, 1173, "04", "Braganca"),
+(4129, 1173, "04", "Bragança"),
 (4130, 1173, "05", "Castelo Branco"),
-(4131, 1173, "06", "Colmbra"),
-(4132, 1173, "07", "Ovora"),
+(4131, 1173, "06", "Coimbra"),
+(4132, 1173, "07", "Évora"),
 (4133, 1173, "08", "Faro"),
 (4134, 1173, "09", "Guarda"),
 (4135, 1173, "10", "Leiria"),
 (4136, 1173, "11", "Lisboa"),
 (4137, 1173, "12", "Portalegre"),
 (4138, 1173, "13", "Porto"),
-(4139, 1173, "14", "Santarem"),
-(4140, 1173, "15", "Setubal"),
+(4139, 1173, "14", "Santarém"),
+(4140, 1173, "15", "Setúbal"),
 (4141, 1173, "16", "Viana do Castelo"),
 (4142, 1173, "17", "Vila Real"),
 (4143, 1173, "18", "Viseu"),
-(4144, 1173, "20", "Regiao Autonoma dos Acores"),
-(4145, 1173, "30", "Regiao Autonoma da Madeira"),
+(4144, 1173, "20", "Região Autónoma dos Açores"),
+(4145, 1173, "30", "Região Autónoma da Madeira"),
 (4146, 1168, "ASU", "Asuncion"),
 (4147, 1168, "16", "Alto Paraguay"),
 (4148, 1168, "10", "Alto Parana"),
@@ -4421,27 +4390,11 @@ INSERT INTO civicrm_state_province (id, country_id, abbreviation, name) VALUES
 -- dev/Core#131 Missing UK State
 (NULL, 1226, "MON", "Monmouthshire");
 -- +--------------------------------------------------------------------+
--- | CiviCRM version 5                                                  |
--- +--------------------------------------------------------------------+
--- | Copyright CiviCRM LLC (c) 2004-2019                                |
--- +--------------------------------------------------------------------+
--- | This file is a part of CiviCRM.                                    |
+-- | Copyright CiviCRM LLC. All rights reserved.                        |
 -- |                                                                    |
--- | CiviCRM is free software; you can copy, modify, and distribute it  |
--- | under the terms of the GNU Affero General Public License           |
--- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
--- |                                                                    |
--- | CiviCRM is distributed in the hope that it will be useful, but     |
--- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
--- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
--- | See the GNU Affero General Public License for more details.        |
--- |                                                                    |
--- | You should have received a copy of the GNU Affero General Public   |
--- | License and the CiviCRM Licensing Exception along                  |
--- | with this program; if not, contact CiviCRM LLC                     |
--- | at info[AT]civicrm[DOT]org. If you have questions about the        |
--- | GNU Affero General Public License or the licensing of CiviCRM,     |
--- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+-- | This work is published under the GNU AGPLv3 license with some      |
+-- | permitted exceptions and without any warranty. For full license    |
+-- | and copyright information, see https://civicrm.org/licensing       |
 -- +--------------------------------------------------------------------+
 --
 -- Generated from civicrm_currency.tpl
@@ -4634,27 +4587,11 @@ INSERT INTO civicrm_currency (id, name, symbol, numeric_code, full_name) VALUES
 (184, "ZMK", NULL, "894", "Zambian Kwacha"),
 (185, "ZWD", "Z$", "716", "Zimbabwe Dollar");
 -- +--------------------------------------------------------------------+
--- | CiviCRM version 5                                                  |
--- +--------------------------------------------------------------------+
--- | Copyright CiviCRM LLC (c) 2004-2019                                |
--- +--------------------------------------------------------------------+
--- | This file is a part of CiviCRM.                                    |
+-- | Copyright CiviCRM LLC. All rights reserved.                        |
 -- |                                                                    |
--- | CiviCRM is free software; you can copy, modify, and distribute it  |
--- | under the terms of the GNU Affero General Public License           |
--- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
--- |                                                                    |
--- | CiviCRM is distributed in the hope that it will be useful, but     |
--- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
--- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
--- | See the GNU Affero General Public License for more details.        |
--- |                                                                    |
--- | You should have received a copy of the GNU Affero General Public   |
--- | License and the CiviCRM Licensing Exception along                  |
--- | with this program; if not, contact CiviCRM LLC                     |
--- | at info[AT]civicrm[DOT]org. If you have questions about the        |
--- | GNU Affero General Public License or the licensing of CiviCRM,     |
--- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+-- | This work is published under the GNU AGPLv3 license with some      |
+-- | permitted exceptions and without any warranty. For full license    |
+-- | and copyright information, see https://civicrm.org/licensing       |
 -- +--------------------------------------------------------------------+
 --
 -- Generated from civicrm_data.tpl
@@ -5175,7 +5112,7 @@ VALUES
   (@option_group_id_acConRef, 'City'            , 5, 'city'          , NULL, 0, NULL, 5, NULL, 0, 0, 1, NULL, NULL, NULL),
   (@option_group_id_acConRef, 'State/Province'  , 6, 'state_province', NULL, 0, NULL, 6, NULL, 0, 0, 1, NULL, NULL, NULL),
   (@option_group_id_acConRef, 'Country'         , 7, 'country'       , NULL, 0, NULL, 7, NULL, 0, 0, 1, NULL, NULL, NULL),
-  (@option_group_id_acConRef, 'Postal Code'     , 8, 'country'       , NULL, 0, NULL, 8, NULL, 0, 0, 1, NULL, NULL, NULL),
+  (@option_group_id_acConRef, 'Postal Code'     , 8, 'postal_code'   , NULL, 0, NULL, 8, NULL, 0, 0, 1, NULL, NULL, NULL),
 
   (@option_group_id_adOpt, 'Street Address'    ,  1, 'street_address', NULL, 0, NULL,  1, NULL, 0, 0, 1, NULL, NULL, NULL),
   (@option_group_id_adOpt, 'Supplemental Address 1'  ,  2, 'supplemental_address_1', NULL, 0, NULL,  2, NULL, 0, 0, 1, NULL, NULL, NULL),
@@ -5205,7 +5142,6 @@ VALUES
 
   (@option_group_id_csearch , 'CRM_Contact_Form_Search_Custom_Sample'               , 1, 'CRM_Contact_Form_Search_Custom_Sample'      , NULL, 0, NULL, 1, 'Household Name and State', 0, 0, 1, NULL, NULL, NULL),
   (@option_group_id_csearch , 'CRM_Contact_Form_Search_Custom_ContributionAggregate', 2, 'CRM_Contact_Form_Search_Custom_ContributionAggregate', NULL, 0, NULL, 2, 'Contribution Aggregate', 0, 0, 1, NULL, NULL, NULL),
-  (@option_group_id_csearch , 'CRM_Contact_Form_Search_Custom_Basic'                , 3, 'CRM_Contact_Form_Search_Custom_Basic'       , NULL, 0, NULL, 3, 'Basic Search', 0, 0, 1, NULL, NULL, NULL),
   (@option_group_id_csearch , 'CRM_Contact_Form_Search_Custom_Group'                , 4, 'CRM_Contact_Form_Search_Custom_Group'       , NULL, 0, NULL, 4, 'Include / Exclude Search', 0, 0, 1, NULL, NULL, NULL),
   (@option_group_id_csearch , 'CRM_Contact_Form_Search_Custom_PostalMailing'        , 5, 'CRM_Contact_Form_Search_Custom_PostalMailing', NULL, 0, NULL, 5, 'Postal Mailing', 0, 0, 1, NULL, NULL, NULL),
   (@option_group_id_csearch , 'CRM_Contact_Form_Search_Custom_Proximity'            , 6, 'CRM_Contact_Form_Search_Custom_Proximity', NULL, 0, NULL, 6, 'Proximity Search', 0, 0, 1, NULL, NULL, NULL),
@@ -5348,6 +5284,7 @@ VALUES
   (@option_group_id_mp, 'Maildir', 2, 'Maildir', NULL, 0, NULL, 2, NULL, 0, 0, 1, NULL, NULL , NULL),
   (@option_group_id_mp, 'POP3',    3, 'POP3',    NULL, 0, NULL, 3, NULL, 0, 0, 1, NULL, NULL , NULL),
   (@option_group_id_mp, 'Localdir', 4, 'Localdir', NULL, 0, NULL, 4, NULL, 0, 0, 1, NULL, NULL , NULL),
+  (@option_group_id_mp, 'IMAP XOAUTH2', 5, 'IMAP_XOAUTH2', NULL, 0, NULL, 5, NULL, 0, 0, 0, NULL, NULL , NULL),
 
 -- priority
   (@option_group_id_priority, 'Urgent', 1, 'Urgent', NULL, 0, NULL, 1, NULL, 0, 0, 1, NULL, NULL, NULL),
@@ -5381,7 +5318,6 @@ VALUES
    (@option_group_id_website, 'Work',     1, 'Work',     NULL, 0, 1, 1, NULL, 0, 0, 1, NULL, NULL, NULL),
    (@option_group_id_website, 'Main',     2, 'Main',     NULL, 0, NULL, 2, NULL, 0, 0, 1, NULL, NULL, NULL),
    (@option_group_id_website, 'Facebook', 3, 'Facebook', NULL, 0, NULL, 3, NULL, 0, 0, 1, NULL, NULL, NULL),
-   (@option_group_id_website, 'Google+',  4, 'Google_',  NULL, 0, NULL, 4, NULL, 0, 0, 1, NULL, NULL, NULL),
    (@option_group_id_website, 'Instagram',  5, 'Instagram',  NULL, 0, NULL, 5, NULL, 0, 0, 1, NULL, NULL, NULL),
    (@option_group_id_website, 'LinkedIn',  6, 'LinkedIn',  NULL, 0, NULL, 6, NULL, 0, 0, 1, NULL, NULL, NULL),
    (@option_group_id_website, 'MySpace',  7, 'MySpace',  NULL, 0, NULL, 7, NULL, 0, 0, 1, NULL, NULL, NULL),
@@ -5566,17 +5502,17 @@ VALUES
    (@option_group_id_name_badge, 'Hanging Badge 3-3/4\" x 4-3\"/4', '{"paper-size":"a4","orientation":"portrait","font-name":"times","font-size":6,"font-style":"","NX":2,"NY":2,"metric":"mm","lMargin":10,"tMargin":28,"SpaceX":0,"SpaceY":0,"width":96,"height":121,"lPadding":5,"tPadding":5}', 'Hanging Badge 3-3/4" x 4-3"/4', NULL, 0, NULL, 4, NULL, 0, 0, 1, NULL, NULL, NULL),
 
 -- Mailing Label Formats
-  (@option_group_id_label, 'Avery 3475', '{"paper-size":"a4","orientation":"portrait","font-name":"helvetica","font-size":10,"font-style":"","metric":"mm","lMargin":0,"tMargin":5,"NX":3,"NY":8,"SpaceX":0,"SpaceY":0,"width":70,"height":36,"lPadding":5.08,"tPadding":5.08}',                   '3475',  'Avery', NULL, 0, 1,  NULL, 0, 1, 1, NULL, NULL, NULL),
-  (@option_group_id_label, 'Avery 5160', '{"paper-size":"letter","orientation":"portrait","font-name":"helvetica","font-size":8,"font-style":"","metric":"in","lMargin":0.21975,"tMargin":0.5,"NX":3,"NY":10,"SpaceX":0.14,"SpaceY":0,"width":2.5935,"height":1,"lPadding":0.20,"tPadding":0.20}', '5160',  'Avery', NULL, 0, 2,  NULL, 0, 1, 1, NULL, NULL, NULL),
-  (@option_group_id_label, 'Avery 5161', '{"paper-size":"letter","orientation":"portrait","font-name":"helvetica","font-size":8,"font-style":"","metric":"in","lMargin":0.175,"tMargin":0.5,"NX":2,"NY":10,"SpaceX":0.15625,"SpaceY":0,"width":4,"height":1,"lPadding":0.20,"tPadding":0.20}',     '5161',  'Avery', NULL, 0, 3,  NULL, 0, 1, 1, NULL, NULL, NULL),
-  (@option_group_id_label, 'Avery 5162', '{"paper-size":"letter","orientation":"portrait","font-name":"helvetica","font-size":8,"font-style":"","metric":"in","lMargin":0.1525,"tMargin":0.88,"NX":2,"NY":7,"SpaceX":0.195,"SpaceY":0,"width":4,"height":1.33,"lPadding":0.20,"tPadding":0.20}',   '5162',  'Avery', NULL, 0, 4,  NULL, 0, 1, 1, NULL, NULL, NULL),
-  (@option_group_id_label, 'Avery 5163', '{"paper-size":"letter","orientation":"portrait","font-name":"helvetica","font-size":8,"font-style":"","metric":"in","lMargin":0.18,"tMargin":0.5,"NX":2,"NY":5,"SpaceX":0.14,"SpaceY":0,"width":4,"height":2,"lPadding":0.20,"tPadding":0.20}',          '5163',  'Avery', NULL, 0, 5,  NULL, 0, 1, 1, NULL, NULL, NULL),
-  (@option_group_id_label, 'Avery 5164', '{"paper-size":"letter","orientation":"portrait","font-name":"helvetica","font-size":12,"font-style":"","metric":"in","lMargin":0.156,"tMargin":0.5,"NX":2,"NY":3,"SpaceX":0.1875,"SpaceY":0,"width":4,"height":3.33,"lPadding":0.20,"tPadding":0.20}',   '5164',  'Avery', NULL, 0, 6,  NULL, 0, 1, 1, NULL, NULL, NULL),
-  (@option_group_id_label, 'Avery 8600', '{"paper-size":"letter","orientation":"portrait","font-name":"helvetica","font-size":8,"font-style":"","metric":"mm","lMargin":7.1,"tMargin":19,"NX":3,"NY":10,"SpaceX":9.5,"SpaceY":3.1,"width":66.6,"height":25.4,"lPadding":5.08,"tPadding":5.08}',    '8600',  'Avery', NULL, 0, 7,  NULL, 0, 1, 1, NULL, NULL, NULL),
-  (@option_group_id_label, 'Avery L7160', '{"paper-size":"a4","orientation":"portrait","font-name":"helvetica","font-size":9,"font-style":"","metric":"in","lMargin":0.28,"tMargin":0.6,"NX":3,"NY":7,"SpaceX":0.1,"SpaceY":0,"width":2.5,"height":1.5,"lPadding":0.20,"tPadding":0.20}',          'L7160', 'Avery', NULL, 0, 8,  NULL, 0, 1, 1, NULL, NULL, NULL),
-  (@option_group_id_label, 'Avery L7161', '{"paper-size":"a4","orientation":"portrait","font-name":"helvetica","font-size":9,"font-style":"","metric":"in","lMargin":0.28,"tMargin":0.35,"NX":3,"NY":6,"SpaceX":0.1,"SpaceY":0,"width":2.5,"height":1.83,"lPadding":0.20,"tPadding":0.20}',        'L7161', 'Avery', NULL, 0, 9,  NULL, 0, 1, 1, NULL, NULL, NULL),
-  (@option_group_id_label, 'Avery L7162', '{"paper-size":"a4","orientation":"portrait","font-name":"helvetica","font-size":9,"font-style":"","metric":"in","lMargin":0.18,"tMargin":0.51,"NX":2,"NY":8,"SpaceX":0.1,"SpaceY":0,"width":3.9,"height":1.33,"lPadding":0.20,"tPadding":0.20}',        'L7162', 'Avery', NULL, 0, 10, NULL, 0, 1, 1, NULL, NULL, NULL),
-  (@option_group_id_label, 'Avery L7163', '{"paper-size":"a4","orientation":"portrait","font-name":"helvetica","font-size":9,"font-style":"","metric":"in","lMargin":0.18,"tMargin":0.6,"NX":2,"NY":7,"SpaceX":0.1,"SpaceY":0,"width":3.9,"height":1.5,"lPadding":0.20,"tPadding":0.20}',          'L7163', 'Avery', NULL, 0, 11, NULL, 0, 1, 1, NULL, NULL, NULL),
+  (@option_group_id_label, 'Avery 3475', '{"paper-size":"a4","orientation":"portrait","font-name":"dejavusans","font-size":10,"font-style":"","metric":"mm","lMargin":0,"tMargin":5,"NX":3,"NY":8,"SpaceX":0,"SpaceY":0,"width":70,"height":36,"lPadding":5.08,"tPadding":5.08}',                   '3475',  'Avery', NULL, 0, 1,  NULL, 0, 1, 1, NULL, NULL, NULL),
+  (@option_group_id_label, 'Avery 5160', '{"paper-size":"letter","orientation":"portrait","font-name":"dejavusans","font-size":8,"font-style":"","metric":"in","lMargin":0.21975,"tMargin":0.5,"NX":3,"NY":10,"SpaceX":0.14,"SpaceY":0,"width":2.5935,"height":1,"lPadding":0.20,"tPadding":0.20}', '5160',  'Avery', NULL, 0, 2,  NULL, 0, 1, 1, NULL, NULL, NULL),
+  (@option_group_id_label, 'Avery 5161', '{"paper-size":"letter","orientation":"portrait","font-name":"dejavusans","font-size":8,"font-style":"","metric":"in","lMargin":0.175,"tMargin":0.5,"NX":2,"NY":10,"SpaceX":0.15625,"SpaceY":0,"width":4,"height":1,"lPadding":0.20,"tPadding":0.20}',     '5161',  'Avery', NULL, 0, 3,  NULL, 0, 1, 1, NULL, NULL, NULL),
+  (@option_group_id_label, 'Avery 5162', '{"paper-size":"letter","orientation":"portrait","font-name":"dejavusans","font-size":8,"font-style":"","metric":"in","lMargin":0.1525,"tMargin":0.88,"NX":2,"NY":7,"SpaceX":0.195,"SpaceY":0,"width":4,"height":1.33,"lPadding":0.20,"tPadding":0.20}',   '5162',  'Avery', NULL, 0, 4,  NULL, 0, 1, 1, NULL, NULL, NULL),
+  (@option_group_id_label, 'Avery 5163', '{"paper-size":"letter","orientation":"portrait","font-name":"dejavusans","font-size":8,"font-style":"","metric":"in","lMargin":0.18,"tMargin":0.5,"NX":2,"NY":5,"SpaceX":0.14,"SpaceY":0,"width":4,"height":2,"lPadding":0.20,"tPadding":0.20}',          '5163',  'Avery', NULL, 0, 5,  NULL, 0, 1, 1, NULL, NULL, NULL),
+  (@option_group_id_label, 'Avery 5164', '{"paper-size":"letter","orientation":"portrait","font-name":"dejavusans","font-size":12,"font-style":"","metric":"in","lMargin":0.156,"tMargin":0.5,"NX":2,"NY":3,"SpaceX":0.1875,"SpaceY":0,"width":4,"height":3.33,"lPadding":0.20,"tPadding":0.20}',   '5164',  'Avery', NULL, 0, 6,  NULL, 0, 1, 1, NULL, NULL, NULL),
+  (@option_group_id_label, 'Avery 8600', '{"paper-size":"letter","orientation":"portrait","font-name":"dejavusans","font-size":8,"font-style":"","metric":"mm","lMargin":7.1,"tMargin":19,"NX":3,"NY":10,"SpaceX":9.5,"SpaceY":3.1,"width":66.6,"height":25.4,"lPadding":5.08,"tPadding":5.08}',    '8600',  'Avery', NULL, 0, 7,  NULL, 0, 1, 1, NULL, NULL, NULL),
+  (@option_group_id_label, 'Avery L7160', '{"paper-size":"a4","orientation":"portrait","font-name":"dejavusans","font-size":9,"font-style":"","metric":"in","lMargin":0.28,"tMargin":0.6,"NX":3,"NY":7,"SpaceX":0.1,"SpaceY":0,"width":2.5,"height":1.5,"lPadding":0.20,"tPadding":0.20}',          'L7160', 'Avery', NULL, 0, 8,  NULL, 0, 1, 1, NULL, NULL, NULL),
+  (@option_group_id_label, 'Avery L7161', '{"paper-size":"a4","orientation":"portrait","font-name":"dejavusans","font-size":9,"font-style":"","metric":"in","lMargin":0.28,"tMargin":0.35,"NX":3,"NY":6,"SpaceX":0.1,"SpaceY":0,"width":2.5,"height":1.83,"lPadding":0.20,"tPadding":0.20}',        'L7161', 'Avery', NULL, 0, 9,  NULL, 0, 1, 1, NULL, NULL, NULL),
+  (@option_group_id_label, 'Avery L7162', '{"paper-size":"a4","orientation":"portrait","font-name":"dejavusans","font-size":9,"font-style":"","metric":"in","lMargin":0.18,"tMargin":0.51,"NX":2,"NY":8,"SpaceX":0.1,"SpaceY":0,"width":3.9,"height":1.33,"lPadding":0.20,"tPadding":0.20}',        'L7162', 'Avery', NULL, 0, 10, NULL, 0, 1, 1, NULL, NULL, NULL),
+  (@option_group_id_label, 'Avery L7163', '{"paper-size":"a4","orientation":"portrait","font-name":"dejavusans","font-size":9,"font-style":"","metric":"in","lMargin":0.18,"tMargin":0.6,"NX":2,"NY":7,"SpaceX":0.1,"SpaceY":0,"width":3.9,"height":1.5,"lPadding":0.20,"tPadding":0.20}',          'L7163', 'Avery', NULL, 0, 11, NULL, 0, 1, 1, NULL, NULL, NULL),
 
 -- Communication Styles
   (@option_group_id_communication_style, 'Formal'  , 1, 'formal'  , NULL, 0, 1, 1, NULL, 0, 0, 1, NULL, NULL, NULL),
@@ -5799,7 +5735,8 @@ VALUES
   (@option_group_id_languages, 0, 1, 'cs_CZ', 'cs', 'Czech', @counter := @counter + 1),
   (@option_group_id_languages, 0, 1, 'da_DK', 'da', 'Danish', @counter := @counter + 1),
   (@option_group_id_languages, 0, 0, 'dv_MV', 'dv', 'Divehi; Dhivehi; Maldivian;', @counter := @counter + 1),
-  (@option_group_id_languages, 0, 1, 'nl_NL', 'nl', 'Dutch', @counter := @counter + 1),
+  (@option_group_id_languages, 0, 1, 'nl_NL', 'nl', 'Dutch (Netherlands)', @counter := @counter + 1),
+  (@option_group_id_languages, 0, 1, 'nl_BE', 'nl', 'Dutch (Belgium)', @counter := @counter + 1),
   (@option_group_id_languages, 0, 0, 'dz_BT', 'dz', 'Dzongkha', @counter := @counter + 1),
   (@option_group_id_languages, 0, 1, 'en_AU', 'en', 'English (Australia)', @counter := @counter + 1),
   (@option_group_id_languages, 0, 1, 'en_CA', 'en', 'English (Canada)', @counter := @counter + 1),
@@ -6007,14 +5944,14 @@ VALUES
  ('PayPal',             'PayPal - Website Payments Pro',      NULL,1,0,'User Name','Password','Signature',NULL,'Payment_PayPalImpl','https://www.paypal.com/','https://api-3t.paypal.com/','https://www.paypal.com/','https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif','https://www.sandbox.paypal.com/','https://api-3t.sandbox.paypal.com/','https://www.sandbox.paypal.com/','https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif',3, 1),
  ('PayPal_Express',     'PayPal - Express',       NULL,1,0,'User Name','Password','Signature',NULL,'Payment_PayPalImpl','https://www.paypal.com/','https://api-3t.paypal.com/',NULL,'https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif','https://www.sandbox.paypal.com/','https://api-3t.sandbox.paypal.com/',NULL,'https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif',2, 1),
  ('AuthNet',            'Authorize.Net',          NULL,1,0,'API Login','Payment Key','MD5 Hash',NULL,'Payment_AuthorizeNet','https://secure2.authorize.net/gateway/transact.dll',NULL,'https://api2.authorize.net/xml/v1/request.api',NULL,'https://test.authorize.net/gateway/transact.dll',NULL,'https://apitest.authorize.net/xml/v1/request.api',NULL,1,1),
- ('PayJunction',        'PayJunction',            NULL,1,0,'User Name','Password',NULL,NULL,'Payment_PayJunction','https://payjunction.com/quick_link',NULL,NULL,NULL,'https://www.payjunctionlabs.com/quick_link',NULL,NULL,NULL,1,1),
- ('eWAY',               'eWAY (Single Currency)', NULL,1,0,'Customer ID',NULL,NULL,NULL,'Payment_eWAY','https://www.eway.com.au/gateway_cvn/xmlpayment.asp',NULL,NULL,NULL,'https://www.eway.com.au/gateway_cvn/xmltest/testpage.asp',NULL,NULL,NULL,1,0),
- ('Payment_Express',    'DPS Payment Express',    NULL,1,0,'User ID','Key','Mac Key - pxaccess only',NULL,'Payment_PaymentExpress','https://www.paymentexpress.com/pleaseenteraurl',NULL,NULL,NULL,'https://www.paymentexpress.com/pleaseenteratesturl',NULL,NULL,NULL,4,0),
+ ('PayJunction',        'PayJunction',            NULL,0,0,'User Name','Password',NULL,NULL,'Payment_PayJunction','https://payjunction.com/quick_link',NULL,NULL,NULL,'https://www.payjunctionlabs.com/quick_link',NULL,NULL,NULL,1,1),
+ ('eWAY',               'eWAY (Single Currency)', NULL,0,0,'Customer ID',NULL,NULL,NULL,'Payment_eWAY','https://www.eway.com.au/gateway_cvn/xmlpayment.asp',NULL,NULL,NULL,'https://www.eway.com.au/gateway_cvn/xmltest/testpage.asp',NULL,NULL,NULL,1,0),
+ ('Payment_Express',    'DPS Payment Express',    NULL,0,0,'User ID','Key','Mac Key - pxaccess only',NULL,'Payment_PaymentExpress','https://www.paymentexpress.com/pleaseenteraurl',NULL,NULL,NULL,'https://www.paymentexpress.com/pleaseenteratesturl',NULL,NULL,NULL,4,0),
  ('Dummy',              'Dummy Payment Processor',NULL,1,1,'User Name',NULL,NULL,NULL,'Payment_Dummy',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,1,1),
- ('Elavon',             'Elavon Payment Processor','Elavon / Nova Virtual Merchant',1,0,'SSL Merchant ID ','SSL User ID','SSL PIN',NULL,'Payment_Elavon','https://www.myvirtualmerchant.com/VirtualMerchant/processxml.do',NULL,NULL,NULL,'https://www.myvirtualmerchant.com/VirtualMerchant/processxml.do',NULL,NULL,NULL,1,0),
- ('Realex',             'Realex Payment',         NULL,1,0,'Merchant ID', 'Password', NULL, 'Account', 'Payment_Realex', 'https://epage.payandshop.com/epage.cgi', NULL, NULL, NULL, 'https://epage.payandshop.com/epage-remote.cgi', NULL, NULL, NULL, 1, 0),
- ('PayflowPro',         'PayflowPro',             NULL,1,0,'Vendor ID', 'Password', 'Partner (merchant)', 'User', 'Payment_PayflowPro', 'https://Payflowpro.paypal.com', NULL, NULL, NULL, 'https://pilot-Payflowpro.paypal.com', NULL, NULL, NULL, 1, 0),
- ('FirstData',          'FirstData (aka linkpoint)', 'FirstData (aka linkpoint)', 1, 0, 'Store name', 'certificate path', NULL, NULL, 'Payment_FirstData', 'https://secure.linkpt.net', NULL, NULL, NULL, 'https://staging.linkpt.net', NULL, NULL, NULL, 1, NULL);
+ ('Elavon',             'Elavon Payment Processor','Elavon / Nova Virtual Merchant',0,0,'SSL Merchant ID ','SSL User ID','SSL PIN',NULL,'Payment_Elavon','https://www.myvirtualmerchant.com/VirtualMerchant/processxml.do',NULL,NULL,NULL,'https://www.myvirtualmerchant.com/VirtualMerchant/processxml.do',NULL,NULL,NULL,1,0),
+ ('Realex',             'Realex Payment',         NULL,0,0,'Merchant ID', 'Password', NULL, 'Account', 'Payment_Realex', 'https://epage.payandshop.com/epage.cgi', NULL, NULL, NULL, 'https://epage.payandshop.com/epage-remote.cgi', NULL, NULL, NULL, 1, 0),
+ ('PayflowPro',         'PayflowPro',             NULL,0,0,'Vendor ID', 'Password', 'Partner (merchant)', 'User', 'Payment_PayflowPro', 'https://Payflowpro.paypal.com', NULL, NULL, NULL, 'https://pilot-Payflowpro.paypal.com', NULL, NULL, NULL, 1, 0),
+ ('FirstData',          'FirstData (aka linkpoint)', 'FirstData (aka linkpoint)', 0, 0, 'Store name', 'certificate path', NULL, NULL, 'Payment_FirstData', 'https://secure.linkpt.net', NULL, NULL, NULL, 'https://staging.linkpt.net', NULL, NULL, NULL, 1, NULL);
 
 
 -- the fuzzy default dedupe rules
@@ -6498,27 +6435,11 @@ INSERT INTO `civicrm_contact_type`
   ( 3, 'Organization', 'Organization', NULL, NULL, 1, 1);
 
 -- +--------------------------------------------------------------------+
--- | CiviCRM version 5                                                  |
--- +--------------------------------------------------------------------+
--- | Copyright CiviCRM LLC (c) 2004-2019                                |
--- +--------------------------------------------------------------------+
--- | This file is a part of CiviCRM.                                    |
+-- | Copyright CiviCRM LLC. All rights reserved.                        |
 -- |                                                                    |
--- | CiviCRM is free software; you can copy, modify, and distribute it  |
--- | under the terms of the GNU Affero General Public License           |
--- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
--- |                                                                    |
--- | CiviCRM is distributed in the hope that it will be useful, but     |
--- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
--- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
--- | See the GNU Affero General Public License for more details.        |
--- |                                                                    |
--- | You should have received a copy of the GNU Affero General Public   |
--- | License and the CiviCRM Licensing Exception along                  |
--- | with this program; if not, contact CiviCRM LLC                     |
--- | at info[AT]civicrm[DOT]org. If you have questions about the        |
--- | GNU Affero General Public License or the licensing of CiviCRM,     |
--- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+-- | This work is published under the GNU AGPLv3 license with some      |
+-- | permitted exceptions and without any warranty. For full license    |
+-- | and copyright information, see https://civicrm.org/licensing       |
 -- +--------------------------------------------------------------------+
 --
 -- Generated from civicrm_msg_template.tpl
@@ -6575,7 +6496,7 @@ INSERT INTO civicrm_option_value
     SELECT @tpl_ovid_petition_confirmation_needed := MAX(id) FROM civicrm_option_value WHERE option_group_id = @tpl_ogid_petition AND name = 'petition_confirmation_needed';
 
 INSERT INTO civicrm_msg_template
-  (msg_title,      msg_subject,                  msg_text,                  msg_html,                  workflow_id,        is_default, is_reserved) VALUES
+  (msg_title,      msg_subject,                  msg_text,                  msg_html,    workflow_name,              workflow_id,        is_default, is_reserved) VALUES
       
       
       
@@ -6722,7 +6643,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_case_activity, 1,          0),
+', 'case_activity', @tpl_ovid_case_activity, 1,          0),
       ('Cases - Send Copy of an Activity', '{if $idHash}[case #{$idHash}]{/if} {$activitySubject}
 ', '===========================================================
 {ts}Activity Summary{/ts} - {$activityTypeName}
@@ -6866,7 +6787,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_case_activity, 0,          1) ,      
+', 'case_activity', @tpl_ovid_case_activity, 0,          1) ,      
       
       
       ('Contributions - Duplicate Organization Alert', '{ts}CiviContribute Alert: Possible Duplicate Contact Record{/ts} - {contact.display_name}
@@ -6973,7 +6894,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_dupalert, 1,          0),
+', 'contribution_dupalert', @tpl_ovid_contribution_dupalert, 1,          0),
       ('Contributions - Duplicate Organization Alert', '{ts}CiviContribute Alert: Possible Duplicate Contact Record{/ts} - {contact.display_name}
 ', '{ts}A contribution / membership signup was made on behalf of the organization listed below.{/ts}
 {ts}The information provided matched multiple existing database records based on the configured Duplicate Matching Rules for your site.{/ts}
@@ -7078,7 +6999,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_dupalert, 0,          1) ,      
+', 'contribution_dupalert', @tpl_ovid_contribution_dupalert, 0,          1) ,      
       
       
       ('Contributions - Receipt (off-line)', '{ts}Contribution Receipt{/ts} - {contact.display_name}
@@ -7092,6 +7013,7 @@ INSERT INTO civicrm_msg_template
 {ts}Contribution Information{/ts}
 
 ===========================================================
+{ts}Contributor{/ts}: {contact.display_name}
 {ts}Financial Type{/ts}: {$formValues.contributionType_name}
 {if $lineItem}
 {foreach from=$lineItem item=value key=priceset}
@@ -7237,6 +7159,14 @@ INSERT INTO civicrm_msg_template
       <th {$headerStyle}>
        {ts}Contribution Information{/ts}
       </th>
+     </tr>
+     <tr>
+      <td {$labelStyle}>
+       {ts}Contributor Name{/ts}
+      </td>
+      <td {$valueStyle}>
+       {contact.display_name}
+      </td>
      </tr>
      <tr>
       <td {$labelStyle}>
@@ -7515,7 +7445,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_offline_receipt, 1,          0),
+', 'contribution_offline_receipt', @tpl_ovid_contribution_offline_receipt, 1,          0),
       ('Contributions - Receipt (off-line)', '{ts}Contribution Receipt{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -7527,6 +7457,7 @@ INSERT INTO civicrm_msg_template
 {ts}Contribution Information{/ts}
 
 ===========================================================
+{ts}Contributor{/ts}: {contact.display_name}
 {ts}Financial Type{/ts}: {$formValues.contributionType_name}
 {if $lineItem}
 {foreach from=$lineItem item=value key=priceset}
@@ -7672,6 +7603,14 @@ INSERT INTO civicrm_msg_template
       <th {$headerStyle}>
        {ts}Contribution Information{/ts}
       </th>
+     </tr>
+     <tr>
+      <td {$labelStyle}>
+       {ts}Contributor Name{/ts}
+      </td>
+      <td {$valueStyle}>
+       {contact.display_name}
+      </td>
      </tr>
      <tr>
       <td {$labelStyle}>
@@ -7950,7 +7889,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_offline_receipt, 0,          1) ,      
+', 'contribution_offline_receipt', @tpl_ovid_contribution_offline_receipt, 0,          1) ,      
       
       
       ('Contributions - Receipt (on-line)', '{if $is_pay_later}{ts}Invoice{/ts}{else}{ts}Receipt{/ts}{/if} - {$title} - {contact.display_name}
@@ -8639,7 +8578,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_online_receipt, 1,          0),
+', 'contribution_online_receipt', @tpl_ovid_contribution_online_receipt, 1,          0),
       ('Contributions - Receipt (on-line)', '{if $is_pay_later}{ts}Invoice{/ts}{else}{ts}Receipt{/ts}{/if} - {$title} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 {if $receipt_text}
@@ -9326,7 +9265,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_online_receipt, 0,          1) ,      
+', 'contribution_online_receipt', @tpl_ovid_contribution_online_receipt, 0,          1) ,      
       
       
       ('Contributions - Invoice', '{if $title}
@@ -9343,104 +9282,91 @@ INSERT INTO civicrm_msg_template
  - {contact.display_name}
 ', '{ts}Contribution Invoice{/ts}
 ', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns = "http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv = "Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
       <title></title>
   </head>
   <body>
-    <table style = "margin-top:2px;padding-left:7px;">
-      <tr>
-        <td><img src = "{$resourceBase}/i/civi99.png" height = "34px" width = "99px"></td>
-      </tr>
-    </table>
-    <center>
-      <table style = "padding-right:19px;font-family: Arial, Verdana, sans-serif;" width = "500" height = "100" border = "0" cellpadding = "2" cellspacing = "1">
+  <div style="padding-top:100px;margin-right:50px;border-style: none;">
+    {if $config->empoweredBy}
+      <table style="margin-top:5px;padding-bottom:50px;" cellpadding="5" cellspacing="0">
         <tr>
-          <td style = "padding-left:15px;" ><b><font size = "4" align = "center">{ts}INVOICE{/ts}</font></b></td>
-          <td colspan = "1"></td>
-          <td style = "padding-left:70px;"><b><font size = "1" align = "center" >{ts}Invoice Date:{/ts}</font></b></td>
-          <td><font size = "1" align = "right">{$domain_organization}</font></td>
+          <td><img src="{$resourceBase}/i/civi99.png" height="34px" width="99px"></td>
+        </tr>
+      </table>
+    {/if}
+      <table style="font-family: Arial, Verdana, sans-serif;" width="100%" height="100" border="0" cellpadding="5" cellspacing="0">
+        <tr>
+          <td width="30%"><b><font size="4" align="center">{ts}INVOICE{/ts}</font></b></td>
+          <td width="50%" valign="bottom"><b><font size="1" align="center">{ts}Invoice Date:{/ts}</font></b></td>
+          <td valign="bottom" style="white-space: nowrap"><b><font size="1" align="right">{$domain_organization}</font></b></td>
         </tr>
         <tr>
           {if $organization_name}
-            <td style = "padding-left:17px;"><font size = "1" align = "center" >{$display_name}  ({$organization_name})</font></td>
+            <td><font size="1" align="center">{$display_name}  ({$organization_name})</font></td>
           {else}
-            <td style = "padding-left:15px;"><font size = "1" align = "center" >{$display_name}</font></td>
+            <td><font size="1" align="center">{$display_name}</font></td>
           {/if}
-          <td colspan = "1"></td>
-          <td style = "padding-left:70px;"><font size = "1" align = "right">{$invoice_date}</font></td>
-          <td>
-            <font size = "1" align = "right">
+          <td><font size="1" align="right">{$invoice_date}</font></td>
+          <td style="white-space: nowrap">
+            <font size="1" align="right">
               {if $domain_street_address }{$domain_street_address}{/if}
               {if $domain_supplemental_address_1 }{$domain_supplemental_address_1}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
-          <td style = "padding-left:17px;"><font size = "1" align = "center">{$street_address}   {$supplemental_address_1}</font></td>
-          <td colspan = "1"></td>
-          <td style = "padding-left:70px;"><b><font size = "1" align = "right">{ts}Invoice Number:{/ts}</font></b></td>
+          <td><font size="1" align="center">{$street_address} {$supplemental_address_1}</font></td>
+          <td><b><font size="1" align="right">{ts}Invoice Number:{/ts}</font></b></td>
           <td>
-            <font size = "1" align = "right">
+            <font size="1" align="right">
               {if $domain_supplemental_address_2 }{$domain_supplemental_address_2}{/if}
               {if $domain_state }{$domain_state}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
-          <td style = "padding-left:17px;"><font size = "1" align = "center">{$supplemental_address_2}  {$stateProvinceAbbreviation}</font></td>
-          <td colspan="1"></td>
-          <td style = "padding-left:70px;"><font size = "1" align = "right">{$invoice_number}</font></td>
-          <td>
-            <font size = "1" align = "right">
+          <td><font size="1" align="center">{$supplemental_address_2} {$stateProvinceAbbreviation}</font></td>
+          <td><font size="1" align="right">{$invoice_number}</font></td>
+          <td style="white-space: nowrap">
+            <font size="1" align="right">
               {if $domain_city}{$domain_city}{/if}
               {if $domain_postal_code }{$domain_postal_code}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
-          <td style = "padding-left:17px;"><font size = "1" align = "right">{$city}  {$postal_code}</font></td>
-          <td colspan="1"></td>
-          <td height = "10" style = "padding-left:70px;"><b><font size = "1"align = "right">{ts}Reference:{/ts}</font></b></td>
-          <td><font size = "1" align = "right"> {if $domain_country}{$domain_country}{/if}</font></td>
+          <td><font size="1" align="right">{$city}  {$postal_code}</font></td>
+          <td height="10"><b><font size="1" align="right">{ts}Reference:{/ts}</font></b></td>
+          <td><font size="1" align="right">{if $domain_country}{$domain_country}{/if}</font></td>
+        </tr>
+        <tr>
+          <td><font size="1" align="right"> {$country}</font></td>
+          <td><font size="1" align="right">{$source}</font></td>
+          <td valign="top" style="white-space: nowrap"><font size="1" align="right">{if $domain_email}{$domain_email}{/if}</font> </td>
         </tr>
         <tr>
           <td></td>
           <td></td>
-          <td style = "padding-left:70px;"><font size = "1"align = "right">{$source}</font></td>
-          <td><font size = "1" align = "right"> {if $domain_phone}{$domain_phone}{/if}</font> </td>
-        </tr>
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td><font size = "1" align = "right"> {if $domain_email}{$domain_email}{/if}</font> </td>
+          <td valign="top"><font size="1" align="right">{if $domain_phone}{$domain_phone}{/if}</font> </td>
         </tr>
       </table>
-      <table style = "margin-top:75px;font-family: Arial, Verdana, sans-serif" width = "590" border = "0"cellpadding = "-5" cellspacing = "19" id = "desc">
-        <tr>
-          <td colspan = "2" {$valueStyle}>
-            <table> {* FIXME: style this table so that it looks like the text version (justification, etc.) *}
+
+             <table style="padding-top:75px;font-family: Arial, Verdana, sans-serif;" width="100%" border="0" cellpadding="5" cellspacing="0">
               <tr>
-                <th style = "padding-right:34px;text-align:left;font-weight:bold;width:200px;"><font size = "1">{ts}Description{/ts}</font></th>
-                <th style = "padding-left:34px;text-align:right;font-weight:bold;" ><font size = "1">{ts}Quantity{/ts}</font></th>
-                <th style = "padding-left:34px;text-align:right;font-weight:bold;"><font size = "1">{ts}Unit Price{/ts}</font></th>
-                <th style = "padding-left:34px;text-align:right;font-weight:bold;width:20px;"><font size = "1">{$taxTerm} </font></th>
-                <th style = "padding-left:34px;text-align:right;font-weight:bold;"><font size = "1">{ts 1=$defaultCurrency}Amount %1{/ts}</font></th>
+                <th style="text-align:left;font-weight:bold;width:100%"><font size="1">{ts}Description{/ts}</font></th>
+                <th style="text-align:right;font-weight:bold;white-space: nowrap"><font size="1">{ts}Quantity{/ts}</font></th>
+                <th style="text-align:right;font-weight:bold;white-space: nowrap"><font size="1">{ts}Unit Price{/ts}</font></th>
+                <th style="text-align:right;font-weight:bold;white-space: nowrap"><font size="1">{$taxTerm}</font></th>
+                <th style="text-align:right;font-weight:bold;white-space: nowrap"><font size="1">{ts 1=$defaultCurrency}Amount %1{/ts}</font></th>
               </tr>
               {foreach from=$lineItem item=value key=priceset name=taxpricevalue}
                 {if $smarty.foreach.taxpricevalue.index eq 0}
-                  <tr>
-                    <td colspan = "5" ><hr size="3" style = "color:#000;"></hr></td>
-                  </tr>
                 {else}
-                  <tr>
-                    <td  colspan = "5" style = "color:#F5F5F5;"><hr></hr></td>
-                  </tr>
                 {/if}
                 <tr>
-                  <td style="text-align:left;" ><font size = "1">
+                  <td style="text-align:left;nowrap"><font size="1">
                     {if $value.html_type eq \'Text\'}
                       {$value.label}
                     {else}
@@ -9449,246 +9375,228 @@ INSERT INTO civicrm_msg_template
                     {if $value.description}
                       <div>{$value.description|truncate:30:"..."}</div>
                     {/if}
-                    </font>
+                   </font>
                   </td>
-                  <td style = "padding-left:34px;text-align:right;"><font size = "1"> {$value.qty}</font></td>
-                  <td style = "padding-left:34px;text-align:right;"><font size = "1"> {$value.unit_price|crmMoney:$currency}</font></td>
+                  <td style="text-align:right;"><font size="1">{$value.qty}</font></td>
+                  <td style="text-align:right;"><font size="1">{$value.unit_price|crmMoney:$currency}</font></td>
                   {if $value.tax_amount != \'\'}
-                    <td style = "padding-left:34px;text-align:right;width:20px;"><font size = "1"> {$value.tax_rate}%</font></td>
+                    <td style="text-align:right;"><font size="1">{$value.tax_rate}%</font></td>
                   {else}
-                    <td style = "padding-left:34px;text-align:right;width:20px;"><font size = "1">{ts 1=$taxTerm}No %1{/ts}</font></td>
+                    <td style="text-align:right;"><font size="1">{ts 1=$taxTerm}-{/ts}</font></td>
                   {/if}
-                  <td style = "padding-left:34px;text-align:right;"><font size = "1">{$value.subTotal|crmMoney:$currency}</font></td>
+                  <td style="text-align:right;"><font size="1">{$value.subTotal|crmMoney:$currency}</font></td>
                 </tr>
               {/foreach}
-              <tr><td  colspan = "5" style = "color:#F5F5F5;"><hr></hr></td></tr>
               <tr>
-                <td colspan = "3"></td>
-                <td style = "padding-left:20px;text-align:right;"><font size = "1">{ts}Sub Total{/ts}</font></td>
-                <td style = "padding-left:34px;text-align:right;"><font size = "1"> {$subTotal|crmMoney:$currency}</font></td>
+                <td colspan="3"></td>
+                <td style="text-align:right;"><font size="1">{ts}Sub Total{/ts}</font></td>
+                <td style="text-align:right;"><font size="1">{$subTotal|crmMoney:$currency}</font></td>
               </tr>
-              {foreach from = $dataArray item = value key = priceset}
+              {foreach from=$dataArray item=value key=priceset}
                 <tr>
-                  <td colspan = "3"></td>
+                  <td colspan="3"></td>
                     {if $priceset}
-                      <td style = "padding-left:20px;text-align:right;"><font size = "1"> {ts 1=$taxTerm 2=$priceset}TOTAL %1 %2%{/ts}</font></td>
-                      <td style = "padding-left:34px;text-align:right"><font size = "1" align = "right">{$value|crmMoney:$currency}</font> </td>
+                      <td style="text-align:right;white-space: nowrap"><font size="1">{ts 1=$taxTerm 2=$priceset}TOTAL %1 %2%{/ts}</font></td>
+                      <td style="text-align:right"><font size="1" align="right">{$value|crmMoney:$currency}</font> </td>
                     {elseif $priceset == 0}
-                      <td style = "padding-left:20px;text-align:right;"><font size = "1">{ts 1=$taxTerm}TOTAL NO %1{/ts}</font></td>
-                      <td style = "padding-left:34px;text-align:right"><font size = "1" align = "right">{$value|crmMoney:$currency}</font> </td>
+                      <td style="text-align:right;white-space: nowrap"><font size="1">{ts 1=$taxTerm}TOTAL %1{/ts}</font></td>
+                      <td style="text-align:right"><font size="1" align="right">{$value|crmMoney:$currency}</font> </td>
                 </tr>
               {/if}
               {/foreach}
               <tr>
-                <td colspan = "3"></td>
-                <td colspan = "2"><hr></hr></td>
+                <td colspan="3"></td>
+                <td style="text-align:right;white-space: nowrap"><b><font size="1">{ts 1=$defaultCurrency}TOTAL %1{/ts}</font></b></td>
+                <td style="text-align:right;"><font size="1">{$amount|crmMoney:$currency}</font></td>
               </tr>
-              <tr>
-                <td colspan = "3"></td>
-                <td style = "padding-left:20px;text-align:right;"><b><font size = "1">{ts 1=$defaultCurrency}TOTAL %1{/ts}</font></b></td>
-                <td style = "padding-left:34px;text-align:right;"><font size = "1">{$amount|crmMoney:$currency}</font></td>
-                <td style = "padding-left:34px;"><font size = "1" align = "right"></font></td>
-              </tr>
-              {if $is_pay_later == 0}
+             {if $amountDue != 0}
                 <tr>
-                  <td colspan = "3"></td>
-                  <td style = "padding-left:20px;text-align:right;"><font size = "1">
+                  <td colspan="3"></td>
+                  <td style="text-align:right;white-space: nowrap"><font size="1">
                     {if $contribution_status_id == $refundedStatusId}
-                      {ts}LESS Amount Credited{/ts}
+                      {ts}Amount Credited{/ts}
                     {else}
-                      {ts}LESS Amount Paid{/ts}
+                      {ts}Amount Paid{/ts}
                     {/if}
-                    </font>
+                   </font>
                   </td>
-                  <td style = "padding-left:34px;text-align:right;"><font size = "1">{$amountPaid|crmMoney:$currency}</font></td>
+                  <td style="text-align:right;"><font size="1">{$amountPaid|crmMoney:$currency}</font></td>
                 </tr>
                 <tr>
-                  <td colspan = "3"></td>
-                  <td colspan = "2" ><hr></hr></td>
+                  <td colspan="3"></td>
+                  <td colspan="2"><hr></hr></td>
                 </tr>
                 <tr>
-                  <td colspan = "3"></td>
-                  <td style = "padding-left:20px;text-align:right;"><b><font size = "1">{ts}AMOUNT DUE:{/ts} </font></b></td>
-                  <td style = "padding-left:34px;text-align:right;"><b><font size = "1">{$amountDue|crmMoney:$currency}</font></b></td>
-                  <td style = "padding-left:34px;"><font size = "1" align = "right"></font></td>
+                  <td colspan="3"></td>
+                  <td style="text-align:right;white-space: nowrap" ><b><font size="1">{ts}AMOUNT DUE:{/ts}</font></b></td>
+                  <td style="text-align:right;"><b><font size="1">{$amountDue|crmMoney:$currency}</font></b></td>
                 </tr>
               {/if}
               <br/><br/><br/>
               <tr>
-                <td colspan = "3"></td>
+                <td colspan="5"></td>
               </tr>
               {if $contribution_status_id == $pendingStatusId && $is_pay_later == 1}
                 <tr>
-                  <td><b><font size = "1" align = "center">{ts 1=$dueDate}DUE DATE: %1{/ts}</font></b></td>
-                  <td colspan = "3"></td>
+                  <td colspan="3"><b><font size="1" align="center">{ts 1=$dueDate}DUE DATE: %1{/ts}</font></b></td>
+                  <td colspan="2"></td>
                 </tr>
               {/if}
             </table>
           </td>
         </tr>
       </table>
+
       {if $contribution_status_id == $pendingStatusId && $is_pay_later == 1}
-        <table style = "margin-top:5px;padding-right:45px;">
+        <table style="margin-top:5px;" width="100%" border="0" cellpadding="0" cellspacing="0">
           <tr>
-            <td><img src = "{$resourceBase}/i/contribute/cut_line.png" height = "15" width = "630"></td>
+            <td><img src="{$resourceBase}/i/contribute/cut_line.png" height="15"></td>
           </tr>
         </table>
-        <table style = "margin-top:6px;padding-right:20px;font-family: Arial, Verdana, sans-serif" width = "480" border = "0"cellpadding = "-5" cellspacing="19" id = "desc">
+
+        <table style="margin-top:5px;font-family: Arial, Verdana, sans-serif" width="100%" border="0" cellpadding="5" cellspacing="0" id="desc">
           <tr>
-            <td width="60%"><b><font size = "4" align = "right">{ts}PAYMENT ADVICE{/ts}</font></b> <br/><br/> <font size = "1" align = "right"><b>{ts}To: {/ts}</b><div style="width:17em;word-wrap:break-word;">
-              {$domain_organization} <br />
-              {$domain_street_address} {$domain_supplemental_address_1} <br />
-              {$domain_supplemental_address_2} {$domain_state} <br />
-              {$domain_city} {$domain_postal_code} <br />
-              {$domain_country} <br />
-              {$domain_phone} <br />
+            <td width="60%"><b><font size="4" align="right">{ts}PAYMENT ADVICE{/ts}</font></b><br/><br/><font size="1" align="left"><b>{ts}To:{/ts}</b><div style="width:24em;word-wrap:break-word;">
+              {$domain_organization}<br />
+              {$domain_street_address} {$domain_supplemental_address_1}<br />
+              {$domain_supplemental_address_2} {$domain_state}<br />
+              {$domain_city} {$domain_postal_code}<br />
+              {$domain_country}<br />
               {$domain_email}</div>
-              </font><br/><br/><font size="1" align="right">{$notes}</font>
+              {$domain_phone}<br />
+             </font><br/><br/><font size="1" align="left">{$notes}</font>
             </td>
             <td width="40%">
-              <table  cellpadding = "-10" cellspacing = "22"  align="right" >
+              <table cellpadding="5" cellspacing="0"  width="100%" border="0">
                 <tr>
-                  <td colspan = "2"></td>
-                  <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Customer: {/ts}</font></td>
-                  <td ><font size = "1" align = "right">{$display_name}</font></td>
+                  <td width="100%"><font size="1" align="right" style="font-weight:bold;">{ts}Customer:{/ts}</font></td>
+                  <td style="white-space: nowrap"><font size="1" align="right">{$display_name}</font></td>
                 </tr>
                 <tr>
-                  <td colspan = "2"></td>
-                  <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Invoice Number: {/ts}</font></td>
-                  <td><font size = "1" align = "right">{$invoice_number}</font></td>
+                  <td><font size="1" align="right" style="font-weight:bold;">{ts}Invoice Number:{/ts}</font></td>
+                  <td><font size="1" align="right">{$invoice_number}</font></td>
                 </tr>
-                <tr><td colspan = "5"style = "color:#F5F5F5;"><hr></hr></td></tr>
+                <tr><td colspan="5" style="color:#F5F5F5;"><hr></td></tr>
                 {if $is_pay_later == 1}
                   <tr>
-                    <td colspan = "2"></td>
-                    <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Amount Due:{/ts}</font></td>
-                    <td><font size = "1" align = "right" style="font-weight:bold;">{$amount|crmMoney:$currency}</font></td>
+                    <td><font size="1" align="right" style="font-weight:bold;">{ts}Amount Due:{/ts}</font></td>
+                    <td><font size="1" align="right" style="font-weight:bold;">{$amount|crmMoney:$currency}</font></td>
                   </tr>
                 {else}
                   <tr>
-                    <td colspan = "2"></td>
-                    <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Amount Due: {/ts}</font></td>
-                    <td><font size = "1" align = "right" style="font-weight:bold;">{$amountDue|crmMoney:$currency}</font></td>
+                    <td><font size="1" align="right" style="font-weight:bold;">{ts}Amount Due:{/ts}</font></td>
+                    <td><font size="1" align="right" style="font-weight:bold;">{$amountDue|crmMoney:$currency}</font></td>
                   </tr>
                 {/if}
                 <tr>
-                  <td colspan = "2"></td>
-                  <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Due Date:  {/ts}</font></td>
-                  <td><font size = "1" align = "right">{$dueDate}</font></td>
+                  <td><font size="1" align="right" style="font-weight:bold;">{ts}Due Date:{/ts}</font></td>
+                  <td><font size="1" align="right">{$dueDate}</font></td>
                 </tr>
                 <tr>
-                  <td colspan = "5" style = "color:#F5F5F5;"><hr></hr></td>
+                  <td colspan="5" style="color:#F5F5F5;"><hr></td>
                 </tr>
               </table>
-            </td>
+      {/if}
+
+      {if $contribution_status_id == $refundedStatusId || $contribution_status_id == $cancelledStatusId}
+      {if $config->empoweredBy}
+        <table style="margin-top:2px;padding-left:7px;page-break-before: always;">
+          <tr>
+            <td><img src="{$resourceBase}/i/civi99.png" height="34px" width="99px"></td>
           </tr>
         </table>
       {/if}
 
-      {if $contribution_status_id == $refundedStatusId || $contribution_status_id == $cancelledStatusId}
-        <table style = "margin-top:2px;padding-left:7px;page-break-before: always;">
-          <tr>
-            <td><img src = "{$resourceBase}/i/civi99.png" height = "34px" width = "99px"></td>
-          </tr>
-        </table>
     <center>
-
-      <table style = "padding-right:19px;font-family: Arial, Verdana, sans-serif" width = "500" height = "100" border = "0" cellpadding = "2" cellspacing = "1">
+      <table style="font-family: Arial, Verdana, sans-serif" width="100%" height="100" border="0" cellpadding="5" cellspacing="5">
         <tr>
-          <td style = "padding-left:15px;" ><b><font size = "4" align = "center">{ts}CREDIT NOTE{/ts}</font></b></td>
-          <td colspan = "1"></td>
-          <td style = "padding-left:70px;"><b><font size = "1" align = "right">{ts}Date:{/ts}</font></b></td>
-          <td><font size = "1" align = "right">{$domain_organization}</font></td>
+          <td style="padding-left:15px;"><b><font size="4" align="center">{ts}CREDIT NOTE{/ts}</font></b></td>
+          <td style="padding-left:30px;"><b><font size="1" align="right">{ts}Date:{/ts}</font></b></td>
+          <td><font size="1" align="right">{$domain_organization}</font></td>
         </tr>
         <tr>
           {if $organization_name}
-            <td style = "padding-left:17px;"><font size = "1" align = "center">{$display_name}  ({$organization_name})</font></td>
+            <td style="padding-left:17px;"><font size="1" align="center">{$display_name}  ({$organization_name})</font></td>
           {else}
-            <td style = "padding-left:17px;"><font size = "1" align = "center">{$display_name}</font></td>
+            <td style="padding-left:17px;"><font size="1" align="center">{$display_name}</font></td>
           {/if}
-          <td colspan = "1"></td>
-          <td style = "padding-left:70px;"><font size = "1" align = "right">{$invoice_date}</font></td>
+          <td style="padding-left:30px;"><font size="1" align="right">{$invoice_date}</font></td>
           <td>
-            <font size = "1" align = "right">
+            <font size="1" align="right">
               {if $domain_street_address }{$domain_street_address}{/if}
               {if $domain_supplemental_address_1 }{$domain_supplemental_address_1}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
-          <td style = "padding-left:17px;"><font size = "1" align = "center">{$street_address}   {$supplemental_address_1}</font></td>
-          <td colspan = "1"></td>
-          <td style = "padding-left:70px;"><b><font size = "1" align = "right">{ts}Credit Note Number:{/ts}</font></b></td>
+          <td style="padding-left:17px;"><font size="1" align="center">{$street_address}   {$supplemental_address_1}</font></td>
+          <td style="padding-left:30px;"><b><font size="1" align="right">{ts}Credit Note Number:{/ts}</font></b></td>
           <td>
-            <font size = "1" align = "right">
+            <font size="1" align="right">
               {if $domain_supplemental_address_2 }{$domain_supplemental_address_2}{/if}
               {if $domain_state }{$domain_state}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
-          <td style = "padding-left:17px;"><font size = "1" align = "center">{$supplemental_address_2}  {$stateProvinceAbbreviation}</font></td>
-          <td colspan="1"></td>
-          <td style = "padding-left:70px;"><font size = "1" align = "right">{$creditnote_id}</font></td>
+          <td style="padding-left:17px;"><font size="1" align="center">{$supplemental_address_2}  {$stateProvinceAbbreviation}</font></td>
+          <td style="padding-left:30px;"><font size="1" align="right">{$creditnote_id}</font></td>
           <td>
-            <font size = "1" align = "right">
+            <font size="1" align="right">
               {if $domain_city}{$domain_city}{/if}
               {if $domain_postal_code }{$domain_postal_code}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
-          <td style = "padding-left:17px;"><font size = "1" align = "right">{$city}  {$postal_code}</font></td>
-          <td colspan="1"></td>
-          <td height = "10" style = "padding-left:70px;"><b><font size = "1"align = "right">{ts}Reference:{/ts}</font></b></td>
+          <td style="padding-left:17px;"><font size="1" align="right">{$city}  {$postal_code}</font></td>
+          <td height="10" style="padding-left:30px;"><b><font size="1" align="right">{ts}Reference:{/ts}</font></b></td>
           <td>
-            <font size = "1" align = "right">
+            <font size="1" align="right">
               {if $domain_country}{$domain_country}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
           <td></td>
-          <td></td>
-          <td style = "padding-left:70px;"><font size = "1"align = "right">{$source}</font></td>
+          <td style="padding-left:30px;"><font size="1" align="right">{$source}</font></td>
           <td>
-            <font size = "1" align = "right">
-              {if $domain_phone}{$domain_phone}{/if}
-            </font>
-          </td>
-        </tr>
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>
-            <font size = "1" align = "right">
+            <font size="1" align="right">
               {if $domain_email}{$domain_email}{/if}
-            </font>
+           </font>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>
+            <font size="1" align="right">
+              {if $domain_phone}{$domain_phone}{/if}
+           </font>
           </td>
         </tr>
       </table>
 
-      <table style = "margin-top:75px;font-family: Arial, Verdana, sans-serif" width = "590" border = "0"cellpadding = "-5" cellspacing = "19" id = "desc">
+      <table style="margin-top:75px;font-family: Arial, Verdana, sans-serif" width="100%" border="0" cellpadding="5" cellspacing="5" id="desc">
         <tr>
-          <td colspan = "2" {$valueStyle}>
+          <td colspan="2" {$valueStyle}>
             <table> {* FIXME: style this table so that it looks like the text version (justification, etc.) *}
               <tr>
-                <th style = "padding-right:28px;text-align:left;font-weight:bold;width:200px;"><font size = "1">{ts}Description{/ts}</font></th>
-                <th style = "padding-left:28px;text-align:right;font-weight:bold;"><font size = "1">{ts}Quantity{/ts}</font></th>
-                <th style = "padding-left:28px;text-align:right;font-weight:bold;"><font size = "1">{ts}Unit Price{/ts}</font></th>
-                <th style = "padding-left:28px;text-align:right;font-weight:bold;"><font size = "1">{$taxTerm} </font></th>
-                <th style = "padding-left:28px;text-align:right;font-weight:bold;"><font size = "1">{ts 1=$defaultCurrency}Amount %1{/ts}</font></th>
+                <th style="padding-right:28px;text-align:left;font-weight:bold;width:200px;"><font size="1">{ts}Description{/ts}</font></th>
+                <th style="padding-left:28px;text-align:right;font-weight:bold;"><font size="1">{ts}Quantity{/ts}</font></th>
+                <th style="padding-left:28px;text-align:right;font-weight:bold;"><font size="1">{ts}Unit Price{/ts}</font></th>
+                <th style="padding-left:28px;text-align:right;font-weight:bold;"><font size="1">{$taxTerm}</font></th>
+                <th style="padding-left:28px;text-align:right;font-weight:bold;"><font size="1">{ts 1=$defaultCurrency}Amount %1{/ts}</font></th>
               </tr>
               {foreach from=$lineItem item=value key=priceset name=pricevalue}
                 {if $smarty.foreach.pricevalue.index eq 0}
-                  <tr><td  colspan = "5" ><hr size="3" style = "color:#000;"></hr></td></tr>
+                  <tr><td colspan="5"><hr size="3" style="color:#000;"></hr></td></tr>
                 {else}
-                  <tr><td  colspan = "5" style = "color:#F5F5F5;"><hr></hr></td></tr>
+                  <tr><td colspan="5" style="color:#F5F5F5;"><hr></hr></td></tr>
                 {/if}
                 <tr>
                   <td style ="text-align:left;"  >
-                    <font size = "1">
+                    <font size="1">
                       {if $value.html_type eq \'Text\'}
                         {$value.label}
                       {else}
@@ -9697,100 +9605,101 @@ INSERT INTO civicrm_msg_template
                       {if $value.description}
                         <div>{$value.description|truncate:30:"..."}</div>
                       {/if}
-                    </font>
+                   </font>
                   </td>
-                  <td style = "padding-left:28px;text-align:right;"><font size = "1"> {$value.qty}</font></td>
-                  <td style = "padding-left:28px;text-align:right;"><font size = "1"> {$value.unit_price|crmMoney:$currency}</font></td>
+                  <td style="padding-left:28px;text-align:right;"><font size="1">{$value.qty}</font></td>
+                  <td style="padding-left:28px;text-align:right;"><font size="1">{$value.unit_price|crmMoney:$currency}</font></td>
                   {if $value.tax_amount != \'\'}
-                    <td style = "padding-left:28px;text-align:right;"><font size = "1"> {$value.tax_rate}%</font></td>
+                    <td style="padding-left:28px;text-align:right;"><font size="1">{$value.tax_rate}%</font></td>
                   {else}
-                    <td style = "padding-left:28px;text-align:right"><font size = "1" >{ts 1=$taxTerm}No %1{/ts}</font></td>
+                    <td style="padding-left:28px;text-align:right"><font size="1">{ts 1=$taxTerm}No %1{/ts}</font></td>
                   {/if}
-                  <td style = "padding-left:28px;text-align:right;"><font size = "1" >{$value.subTotal|crmMoney:$currency}</font></td>
+                  <td style="padding-left:28px;text-align:right;"><font size="1">{$value.subTotal|crmMoney:$currency}</font></td>
                 </tr>
               {/foreach}
-              <tr><td  colspan = "5" style = "color:#F5F5F5;"><hr></hr></td></tr>
+              <tr><td colspan="5" style="color:#F5F5F5;"><hr></hr></td></tr>
               <tr>
-                <td colspan = "3"></td>
-                <td style = "padding-left:28px;text-align:right;"><font size = "1">{ts}Sub Total{/ts}</font></td>
-                <td style = "padding-left:28px;text-align:right;"><font size = "1"> {$subTotal|crmMoney:$currency}</font></td>
+                <td colspan="3"></td>
+                <td style="padding-left:28px;text-align:right;"><font size="1">{ts}Sub Total{/ts}</font></td>
+                <td style="padding-left:28px;text-align:right;"><font size="1">{$subTotal|crmMoney:$currency}</font></td>
               </tr>
-              {foreach from = $dataArray item = value key = priceset}
+              {foreach from=$dataArray item=value key=priceset}
                 <tr>
-                  <td colspan = "3"></td>
+                  <td colspan="3"></td>
                   {if $priceset}
-                    <td style = "padding-left:28px;text-align:right;"><font size = "1"> {ts 1=$taxTerm 2=$priceset}TOTAL %1 %2%{/ts}</font></td>
-                    <td style = "padding-left:28px;text-align:right;"><font size = "1" align = "right">{$value|crmMoney:$currency}</font> </td>
+                    <td style="padding-left:28px;text-align:right;"><font size="1">{ts 1=$taxTerm 2=$priceset}TOTAL %1 %2%{/ts}</font></td>
+                    <td style="padding-left:28px;text-align:right;"><font size="1" align="right">{$value|crmMoney:$currency}</font> </td>
                   {elseif $priceset == 0}
-                    <td style = "padding-left:28px;text-align:right;"><font size = "1">{ts 1=$taxTerm}TOTAL NO %1{/ts}</font></td>
-                    <td style = "padding-left:28px;text-align:right;"><font size = "1" align = "right">{$value|crmMoney:$currency}</font> </td>
+                    <td style="padding-left:28px;text-align:right;"><font size="1">{ts 1=$taxTerm}TOTAL NO %1{/ts}</font></td>
+                    <td style="padding-left:28px;text-align:right;"><font size="1" align="right">{$value|crmMoney:$currency}</font> </td>
                 </tr>
                 {/if}
               {/foreach}
               <tr>
-                <td colspan = "3"></td>
-                <td colspan = "2"><hr></hr></td>
+                <td colspan="3"></td>
+                <td colspan="2"><hr></hr></td>
               </tr>
               <tr>
-                <td colspan = "3"></td>
-                <td style = "padding-left:28px;text-align:right;"><b><font size = "1">{ts 1=$defaultCurrency}TOTAL %1{/ts}</font></b></td>
-                <td style = "padding-left:28px;text-align:right;"><font size = "1">{$amount|crmMoney:$currency}</font></td>
+                <td colspan="3"></td>
+                <td style="padding-left:28px;text-align:right;"><b><font size="1">{ts 1=$defaultCurrency}TOTAL %1{/ts}</font></b></td>
+                <td style="padding-left:28px;text-align:right;"><font size="1">{$amount|crmMoney:$currency}</font></td>
               </tr>
               {if $is_pay_later == 0}
                 <tr>
-                  <td colspan = "3"></td>
-                  <td style = "padding-left:28px;text-align:right;"><font size = "1" >{ts}LESS Credit to invoice(s){/ts}</font></td>
-                  <td style = "padding-left:28px;text-align:right;"><font size = "1">{$amount|crmMoney:$currency}</font></td>
+                  <td colspan="3"></td>
+                  <td style="padding-left:28px;text-align:right;"><font size="1">{ts}LESS Credit to invoice(s){/ts}</font></td>
+                  <td style="padding-left:28px;text-align:right;"><font size="1">{$amount|crmMoney:$currency}</font></td>
                 </tr>
                 <tr>
-                  <td colspan = "3"></td>
-                  <td colspan = "2" ><hr></hr></td>
+                  <td colspan="3"></td>
+                  <td colspan="2"><hr></hr></td>
                 </tr>
                 <tr>
-                  <td colspan = "3"></td>
-                  <td style = "padding-left:28px;text-align:right;"><b><font size = "1">{ts}REMAINING CREDIT{/ts}</font></b></td>
-                  <td style = "padding-left:28px;text-align:right;"><b><font size = "1">{$amountDue|crmMoney:$currency}</font></b></td>
-                  <td style = "padding-left:28px;"><font size = "1" align = "right"></font></td>
+                  <td colspan="3"></td>
+                  <td style="padding-left:28px;text-align:right;"><b><font size="1">{ts}REMAINING CREDIT{/ts}</font></b></td>
+                  <td style="padding-left:28px;text-align:right;"><b><font size="1">{$amountDue|crmMoney:$currency}</font></b></td>
+                  <td style="padding-left:28px;"><font size="1" align="right"></font></td>
                 </tr>
               {/if}
               <br/><br/><br/>
               <tr>
-                <td colspan = "3"></td>
+                <td colspan="3"></td>
               </tr>
               <tr>
                 <td></td>
-                <td colspan = "3"></td>
+                <td colspan="3"></td>
               </tr>
             </table>
           </td>
         </tr>
       </table>
-      <table style = "margin-top:5px;padding-right:45px;">
+
+      <table width="100%" style="margin-top:5px;padding-right:45px;">
         <tr>
-          <td><img src = "{$resourceBase}/i/contribute/cut_line.png" height = "15" width = "630"></td>
+          <td><img src="{$resourceBase}/i/contribute/cut_line.png" height="15" width="100%"></td>
         </tr>
       </table>
 
-      <table style = "margin-top:6px;padding-right:20px;font-family: Arial, Verdana, sans-serif" width = "507" border = "0"cellpadding = "-5" cellspacing="19" id = "desc">
+      <table style="margin-top:6px;font-family: Arial, Verdana, sans-serif" width="100%" border="0" cellpadding="5" cellspacing="5" id="desc">
         <tr>
-          <td width="60%"><font size = "4" align = "right"><b>{ts}CREDIT ADVICE{/ts}</b><br/><br /><div  style="font-size:10px;max-width:300px;">{ts}Please do not pay on this advice. Deduct the amount of this Credit Note from your next payment to us{/ts}</div><br/></font></td>
+          <td width="60%"><font size="4" align="right"><b>{ts}CREDIT ADVICE{/ts}</b><br/><br /><div style="font-size:10px;max-width:300px;">{ts}Please do not pay on this advice. Deduct the amount of this Credit Note from your next payment to us{/ts}</div><br/></font></td>
           <td width="40%">
-            <table    align="right" >
+            <table align="right">
               <tr>
-                <td colspan = "2"></td>
-                <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Customer:{/ts} </font></td>
-                <td><font size = "1" align = "right" >{$display_name}</font></td>
+                <td colspan="2"></td>
+                <td><font size="1" align="right" style="font-weight:bold;">{ts}Customer:{/ts}</font></td>
+                <td><font size="1" align="right">{$display_name}</font></td>
               </tr>
               <tr>
-                <td colspan = "2"></td>
-                <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Credit Note#:{/ts} </font></td>
-                <td><font size = "1" align = "right">{$creditnote_id}</font></td>
+                <td colspan="2"></td>
+                <td><font size="1" align="right" style="font-weight:bold;">{ts}Credit Note#:{/ts}</font></td>
+                <td><font size="1" align="right">{$creditnote_id}</font></td>
               </tr>
-              <tr><td  colspan = "5"style = "color:#F5F5F5;"><hr></hr></td></tr>
+              <tr><td colspan="5"style="color:#F5F5F5;"><hr></hr></td></tr>
               <tr>
-                <td colspan = "2"></td>
-                <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Credit Amount:{/ts}</font></td>
-                <td width=\'50px\'><font size = "1" align = "right" style="font-weight:bold;">{$amount|crmMoney:$currency}</font></td>
+                <td colspan="2"></td>
+                <td><font size="1" align="right" style="font-weight:bold;">{ts}Credit Amount:{/ts}</font></td>
+                <td width=\'50px\'><font size="1" align="right" style="font-weight:bold;">{$amount|crmMoney:$currency}</font></td>
               </tr>
             </table>
           </td>
@@ -9798,9 +9707,11 @@ INSERT INTO civicrm_msg_template
       </table>
     {/if}
     </center>
+
+  </div>
   </body>
 </html>
-', @tpl_ovid_contribution_invoice_receipt, 1,          0),
+', 'contribution_invoice_receipt', @tpl_ovid_contribution_invoice_receipt, 1,          0),
       ('Contributions - Invoice', '{if $title}
   {if $component}
     {if $component == \'event\'}
@@ -9815,104 +9726,91 @@ INSERT INTO civicrm_msg_template
  - {contact.display_name}
 ', '{ts}Contribution Invoice{/ts}
 ', '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns = "http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv = "Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
       <title></title>
   </head>
   <body>
-    <table style = "margin-top:2px;padding-left:7px;">
-      <tr>
-        <td><img src = "{$resourceBase}/i/civi99.png" height = "34px" width = "99px"></td>
-      </tr>
-    </table>
-    <center>
-      <table style = "padding-right:19px;font-family: Arial, Verdana, sans-serif;" width = "500" height = "100" border = "0" cellpadding = "2" cellspacing = "1">
+  <div style="padding-top:100px;margin-right:50px;border-style: none;">
+    {if $config->empoweredBy}
+      <table style="margin-top:5px;padding-bottom:50px;" cellpadding="5" cellspacing="0">
         <tr>
-          <td style = "padding-left:15px;" ><b><font size = "4" align = "center">{ts}INVOICE{/ts}</font></b></td>
-          <td colspan = "1"></td>
-          <td style = "padding-left:70px;"><b><font size = "1" align = "center" >{ts}Invoice Date:{/ts}</font></b></td>
-          <td><font size = "1" align = "right">{$domain_organization}</font></td>
+          <td><img src="{$resourceBase}/i/civi99.png" height="34px" width="99px"></td>
+        </tr>
+      </table>
+    {/if}
+      <table style="font-family: Arial, Verdana, sans-serif;" width="100%" height="100" border="0" cellpadding="5" cellspacing="0">
+        <tr>
+          <td width="30%"><b><font size="4" align="center">{ts}INVOICE{/ts}</font></b></td>
+          <td width="50%" valign="bottom"><b><font size="1" align="center">{ts}Invoice Date:{/ts}</font></b></td>
+          <td valign="bottom" style="white-space: nowrap"><b><font size="1" align="right">{$domain_organization}</font></b></td>
         </tr>
         <tr>
           {if $organization_name}
-            <td style = "padding-left:17px;"><font size = "1" align = "center" >{$display_name}  ({$organization_name})</font></td>
+            <td><font size="1" align="center">{$display_name}  ({$organization_name})</font></td>
           {else}
-            <td style = "padding-left:15px;"><font size = "1" align = "center" >{$display_name}</font></td>
+            <td><font size="1" align="center">{$display_name}</font></td>
           {/if}
-          <td colspan = "1"></td>
-          <td style = "padding-left:70px;"><font size = "1" align = "right">{$invoice_date}</font></td>
-          <td>
-            <font size = "1" align = "right">
+          <td><font size="1" align="right">{$invoice_date}</font></td>
+          <td style="white-space: nowrap">
+            <font size="1" align="right">
               {if $domain_street_address }{$domain_street_address}{/if}
               {if $domain_supplemental_address_1 }{$domain_supplemental_address_1}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
-          <td style = "padding-left:17px;"><font size = "1" align = "center">{$street_address}   {$supplemental_address_1}</font></td>
-          <td colspan = "1"></td>
-          <td style = "padding-left:70px;"><b><font size = "1" align = "right">{ts}Invoice Number:{/ts}</font></b></td>
+          <td><font size="1" align="center">{$street_address} {$supplemental_address_1}</font></td>
+          <td><b><font size="1" align="right">{ts}Invoice Number:{/ts}</font></b></td>
           <td>
-            <font size = "1" align = "right">
+            <font size="1" align="right">
               {if $domain_supplemental_address_2 }{$domain_supplemental_address_2}{/if}
               {if $domain_state }{$domain_state}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
-          <td style = "padding-left:17px;"><font size = "1" align = "center">{$supplemental_address_2}  {$stateProvinceAbbreviation}</font></td>
-          <td colspan="1"></td>
-          <td style = "padding-left:70px;"><font size = "1" align = "right">{$invoice_number}</font></td>
-          <td>
-            <font size = "1" align = "right">
+          <td><font size="1" align="center">{$supplemental_address_2} {$stateProvinceAbbreviation}</font></td>
+          <td><font size="1" align="right">{$invoice_number}</font></td>
+          <td style="white-space: nowrap">
+            <font size="1" align="right">
               {if $domain_city}{$domain_city}{/if}
               {if $domain_postal_code }{$domain_postal_code}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
-          <td style = "padding-left:17px;"><font size = "1" align = "right">{$city}  {$postal_code}</font></td>
-          <td colspan="1"></td>
-          <td height = "10" style = "padding-left:70px;"><b><font size = "1"align = "right">{ts}Reference:{/ts}</font></b></td>
-          <td><font size = "1" align = "right"> {if $domain_country}{$domain_country}{/if}</font></td>
+          <td><font size="1" align="right">{$city}  {$postal_code}</font></td>
+          <td height="10"><b><font size="1" align="right">{ts}Reference:{/ts}</font></b></td>
+          <td><font size="1" align="right">{if $domain_country}{$domain_country}{/if}</font></td>
+        </tr>
+        <tr>
+          <td><font size="1" align="right"> {$country}</font></td>
+          <td><font size="1" align="right">{$source}</font></td>
+          <td valign="top" style="white-space: nowrap"><font size="1" align="right">{if $domain_email}{$domain_email}{/if}</font> </td>
         </tr>
         <tr>
           <td></td>
           <td></td>
-          <td style = "padding-left:70px;"><font size = "1"align = "right">{$source}</font></td>
-          <td><font size = "1" align = "right"> {if $domain_phone}{$domain_phone}{/if}</font> </td>
-        </tr>
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td><font size = "1" align = "right"> {if $domain_email}{$domain_email}{/if}</font> </td>
+          <td valign="top"><font size="1" align="right">{if $domain_phone}{$domain_phone}{/if}</font> </td>
         </tr>
       </table>
-      <table style = "margin-top:75px;font-family: Arial, Verdana, sans-serif" width = "590" border = "0"cellpadding = "-5" cellspacing = "19" id = "desc">
-        <tr>
-          <td colspan = "2" {$valueStyle}>
-            <table> {* FIXME: style this table so that it looks like the text version (justification, etc.) *}
+
+             <table style="padding-top:75px;font-family: Arial, Verdana, sans-serif;" width="100%" border="0" cellpadding="5" cellspacing="0">
               <tr>
-                <th style = "padding-right:34px;text-align:left;font-weight:bold;width:200px;"><font size = "1">{ts}Description{/ts}</font></th>
-                <th style = "padding-left:34px;text-align:right;font-weight:bold;" ><font size = "1">{ts}Quantity{/ts}</font></th>
-                <th style = "padding-left:34px;text-align:right;font-weight:bold;"><font size = "1">{ts}Unit Price{/ts}</font></th>
-                <th style = "padding-left:34px;text-align:right;font-weight:bold;width:20px;"><font size = "1">{$taxTerm} </font></th>
-                <th style = "padding-left:34px;text-align:right;font-weight:bold;"><font size = "1">{ts 1=$defaultCurrency}Amount %1{/ts}</font></th>
+                <th style="text-align:left;font-weight:bold;width:100%"><font size="1">{ts}Description{/ts}</font></th>
+                <th style="text-align:right;font-weight:bold;white-space: nowrap"><font size="1">{ts}Quantity{/ts}</font></th>
+                <th style="text-align:right;font-weight:bold;white-space: nowrap"><font size="1">{ts}Unit Price{/ts}</font></th>
+                <th style="text-align:right;font-weight:bold;white-space: nowrap"><font size="1">{$taxTerm}</font></th>
+                <th style="text-align:right;font-weight:bold;white-space: nowrap"><font size="1">{ts 1=$defaultCurrency}Amount %1{/ts}</font></th>
               </tr>
               {foreach from=$lineItem item=value key=priceset name=taxpricevalue}
                 {if $smarty.foreach.taxpricevalue.index eq 0}
-                  <tr>
-                    <td colspan = "5" ><hr size="3" style = "color:#000;"></hr></td>
-                  </tr>
                 {else}
-                  <tr>
-                    <td  colspan = "5" style = "color:#F5F5F5;"><hr></hr></td>
-                  </tr>
                 {/if}
                 <tr>
-                  <td style="text-align:left;" ><font size = "1">
+                  <td style="text-align:left;nowrap"><font size="1">
                     {if $value.html_type eq \'Text\'}
                       {$value.label}
                     {else}
@@ -9921,246 +9819,228 @@ INSERT INTO civicrm_msg_template
                     {if $value.description}
                       <div>{$value.description|truncate:30:"..."}</div>
                     {/if}
-                    </font>
+                   </font>
                   </td>
-                  <td style = "padding-left:34px;text-align:right;"><font size = "1"> {$value.qty}</font></td>
-                  <td style = "padding-left:34px;text-align:right;"><font size = "1"> {$value.unit_price|crmMoney:$currency}</font></td>
+                  <td style="text-align:right;"><font size="1">{$value.qty}</font></td>
+                  <td style="text-align:right;"><font size="1">{$value.unit_price|crmMoney:$currency}</font></td>
                   {if $value.tax_amount != \'\'}
-                    <td style = "padding-left:34px;text-align:right;width:20px;"><font size = "1"> {$value.tax_rate}%</font></td>
+                    <td style="text-align:right;"><font size="1">{$value.tax_rate}%</font></td>
                   {else}
-                    <td style = "padding-left:34px;text-align:right;width:20px;"><font size = "1">{ts 1=$taxTerm}No %1{/ts}</font></td>
+                    <td style="text-align:right;"><font size="1">{ts 1=$taxTerm}-{/ts}</font></td>
                   {/if}
-                  <td style = "padding-left:34px;text-align:right;"><font size = "1">{$value.subTotal|crmMoney:$currency}</font></td>
+                  <td style="text-align:right;"><font size="1">{$value.subTotal|crmMoney:$currency}</font></td>
                 </tr>
               {/foreach}
-              <tr><td  colspan = "5" style = "color:#F5F5F5;"><hr></hr></td></tr>
               <tr>
-                <td colspan = "3"></td>
-                <td style = "padding-left:20px;text-align:right;"><font size = "1">{ts}Sub Total{/ts}</font></td>
-                <td style = "padding-left:34px;text-align:right;"><font size = "1"> {$subTotal|crmMoney:$currency}</font></td>
+                <td colspan="3"></td>
+                <td style="text-align:right;"><font size="1">{ts}Sub Total{/ts}</font></td>
+                <td style="text-align:right;"><font size="1">{$subTotal|crmMoney:$currency}</font></td>
               </tr>
-              {foreach from = $dataArray item = value key = priceset}
+              {foreach from=$dataArray item=value key=priceset}
                 <tr>
-                  <td colspan = "3"></td>
+                  <td colspan="3"></td>
                     {if $priceset}
-                      <td style = "padding-left:20px;text-align:right;"><font size = "1"> {ts 1=$taxTerm 2=$priceset}TOTAL %1 %2%{/ts}</font></td>
-                      <td style = "padding-left:34px;text-align:right"><font size = "1" align = "right">{$value|crmMoney:$currency}</font> </td>
+                      <td style="text-align:right;white-space: nowrap"><font size="1">{ts 1=$taxTerm 2=$priceset}TOTAL %1 %2%{/ts}</font></td>
+                      <td style="text-align:right"><font size="1" align="right">{$value|crmMoney:$currency}</font> </td>
                     {elseif $priceset == 0}
-                      <td style = "padding-left:20px;text-align:right;"><font size = "1">{ts 1=$taxTerm}TOTAL NO %1{/ts}</font></td>
-                      <td style = "padding-left:34px;text-align:right"><font size = "1" align = "right">{$value|crmMoney:$currency}</font> </td>
+                      <td style="text-align:right;white-space: nowrap"><font size="1">{ts 1=$taxTerm}TOTAL %1{/ts}</font></td>
+                      <td style="text-align:right"><font size="1" align="right">{$value|crmMoney:$currency}</font> </td>
                 </tr>
               {/if}
               {/foreach}
               <tr>
-                <td colspan = "3"></td>
-                <td colspan = "2"><hr></hr></td>
+                <td colspan="3"></td>
+                <td style="text-align:right;white-space: nowrap"><b><font size="1">{ts 1=$defaultCurrency}TOTAL %1{/ts}</font></b></td>
+                <td style="text-align:right;"><font size="1">{$amount|crmMoney:$currency}</font></td>
               </tr>
-              <tr>
-                <td colspan = "3"></td>
-                <td style = "padding-left:20px;text-align:right;"><b><font size = "1">{ts 1=$defaultCurrency}TOTAL %1{/ts}</font></b></td>
-                <td style = "padding-left:34px;text-align:right;"><font size = "1">{$amount|crmMoney:$currency}</font></td>
-                <td style = "padding-left:34px;"><font size = "1" align = "right"></font></td>
-              </tr>
-              {if $is_pay_later == 0}
+             {if $amountDue != 0}
                 <tr>
-                  <td colspan = "3"></td>
-                  <td style = "padding-left:20px;text-align:right;"><font size = "1">
+                  <td colspan="3"></td>
+                  <td style="text-align:right;white-space: nowrap"><font size="1">
                     {if $contribution_status_id == $refundedStatusId}
-                      {ts}LESS Amount Credited{/ts}
+                      {ts}Amount Credited{/ts}
                     {else}
-                      {ts}LESS Amount Paid{/ts}
+                      {ts}Amount Paid{/ts}
                     {/if}
-                    </font>
+                   </font>
                   </td>
-                  <td style = "padding-left:34px;text-align:right;"><font size = "1">{$amountPaid|crmMoney:$currency}</font></td>
+                  <td style="text-align:right;"><font size="1">{$amountPaid|crmMoney:$currency}</font></td>
                 </tr>
                 <tr>
-                  <td colspan = "3"></td>
-                  <td colspan = "2" ><hr></hr></td>
+                  <td colspan="3"></td>
+                  <td colspan="2"><hr></hr></td>
                 </tr>
                 <tr>
-                  <td colspan = "3"></td>
-                  <td style = "padding-left:20px;text-align:right;"><b><font size = "1">{ts}AMOUNT DUE:{/ts} </font></b></td>
-                  <td style = "padding-left:34px;text-align:right;"><b><font size = "1">{$amountDue|crmMoney:$currency}</font></b></td>
-                  <td style = "padding-left:34px;"><font size = "1" align = "right"></font></td>
+                  <td colspan="3"></td>
+                  <td style="text-align:right;white-space: nowrap" ><b><font size="1">{ts}AMOUNT DUE:{/ts}</font></b></td>
+                  <td style="text-align:right;"><b><font size="1">{$amountDue|crmMoney:$currency}</font></b></td>
                 </tr>
               {/if}
               <br/><br/><br/>
               <tr>
-                <td colspan = "3"></td>
+                <td colspan="5"></td>
               </tr>
               {if $contribution_status_id == $pendingStatusId && $is_pay_later == 1}
                 <tr>
-                  <td><b><font size = "1" align = "center">{ts 1=$dueDate}DUE DATE: %1{/ts}</font></b></td>
-                  <td colspan = "3"></td>
+                  <td colspan="3"><b><font size="1" align="center">{ts 1=$dueDate}DUE DATE: %1{/ts}</font></b></td>
+                  <td colspan="2"></td>
                 </tr>
               {/if}
             </table>
           </td>
         </tr>
       </table>
+
       {if $contribution_status_id == $pendingStatusId && $is_pay_later == 1}
-        <table style = "margin-top:5px;padding-right:45px;">
+        <table style="margin-top:5px;" width="100%" border="0" cellpadding="0" cellspacing="0">
           <tr>
-            <td><img src = "{$resourceBase}/i/contribute/cut_line.png" height = "15" width = "630"></td>
+            <td><img src="{$resourceBase}/i/contribute/cut_line.png" height="15"></td>
           </tr>
         </table>
-        <table style = "margin-top:6px;padding-right:20px;font-family: Arial, Verdana, sans-serif" width = "480" border = "0"cellpadding = "-5" cellspacing="19" id = "desc">
+
+        <table style="margin-top:5px;font-family: Arial, Verdana, sans-serif" width="100%" border="0" cellpadding="5" cellspacing="0" id="desc">
           <tr>
-            <td width="60%"><b><font size = "4" align = "right">{ts}PAYMENT ADVICE{/ts}</font></b> <br/><br/> <font size = "1" align = "right"><b>{ts}To: {/ts}</b><div style="width:17em;word-wrap:break-word;">
-              {$domain_organization} <br />
-              {$domain_street_address} {$domain_supplemental_address_1} <br />
-              {$domain_supplemental_address_2} {$domain_state} <br />
-              {$domain_city} {$domain_postal_code} <br />
-              {$domain_country} <br />
-              {$domain_phone} <br />
+            <td width="60%"><b><font size="4" align="right">{ts}PAYMENT ADVICE{/ts}</font></b><br/><br/><font size="1" align="left"><b>{ts}To:{/ts}</b><div style="width:24em;word-wrap:break-word;">
+              {$domain_organization}<br />
+              {$domain_street_address} {$domain_supplemental_address_1}<br />
+              {$domain_supplemental_address_2} {$domain_state}<br />
+              {$domain_city} {$domain_postal_code}<br />
+              {$domain_country}<br />
               {$domain_email}</div>
-              </font><br/><br/><font size="1" align="right">{$notes}</font>
+              {$domain_phone}<br />
+             </font><br/><br/><font size="1" align="left">{$notes}</font>
             </td>
             <td width="40%">
-              <table  cellpadding = "-10" cellspacing = "22"  align="right" >
+              <table cellpadding="5" cellspacing="0"  width="100%" border="0">
                 <tr>
-                  <td colspan = "2"></td>
-                  <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Customer: {/ts}</font></td>
-                  <td ><font size = "1" align = "right">{$display_name}</font></td>
+                  <td width="100%"><font size="1" align="right" style="font-weight:bold;">{ts}Customer:{/ts}</font></td>
+                  <td style="white-space: nowrap"><font size="1" align="right">{$display_name}</font></td>
                 </tr>
                 <tr>
-                  <td colspan = "2"></td>
-                  <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Invoice Number: {/ts}</font></td>
-                  <td><font size = "1" align = "right">{$invoice_number}</font></td>
+                  <td><font size="1" align="right" style="font-weight:bold;">{ts}Invoice Number:{/ts}</font></td>
+                  <td><font size="1" align="right">{$invoice_number}</font></td>
                 </tr>
-                <tr><td colspan = "5"style = "color:#F5F5F5;"><hr></hr></td></tr>
+                <tr><td colspan="5" style="color:#F5F5F5;"><hr></td></tr>
                 {if $is_pay_later == 1}
                   <tr>
-                    <td colspan = "2"></td>
-                    <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Amount Due:{/ts}</font></td>
-                    <td><font size = "1" align = "right" style="font-weight:bold;">{$amount|crmMoney:$currency}</font></td>
+                    <td><font size="1" align="right" style="font-weight:bold;">{ts}Amount Due:{/ts}</font></td>
+                    <td><font size="1" align="right" style="font-weight:bold;">{$amount|crmMoney:$currency}</font></td>
                   </tr>
                 {else}
                   <tr>
-                    <td colspan = "2"></td>
-                    <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Amount Due: {/ts}</font></td>
-                    <td><font size = "1" align = "right" style="font-weight:bold;">{$amountDue|crmMoney:$currency}</font></td>
+                    <td><font size="1" align="right" style="font-weight:bold;">{ts}Amount Due:{/ts}</font></td>
+                    <td><font size="1" align="right" style="font-weight:bold;">{$amountDue|crmMoney:$currency}</font></td>
                   </tr>
                 {/if}
                 <tr>
-                  <td colspan = "2"></td>
-                  <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Due Date:  {/ts}</font></td>
-                  <td><font size = "1" align = "right">{$dueDate}</font></td>
+                  <td><font size="1" align="right" style="font-weight:bold;">{ts}Due Date:{/ts}</font></td>
+                  <td><font size="1" align="right">{$dueDate}</font></td>
                 </tr>
                 <tr>
-                  <td colspan = "5" style = "color:#F5F5F5;"><hr></hr></td>
+                  <td colspan="5" style="color:#F5F5F5;"><hr></td>
                 </tr>
               </table>
-            </td>
+      {/if}
+
+      {if $contribution_status_id == $refundedStatusId || $contribution_status_id == $cancelledStatusId}
+      {if $config->empoweredBy}
+        <table style="margin-top:2px;padding-left:7px;page-break-before: always;">
+          <tr>
+            <td><img src="{$resourceBase}/i/civi99.png" height="34px" width="99px"></td>
           </tr>
         </table>
       {/if}
 
-      {if $contribution_status_id == $refundedStatusId || $contribution_status_id == $cancelledStatusId}
-        <table style = "margin-top:2px;padding-left:7px;page-break-before: always;">
-          <tr>
-            <td><img src = "{$resourceBase}/i/civi99.png" height = "34px" width = "99px"></td>
-          </tr>
-        </table>
     <center>
-
-      <table style = "padding-right:19px;font-family: Arial, Verdana, sans-serif" width = "500" height = "100" border = "0" cellpadding = "2" cellspacing = "1">
+      <table style="font-family: Arial, Verdana, sans-serif" width="100%" height="100" border="0" cellpadding="5" cellspacing="5">
         <tr>
-          <td style = "padding-left:15px;" ><b><font size = "4" align = "center">{ts}CREDIT NOTE{/ts}</font></b></td>
-          <td colspan = "1"></td>
-          <td style = "padding-left:70px;"><b><font size = "1" align = "right">{ts}Date:{/ts}</font></b></td>
-          <td><font size = "1" align = "right">{$domain_organization}</font></td>
+          <td style="padding-left:15px;"><b><font size="4" align="center">{ts}CREDIT NOTE{/ts}</font></b></td>
+          <td style="padding-left:30px;"><b><font size="1" align="right">{ts}Date:{/ts}</font></b></td>
+          <td><font size="1" align="right">{$domain_organization}</font></td>
         </tr>
         <tr>
           {if $organization_name}
-            <td style = "padding-left:17px;"><font size = "1" align = "center">{$display_name}  ({$organization_name})</font></td>
+            <td style="padding-left:17px;"><font size="1" align="center">{$display_name}  ({$organization_name})</font></td>
           {else}
-            <td style = "padding-left:17px;"><font size = "1" align = "center">{$display_name}</font></td>
+            <td style="padding-left:17px;"><font size="1" align="center">{$display_name}</font></td>
           {/if}
-          <td colspan = "1"></td>
-          <td style = "padding-left:70px;"><font size = "1" align = "right">{$invoice_date}</font></td>
+          <td style="padding-left:30px;"><font size="1" align="right">{$invoice_date}</font></td>
           <td>
-            <font size = "1" align = "right">
+            <font size="1" align="right">
               {if $domain_street_address }{$domain_street_address}{/if}
               {if $domain_supplemental_address_1 }{$domain_supplemental_address_1}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
-          <td style = "padding-left:17px;"><font size = "1" align = "center">{$street_address}   {$supplemental_address_1}</font></td>
-          <td colspan = "1"></td>
-          <td style = "padding-left:70px;"><b><font size = "1" align = "right">{ts}Credit Note Number:{/ts}</font></b></td>
+          <td style="padding-left:17px;"><font size="1" align="center">{$street_address}   {$supplemental_address_1}</font></td>
+          <td style="padding-left:30px;"><b><font size="1" align="right">{ts}Credit Note Number:{/ts}</font></b></td>
           <td>
-            <font size = "1" align = "right">
+            <font size="1" align="right">
               {if $domain_supplemental_address_2 }{$domain_supplemental_address_2}{/if}
               {if $domain_state }{$domain_state}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
-          <td style = "padding-left:17px;"><font size = "1" align = "center">{$supplemental_address_2}  {$stateProvinceAbbreviation}</font></td>
-          <td colspan="1"></td>
-          <td style = "padding-left:70px;"><font size = "1" align = "right">{$creditnote_id}</font></td>
+          <td style="padding-left:17px;"><font size="1" align="center">{$supplemental_address_2}  {$stateProvinceAbbreviation}</font></td>
+          <td style="padding-left:30px;"><font size="1" align="right">{$creditnote_id}</font></td>
           <td>
-            <font size = "1" align = "right">
+            <font size="1" align="right">
               {if $domain_city}{$domain_city}{/if}
               {if $domain_postal_code }{$domain_postal_code}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
-          <td style = "padding-left:17px;"><font size = "1" align = "right">{$city}  {$postal_code}</font></td>
-          <td colspan="1"></td>
-          <td height = "10" style = "padding-left:70px;"><b><font size = "1"align = "right">{ts}Reference:{/ts}</font></b></td>
+          <td style="padding-left:17px;"><font size="1" align="right">{$city}  {$postal_code}</font></td>
+          <td height="10" style="padding-left:30px;"><b><font size="1" align="right">{ts}Reference:{/ts}</font></b></td>
           <td>
-            <font size = "1" align = "right">
+            <font size="1" align="right">
               {if $domain_country}{$domain_country}{/if}
-            </font>
+           </font>
           </td>
         </tr>
         <tr>
           <td></td>
-          <td></td>
-          <td style = "padding-left:70px;"><font size = "1"align = "right">{$source}</font></td>
+          <td style="padding-left:30px;"><font size="1" align="right">{$source}</font></td>
           <td>
-            <font size = "1" align = "right">
-              {if $domain_phone}{$domain_phone}{/if}
-            </font>
-          </td>
-        </tr>
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>
-            <font size = "1" align = "right">
+            <font size="1" align="right">
               {if $domain_email}{$domain_email}{/if}
-            </font>
+           </font>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td>
+            <font size="1" align="right">
+              {if $domain_phone}{$domain_phone}{/if}
+           </font>
           </td>
         </tr>
       </table>
 
-      <table style = "margin-top:75px;font-family: Arial, Verdana, sans-serif" width = "590" border = "0"cellpadding = "-5" cellspacing = "19" id = "desc">
+      <table style="margin-top:75px;font-family: Arial, Verdana, sans-serif" width="100%" border="0" cellpadding="5" cellspacing="5" id="desc">
         <tr>
-          <td colspan = "2" {$valueStyle}>
+          <td colspan="2" {$valueStyle}>
             <table> {* FIXME: style this table so that it looks like the text version (justification, etc.) *}
               <tr>
-                <th style = "padding-right:28px;text-align:left;font-weight:bold;width:200px;"><font size = "1">{ts}Description{/ts}</font></th>
-                <th style = "padding-left:28px;text-align:right;font-weight:bold;"><font size = "1">{ts}Quantity{/ts}</font></th>
-                <th style = "padding-left:28px;text-align:right;font-weight:bold;"><font size = "1">{ts}Unit Price{/ts}</font></th>
-                <th style = "padding-left:28px;text-align:right;font-weight:bold;"><font size = "1">{$taxTerm} </font></th>
-                <th style = "padding-left:28px;text-align:right;font-weight:bold;"><font size = "1">{ts 1=$defaultCurrency}Amount %1{/ts}</font></th>
+                <th style="padding-right:28px;text-align:left;font-weight:bold;width:200px;"><font size="1">{ts}Description{/ts}</font></th>
+                <th style="padding-left:28px;text-align:right;font-weight:bold;"><font size="1">{ts}Quantity{/ts}</font></th>
+                <th style="padding-left:28px;text-align:right;font-weight:bold;"><font size="1">{ts}Unit Price{/ts}</font></th>
+                <th style="padding-left:28px;text-align:right;font-weight:bold;"><font size="1">{$taxTerm}</font></th>
+                <th style="padding-left:28px;text-align:right;font-weight:bold;"><font size="1">{ts 1=$defaultCurrency}Amount %1{/ts}</font></th>
               </tr>
               {foreach from=$lineItem item=value key=priceset name=pricevalue}
                 {if $smarty.foreach.pricevalue.index eq 0}
-                  <tr><td  colspan = "5" ><hr size="3" style = "color:#000;"></hr></td></tr>
+                  <tr><td colspan="5"><hr size="3" style="color:#000;"></hr></td></tr>
                 {else}
-                  <tr><td  colspan = "5" style = "color:#F5F5F5;"><hr></hr></td></tr>
+                  <tr><td colspan="5" style="color:#F5F5F5;"><hr></hr></td></tr>
                 {/if}
                 <tr>
                   <td style ="text-align:left;"  >
-                    <font size = "1">
+                    <font size="1">
                       {if $value.html_type eq \'Text\'}
                         {$value.label}
                       {else}
@@ -10169,100 +10049,101 @@ INSERT INTO civicrm_msg_template
                       {if $value.description}
                         <div>{$value.description|truncate:30:"..."}</div>
                       {/if}
-                    </font>
+                   </font>
                   </td>
-                  <td style = "padding-left:28px;text-align:right;"><font size = "1"> {$value.qty}</font></td>
-                  <td style = "padding-left:28px;text-align:right;"><font size = "1"> {$value.unit_price|crmMoney:$currency}</font></td>
+                  <td style="padding-left:28px;text-align:right;"><font size="1">{$value.qty}</font></td>
+                  <td style="padding-left:28px;text-align:right;"><font size="1">{$value.unit_price|crmMoney:$currency}</font></td>
                   {if $value.tax_amount != \'\'}
-                    <td style = "padding-left:28px;text-align:right;"><font size = "1"> {$value.tax_rate}%</font></td>
+                    <td style="padding-left:28px;text-align:right;"><font size="1">{$value.tax_rate}%</font></td>
                   {else}
-                    <td style = "padding-left:28px;text-align:right"><font size = "1" >{ts 1=$taxTerm}No %1{/ts}</font></td>
+                    <td style="padding-left:28px;text-align:right"><font size="1">{ts 1=$taxTerm}No %1{/ts}</font></td>
                   {/if}
-                  <td style = "padding-left:28px;text-align:right;"><font size = "1" >{$value.subTotal|crmMoney:$currency}</font></td>
+                  <td style="padding-left:28px;text-align:right;"><font size="1">{$value.subTotal|crmMoney:$currency}</font></td>
                 </tr>
               {/foreach}
-              <tr><td  colspan = "5" style = "color:#F5F5F5;"><hr></hr></td></tr>
+              <tr><td colspan="5" style="color:#F5F5F5;"><hr></hr></td></tr>
               <tr>
-                <td colspan = "3"></td>
-                <td style = "padding-left:28px;text-align:right;"><font size = "1">{ts}Sub Total{/ts}</font></td>
-                <td style = "padding-left:28px;text-align:right;"><font size = "1"> {$subTotal|crmMoney:$currency}</font></td>
+                <td colspan="3"></td>
+                <td style="padding-left:28px;text-align:right;"><font size="1">{ts}Sub Total{/ts}</font></td>
+                <td style="padding-left:28px;text-align:right;"><font size="1">{$subTotal|crmMoney:$currency}</font></td>
               </tr>
-              {foreach from = $dataArray item = value key = priceset}
+              {foreach from=$dataArray item=value key=priceset}
                 <tr>
-                  <td colspan = "3"></td>
+                  <td colspan="3"></td>
                   {if $priceset}
-                    <td style = "padding-left:28px;text-align:right;"><font size = "1"> {ts 1=$taxTerm 2=$priceset}TOTAL %1 %2%{/ts}</font></td>
-                    <td style = "padding-left:28px;text-align:right;"><font size = "1" align = "right">{$value|crmMoney:$currency}</font> </td>
+                    <td style="padding-left:28px;text-align:right;"><font size="1">{ts 1=$taxTerm 2=$priceset}TOTAL %1 %2%{/ts}</font></td>
+                    <td style="padding-left:28px;text-align:right;"><font size="1" align="right">{$value|crmMoney:$currency}</font> </td>
                   {elseif $priceset == 0}
-                    <td style = "padding-left:28px;text-align:right;"><font size = "1">{ts 1=$taxTerm}TOTAL NO %1{/ts}</font></td>
-                    <td style = "padding-left:28px;text-align:right;"><font size = "1" align = "right">{$value|crmMoney:$currency}</font> </td>
+                    <td style="padding-left:28px;text-align:right;"><font size="1">{ts 1=$taxTerm}TOTAL NO %1{/ts}</font></td>
+                    <td style="padding-left:28px;text-align:right;"><font size="1" align="right">{$value|crmMoney:$currency}</font> </td>
                 </tr>
                 {/if}
               {/foreach}
               <tr>
-                <td colspan = "3"></td>
-                <td colspan = "2"><hr></hr></td>
+                <td colspan="3"></td>
+                <td colspan="2"><hr></hr></td>
               </tr>
               <tr>
-                <td colspan = "3"></td>
-                <td style = "padding-left:28px;text-align:right;"><b><font size = "1">{ts 1=$defaultCurrency}TOTAL %1{/ts}</font></b></td>
-                <td style = "padding-left:28px;text-align:right;"><font size = "1">{$amount|crmMoney:$currency}</font></td>
+                <td colspan="3"></td>
+                <td style="padding-left:28px;text-align:right;"><b><font size="1">{ts 1=$defaultCurrency}TOTAL %1{/ts}</font></b></td>
+                <td style="padding-left:28px;text-align:right;"><font size="1">{$amount|crmMoney:$currency}</font></td>
               </tr>
               {if $is_pay_later == 0}
                 <tr>
-                  <td colspan = "3"></td>
-                  <td style = "padding-left:28px;text-align:right;"><font size = "1" >{ts}LESS Credit to invoice(s){/ts}</font></td>
-                  <td style = "padding-left:28px;text-align:right;"><font size = "1">{$amount|crmMoney:$currency}</font></td>
+                  <td colspan="3"></td>
+                  <td style="padding-left:28px;text-align:right;"><font size="1">{ts}LESS Credit to invoice(s){/ts}</font></td>
+                  <td style="padding-left:28px;text-align:right;"><font size="1">{$amount|crmMoney:$currency}</font></td>
                 </tr>
                 <tr>
-                  <td colspan = "3"></td>
-                  <td colspan = "2" ><hr></hr></td>
+                  <td colspan="3"></td>
+                  <td colspan="2"><hr></hr></td>
                 </tr>
                 <tr>
-                  <td colspan = "3"></td>
-                  <td style = "padding-left:28px;text-align:right;"><b><font size = "1">{ts}REMAINING CREDIT{/ts}</font></b></td>
-                  <td style = "padding-left:28px;text-align:right;"><b><font size = "1">{$amountDue|crmMoney:$currency}</font></b></td>
-                  <td style = "padding-left:28px;"><font size = "1" align = "right"></font></td>
+                  <td colspan="3"></td>
+                  <td style="padding-left:28px;text-align:right;"><b><font size="1">{ts}REMAINING CREDIT{/ts}</font></b></td>
+                  <td style="padding-left:28px;text-align:right;"><b><font size="1">{$amountDue|crmMoney:$currency}</font></b></td>
+                  <td style="padding-left:28px;"><font size="1" align="right"></font></td>
                 </tr>
               {/if}
               <br/><br/><br/>
               <tr>
-                <td colspan = "3"></td>
+                <td colspan="3"></td>
               </tr>
               <tr>
                 <td></td>
-                <td colspan = "3"></td>
+                <td colspan="3"></td>
               </tr>
             </table>
           </td>
         </tr>
       </table>
-      <table style = "margin-top:5px;padding-right:45px;">
+
+      <table width="100%" style="margin-top:5px;padding-right:45px;">
         <tr>
-          <td><img src = "{$resourceBase}/i/contribute/cut_line.png" height = "15" width = "630"></td>
+          <td><img src="{$resourceBase}/i/contribute/cut_line.png" height="15" width="100%"></td>
         </tr>
       </table>
 
-      <table style = "margin-top:6px;padding-right:20px;font-family: Arial, Verdana, sans-serif" width = "507" border = "0"cellpadding = "-5" cellspacing="19" id = "desc">
+      <table style="margin-top:6px;font-family: Arial, Verdana, sans-serif" width="100%" border="0" cellpadding="5" cellspacing="5" id="desc">
         <tr>
-          <td width="60%"><font size = "4" align = "right"><b>{ts}CREDIT ADVICE{/ts}</b><br/><br /><div  style="font-size:10px;max-width:300px;">{ts}Please do not pay on this advice. Deduct the amount of this Credit Note from your next payment to us{/ts}</div><br/></font></td>
+          <td width="60%"><font size="4" align="right"><b>{ts}CREDIT ADVICE{/ts}</b><br/><br /><div style="font-size:10px;max-width:300px;">{ts}Please do not pay on this advice. Deduct the amount of this Credit Note from your next payment to us{/ts}</div><br/></font></td>
           <td width="40%">
-            <table    align="right" >
+            <table align="right">
               <tr>
-                <td colspan = "2"></td>
-                <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Customer:{/ts} </font></td>
-                <td><font size = "1" align = "right" >{$display_name}</font></td>
+                <td colspan="2"></td>
+                <td><font size="1" align="right" style="font-weight:bold;">{ts}Customer:{/ts}</font></td>
+                <td><font size="1" align="right">{$display_name}</font></td>
               </tr>
               <tr>
-                <td colspan = "2"></td>
-                <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Credit Note#:{/ts} </font></td>
-                <td><font size = "1" align = "right">{$creditnote_id}</font></td>
+                <td colspan="2"></td>
+                <td><font size="1" align="right" style="font-weight:bold;">{ts}Credit Note#:{/ts}</font></td>
+                <td><font size="1" align="right">{$creditnote_id}</font></td>
               </tr>
-              <tr><td  colspan = "5"style = "color:#F5F5F5;"><hr></hr></td></tr>
+              <tr><td colspan="5"style="color:#F5F5F5;"><hr></hr></td></tr>
               <tr>
-                <td colspan = "2"></td>
-                <td><font size = "1" align = "right" style="font-weight:bold;">{ts}Credit Amount:{/ts}</font></td>
-                <td width=\'50px\'><font size = "1" align = "right" style="font-weight:bold;">{$amount|crmMoney:$currency}</font></td>
+                <td colspan="2"></td>
+                <td><font size="1" align="right" style="font-weight:bold;">{ts}Credit Amount:{/ts}</font></td>
+                <td width=\'50px\'><font size="1" align="right" style="font-weight:bold;">{$amount|crmMoney:$currency}</font></td>
               </tr>
             </table>
           </td>
@@ -10270,9 +10151,11 @@ INSERT INTO civicrm_msg_template
       </table>
     {/if}
     </center>
+
+  </div>
   </body>
 </html>
-', @tpl_ovid_contribution_invoice_receipt, 0,          1) ,      
+', 'contribution_invoice_receipt', @tpl_ovid_contribution_invoice_receipt, 0,          1) ,      
       
       
       ('Contributions - Recurring Start and End Notification', '{ts}Recurring Contribution Notification{/ts} - {contact.display_name}
@@ -10475,7 +10358,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_recurring_notify, 1,          0),
+', 'contribution_recurring_notify', @tpl_ovid_contribution_recurring_notify, 1,          0),
       ('Contributions - Recurring Start and End Notification', '{ts}Recurring Contribution Notification{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -10676,7 +10559,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_recurring_notify, 0,          1) ,      
+', 'contribution_recurring_notify', @tpl_ovid_contribution_recurring_notify, 0,          1) ,      
       
       
       ('Contributions - Recurring Cancellation Notification', '{ts}Recurring Contribution Cancellation Notification{/ts} - {contact.display_name}
@@ -10716,7 +10599,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_recurring_cancelled, 1,          0),
+', 'contribution_recurring_cancelled', @tpl_ovid_contribution_recurring_cancelled, 1,          0),
       ('Contributions - Recurring Cancellation Notification', '{ts}Recurring Contribution Cancellation Notification{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -10754,7 +10637,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_recurring_cancelled, 0,          1) ,      
+', 'contribution_recurring_cancelled', @tpl_ovid_contribution_recurring_cancelled, 0,          1) ,      
       
       
       ('Contributions - Recurring Billing Updates', '{ts}Recurring Contribution Billing Updates{/ts} - {contact.display_name}
@@ -10846,7 +10729,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_recurring_billing, 1,          0),
+', 'contribution_recurring_billing', @tpl_ovid_contribution_recurring_billing, 1,          0),
       ('Contributions - Recurring Billing Updates', '{ts}Recurring Contribution Billing Updates{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -10936,7 +10819,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_recurring_billing, 0,          1) ,      
+', 'contribution_recurring_billing', @tpl_ovid_contribution_recurring_billing, 0,          1) ,      
       
       
       ('Contributions - Recurring Updates', '{ts}Recurring Contribution Update Notification{/ts} - {contact.display_name}
@@ -10984,7 +10867,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_recurring_edit, 1,          0),
+', 'contribution_recurring_edit', @tpl_ovid_contribution_recurring_edit, 1,          0),
       ('Contributions - Recurring Updates', '{ts}Recurring Contribution Update Notification{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -11030,7 +10913,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_contribution_recurring_edit, 0,          1) ,      
+', 'contribution_recurring_edit', @tpl_ovid_contribution_recurring_edit, 0,          1) ,      
       
       
       ('Personal Campaign Pages - Admin Notification', '{ts}Personal Campaign Page Notification{/ts} - {contact.display_name}
@@ -11150,7 +11033,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_pcp_notify, 1,          0),
+', 'pcp_notify', @tpl_ovid_pcp_notify, 1,          0),
       ('Personal Campaign Pages - Admin Notification', '{ts}Personal Campaign Page Notification{/ts} - {contact.display_name}
 ', '===========================================================
 {ts}Personal Campaign Page Notification{/ts}
@@ -11268,7 +11151,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_pcp_notify, 0,          1) ,      
+', 'pcp_notify', @tpl_ovid_pcp_notify, 0,          1) ,      
       
       
       ('Personal Campaign Pages - Supporter Status Change Notification', '{ts 1=$contribPageTitle}Your Personal Campaign Page for %1{/ts} - {contact.display_name}
@@ -11374,7 +11257,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_pcp_status_change, 1,          0),
+', 'pcp_status_change', @tpl_ovid_pcp_status_change, 1,          0),
       ('Personal Campaign Pages - Supporter Status Change Notification', '{ts 1=$contribPageTitle}Your Personal Campaign Page for %1{/ts} - {contact.display_name}
 ', '{if $pcpStatus eq \'Approved\'}
 ============================
@@ -11478,7 +11361,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_pcp_status_change, 0,          1) ,      
+', 'pcp_status_change', @tpl_ovid_pcp_status_change, 0,          1) ,      
       
       
       ('Personal Campaign Pages - Supporter Welcome', '{ts 1=$contribPageTitle}Your Personal Campaign Page for %1{/ts} - {contact.display_name}
@@ -11639,7 +11522,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_pcp_supporter_notify, 1,          0),
+', 'pcp_supporter_notify', @tpl_ovid_pcp_supporter_notify, 1,          0),
       ('Personal Campaign Pages - Supporter Welcome', '{ts 1=$contribPageTitle}Your Personal Campaign Page for %1{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -11798,7 +11681,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_pcp_supporter_notify, 0,          1) ,      
+', 'pcp_supporter_notify', @tpl_ovid_pcp_supporter_notify, 0,          1) ,      
       
       
       ('Personal Campaign Pages - Owner Notification', '{ts}Someone has just donated to your personal campaign page{/ts} - {contact.display_name}
@@ -11852,7 +11735,7 @@ INSERT INTO civicrm_msg_template
   </table>
 </body>
 </html>
-', @tpl_ovid_pcp_owner_notify, 1,          0),
+', 'pcp_owner_notify', @tpl_ovid_pcp_owner_notify, 1,          0),
       ('Personal Campaign Pages - Owner Notification', '{ts}Someone has just donated to your personal campaign page{/ts} - {contact.display_name}
 ', '===========================================================
 {ts}Personal Campaign Page Owner Notification{/ts}
@@ -11904,7 +11787,7 @@ INSERT INTO civicrm_msg_template
   </table>
 </body>
 </html>
-', @tpl_ovid_pcp_owner_notify, 0,          1) ,      
+', 'pcp_owner_notify', @tpl_ovid_pcp_owner_notify, 0,          1) ,      
       
       
       ('Additional Payment Receipt or Refund Notification', '{if $isRefund}{ts}Refund Notification{/ts}{else}{ts}Payment Receipt{/ts}{/if}{if $component eq \'event\'} - {$event.title}{/if} - {contact.display_name}
@@ -12257,7 +12140,7 @@ INSERT INTO civicrm_msg_template
 
  </body>
 </html>
-', @tpl_ovid_payment_or_refund_notification, 1,          0),
+', 'payment_or_refund_notification', @tpl_ovid_payment_or_refund_notification, 1,          0),
       ('Additional Payment Receipt or Refund Notification', '{if $isRefund}{ts}Refund Notification{/ts}{else}{ts}Payment Receipt{/ts}{/if}{if $component eq \'event\'} - {$event.title}{/if} - {contact.display_name}
 ', '{if $emailGreeting}{$emailGreeting},
 {/if}
@@ -12608,7 +12491,7 @@ INSERT INTO civicrm_msg_template
 
  </body>
 </html>
-', @tpl_ovid_payment_or_refund_notification, 0,          1) ,      
+', 'payment_or_refund_notification', @tpl_ovid_payment_or_refund_notification, 0,          1) ,      
       
       
       ('Events - Registration Confirmation and Receipt (off-line)', '{ts}Event Confirmation{/ts} - {$event.title} - {contact.display_name}
@@ -13412,7 +13295,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_event_offline_receipt, 1,          0),
+', 'event_offline_receipt', @tpl_ovid_event_offline_receipt, 1,          0),
       ('Events - Registration Confirmation and Receipt (off-line)', '{ts}Event Confirmation{/ts} - {$event.title} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 {if $event.confirm_email_text AND (not $isOnWaitlist AND not $isRequireApproval)}
@@ -14214,7 +14097,7 @@ INSERT INTO civicrm_msg_template
 
 </body>
 </html>
-', @tpl_ovid_event_offline_receipt, 0,          1) ,      
+', 'event_offline_receipt', @tpl_ovid_event_offline_receipt, 0,          1) ,      
       
       
       ('Events - Registration Confirmation and Receipt (on-line)', '{if $isOnWaitlist}{ts}Wait List Confirmation{/ts}{elseif $isRequireApproval}{ts}Registration Request Confirmation{/ts}{else}{ts}Registration Confirmation{/ts}{/if} - {$event.event_title} - {contact.display_name}
@@ -15025,7 +14908,7 @@ You were registered by: {$payer.name}
 
 </body>
 </html>
-', @tpl_ovid_event_online_receipt, 1,          0),
+', 'event_online_receipt', @tpl_ovid_event_online_receipt, 1,          0),
       ('Events - Registration Confirmation and Receipt (on-line)', '{if $isOnWaitlist}{ts}Wait List Confirmation{/ts}{elseif $isRequireApproval}{ts}Registration Request Confirmation{/ts}{else}{ts}Registration Confirmation{/ts}{/if} - {$event.event_title} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 {if $event.confirm_email_text AND (not $isOnWaitlist AND not $isRequireApproval)}
@@ -15834,7 +15717,7 @@ You were registered by: {$payer.name}
 
 </body>
 </html>
-', @tpl_ovid_event_online_receipt, 0,          1) ,      
+', 'event_online_receipt', @tpl_ovid_event_online_receipt, 0,          1) ,      
       
       
       ('Events - Receipt only', 'Receipt for {if $events_in_cart} Event Registration{/if} - {contact.display_name}
@@ -16093,7 +15976,7 @@ Total: {$total|crmMoney:$currency|string_format:"%10s"}
     If you have questions about the status of your registration or purchase please feel free to contact us.
   </body>
 </html>
-', @tpl_ovid_event_registration_receipt, 1,          0),
+', 'event_registration_receipt', @tpl_ovid_event_registration_receipt, 1,          0),
       ('Events - Receipt only', 'Receipt for {if $events_in_cart} Event Registration{/if} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -16350,7 +16233,7 @@ Total: {$total|crmMoney:$currency|string_format:"%10s"}
     If you have questions about the status of your registration or purchase please feel free to contact us.
   </body>
 </html>
-', @tpl_ovid_event_registration_receipt, 0,          1) ,      
+', 'event_registration_receipt', @tpl_ovid_event_registration_receipt, 0,          1) ,      
       
       
       ('Events - Registration Cancellation Notice', '{ts 1=$event.event_title}Event Registration Cancelled for %1{/ts} - {contact.display_name}
@@ -16530,7 +16413,7 @@ Total: {$total|crmMoney:$currency|string_format:"%10s"}
 
 </body>
 </html>
-', @tpl_ovid_participant_cancelled, 1,          0),
+', 'participant_cancelled', @tpl_ovid_participant_cancelled, 1,          0),
       ('Events - Registration Cancellation Notice', '{ts 1=$event.event_title}Event Registration Cancelled for %1{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -16708,7 +16591,7 @@ Total: {$total|crmMoney:$currency|string_format:"%10s"}
 
 </body>
 </html>
-', @tpl_ovid_participant_cancelled, 0,          1) ,      
+', 'participant_cancelled', @tpl_ovid_participant_cancelled, 0,          1) ,      
       
       
       ('Events - Registration Confirmation Invite', '{ts 1=$event.event_title}Confirm your registration for %1{/ts} - {contact.display_name}
@@ -16837,7 +16720,7 @@ Click this link to go to a web page where you can confirm your registration onli
   {/if}
   {if $event.allow_selfcancelxfer }
   {ts}This event allows for{/ts}
-  {capture assign=selfService}{crmURL p=\'civicrm/event/selfsvcupdate\' q="reset=1&pid=`$participantID`&{contact.checksum}" h=0 a=1 fe=1}{/capture}
+  {capture assign=selfService}{crmURL p=\'civicrm/event/selfsvcupdate\' q="reset=1&pid=`$participant.id`&{contact.checksum}" h=0 a=1 fe=1}{/capture}
        <a href="{$selfService}"> {ts}self service cancel or transfer{/ts}</a>
   {/if}
 
@@ -16980,7 +16863,7 @@ Click this link to go to a web page where you can confirm your registration onli
 
 </body>
 </html>
-', @tpl_ovid_participant_confirm, 1,          0),
+', 'participant_confirm', @tpl_ovid_participant_confirm, 1,          0),
       ('Events - Registration Confirmation Invite', '{ts 1=$event.event_title}Confirm your registration for %1{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -17107,7 +16990,7 @@ Click this link to go to a web page where you can confirm your registration onli
   {/if}
   {if $event.allow_selfcancelxfer }
   {ts}This event allows for{/ts}
-  {capture assign=selfService}{crmURL p=\'civicrm/event/selfsvcupdate\' q="reset=1&pid=`$participantID`&{contact.checksum}" h=0 a=1 fe=1}{/capture}
+  {capture assign=selfService}{crmURL p=\'civicrm/event/selfsvcupdate\' q="reset=1&pid=`$participant.id`&{contact.checksum}" h=0 a=1 fe=1}{/capture}
        <a href="{$selfService}"> {ts}self service cancel or transfer{/ts}</a>
   {/if}
 
@@ -17250,7 +17133,7 @@ Click this link to go to a web page where you can confirm your registration onli
 
 </body>
 </html>
-', @tpl_ovid_participant_confirm, 0,          1) ,      
+', 'participant_confirm', @tpl_ovid_participant_confirm, 0,          1) ,      
       
       
       ('Events - Pending Registration Expiration Notice', '{ts 1=$event.event_title}Event registration has expired for %1{/ts} - {contact.display_name}
@@ -17437,7 +17320,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_participant_expired, 1,          0),
+', 'participant_expired', @tpl_ovid_participant_expired, 1,          0),
       ('Events - Pending Registration Expiration Notice', '{ts 1=$event.event_title}Event registration has expired for %1{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -17622,7 +17505,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_participant_expired, 0,          1) ,      
+', 'participant_expired', @tpl_ovid_participant_expired, 0,          1) ,      
       
       
       ('Events - Registration Transferred Notice', '{ts 1=$event.event_title}Event Registration Transferred for %1{/ts} - {contact.display_name}
@@ -17800,7 +17683,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_participant_transferred, 1,          0),
+', 'participant_transferred', @tpl_ovid_participant_transferred, 1,          0),
       ('Events - Registration Transferred Notice', '{ts 1=$event.event_title}Event Registration Transferred for %1{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -17976,7 +17859,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_participant_transferred, 0,          1) ,      
+', 'participant_transferred', @tpl_ovid_participant_transferred, 0,          1) ,      
       
       
       ('Tell-a-Friend Email', '{ts 1=$senderContactName 2=$title}%1 wants you to know about %2{/ts}
@@ -18035,7 +17918,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_friend, 1,          0),
+', 'friend', @tpl_ovid_friend, 1,          0),
       ('Tell-a-Friend Email', '{ts 1=$senderContactName 2=$title}%1 wants you to know about %2{/ts}
 ', '{$senderMessage}
 
@@ -18092,7 +17975,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_friend, 0,          1) ,      
+', 'friend', @tpl_ovid_friend, 0,          1) ,      
       
       
       ('Memberships - Signup and Renewal Receipts (off-line)', '{if $receiptType EQ \'membership signup\'}
@@ -18505,7 +18388,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_membership_offline_receipt, 1,          0),
+', 'membership_offline_receipt', @tpl_ovid_membership_offline_receipt, 1,          0),
       ('Memberships - Signup and Renewal Receipts (off-line)', '{if $receiptType EQ \'membership signup\'}
 {ts}Membership Confirmation and Receipt{/ts}
 {elseif $receiptType EQ \'membership renewal\'}
@@ -18916,7 +18799,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_membership_offline_receipt, 0,          1) ,      
+', 'membership_offline_receipt', @tpl_ovid_membership_offline_receipt, 0,          1) ,      
       
       
       ('Memberships - Receipt (on-line)', '{if $is_pay_later}{ts}Invoice{/ts}{else}{ts}Receipt{/ts}{/if} - {$title} - {contact.display_name}
@@ -19714,7 +19597,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_membership_online_receipt, 1,          0),
+', 'membership_online_receipt', @tpl_ovid_membership_online_receipt, 1,          0),
       ('Memberships - Receipt (on-line)', '{if $is_pay_later}{ts}Invoice{/ts}{else}{ts}Receipt{/ts}{/if} - {$title} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 {if $receipt_text}
@@ -20510,7 +20393,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_membership_online_receipt, 0,          1) ,      
+', 'membership_online_receipt', @tpl_ovid_membership_online_receipt, 0,          1) ,      
       
       
       ('Memberships - Auto-renew Cancellation Notification', '{ts}Autorenew Membership Cancellation Notification{/ts} - {contact.display_name}
@@ -20598,7 +20481,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_membership_autorenew_cancelled, 1,          0),
+', 'membership_autorenew_cancelled', @tpl_ovid_membership_autorenew_cancelled, 1,          0),
       ('Memberships - Auto-renew Cancellation Notification', '{ts}Autorenew Membership Cancellation Notification{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -20684,7 +20567,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_membership_autorenew_cancelled, 0,          1) ,      
+', 'membership_autorenew_cancelled', @tpl_ovid_membership_autorenew_cancelled, 0,          1) ,      
       
       
       ('Memberships - Auto-renew Billing Updates', '{ts}Membership Autorenewal Billing Updates{/ts} - {contact.display_name}
@@ -20777,7 +20660,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_membership_autorenew_billing, 1,          0),
+', 'membership_autorenew_billing', @tpl_ovid_membership_autorenew_billing, 1,          0),
       ('Memberships - Auto-renew Billing Updates', '{ts}Membership Autorenewal Billing Updates{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -20868,7 +20751,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_membership_autorenew_billing, 0,          1) ,      
+', 'membership_autorenew_billing', @tpl_ovid_membership_autorenew_billing, 0,          1) ,      
       
       
       ('Test-drive - Receipt Header', '[TEST]
@@ -20889,7 +20772,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
   </tr>
  </table>
 </center>
-', @tpl_ovid_test_preview, 1,          0),
+', 'test_preview', @tpl_ovid_test_preview, 1,          0),
       ('Test-drive - Receipt Header', '[TEST]
 ', '***********************************************************
 
@@ -20908,7 +20791,7 @@ or want to inquire about reinstating your registration for this event.{/ts}</p>
   </tr>
  </table>
 </center>
-', @tpl_ovid_test_preview, 0,          1) ,      
+', 'test_preview', @tpl_ovid_test_preview, 0,          1) ,      
       
       
       ('Pledges - Acknowledgement', '{ts}Thank you for your Pledge{/ts} - {contact.display_name}
@@ -21074,7 +20957,7 @@ or need to modify your payment schedule.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_pledge_acknowledge, 1,          0),
+', 'pledge_acknowledge', @tpl_ovid_pledge_acknowledge, 1,          0),
       ('Pledges - Acknowledgement', '{ts}Thank you for your Pledge{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}<p>{$greeting},</p>{/if}
 
@@ -21238,7 +21121,7 @@ or need to modify your payment schedule.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_pledge_acknowledge, 0,          1) ,      
+', 'pledge_acknowledge', @tpl_ovid_pledge_acknowledge, 0,          1) ,      
       
       
       ('Pledges - Payment Reminder', '{ts}Pledge Payment Reminder{/ts} - {contact.display_name}
@@ -21382,7 +21265,7 @@ or need to modify your payment schedule.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_pledge_reminder, 1,          0),
+', 'pledge_reminder', @tpl_ovid_pledge_reminder, 1,          0),
       ('Pledges - Payment Reminder', '{ts}Pledge Payment Reminder{/ts} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -21524,7 +21407,7 @@ or need to modify your payment schedule.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_pledge_reminder, 0,          1) ,      
+', 'pledge_reminder', @tpl_ovid_pledge_reminder, 0,          1) ,      
       
       
       ('Profiles - Admin Notification', '{$grouptitle} {ts 1=$displayName}Submitted by %1{/ts} - {contact.display_name}
@@ -21613,7 +21496,7 @@ or need to modify your payment schedule.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_uf_notify, 1,          0),
+', 'uf_notify', @tpl_ovid_uf_notify, 1,          0),
       ('Profiles - Admin Notification', '{$grouptitle} {ts 1=$displayName}Submitted by %1{/ts} - {contact.display_name}
 ', '{ts}Submitted For:{/ts} {$displayName}
 {ts}Date:{/ts} {$currentDate}
@@ -21700,7 +21583,7 @@ or need to modify your payment schedule.{/ts}</p>
 
 </body>
 </html>
-', @tpl_ovid_uf_notify, 0,          1) ,      
+', 'uf_notify', @tpl_ovid_uf_notify, 0,          1) ,      
       
       
       ('Petition - signature added', 'Thank you for signing {$petition.title} - {contact.display_name}
@@ -21712,7 +21595,7 @@ Thank you for signing {$petition.title}.
 <p>Thank you for signing {$petition.title}.</p>
 
 {include file="CRM/Campaign/Page/Petition/SocialNetwork.tpl" petition_id=$survey_id noscript=true emailMode=true}
-', @tpl_ovid_petition_sign, 1,          0),
+', 'petition_sign', @tpl_ovid_petition_sign, 1,          0),
       ('Petition - signature added', 'Thank you for signing {$petition.title} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -21722,7 +21605,7 @@ Thank you for signing {$petition.title}.
 <p>Thank you for signing {$petition.title}.</p>
 
 {include file="CRM/Campaign/Page/Petition/SocialNetwork.tpl" petition_id=$survey_id noscript=true emailMode=true}
-', @tpl_ovid_petition_sign, 0,          1) ,      
+', 'petition_sign', @tpl_ovid_petition_sign, 0,          1) ,      
       
       
       ('Petition - need verification', 'Confirmation of signature needed for {$petition.title} - {contact.display_name}
@@ -21748,7 +21631,7 @@ on the link below or pasting the link into your browser.
 Email confirmation page: <a href="{$petition.confirmUrl} ">{$petition.confirmUrl}</a></p>
 
 <p>If you did not sign this petition, please ignore this message.</p>
-', @tpl_ovid_petition_confirmation_needed, 1,          0),
+', 'petition_confirmation_needed', @tpl_ovid_petition_confirmation_needed, 1,          0),
       ('Petition - need verification', 'Confirmation of signature needed for {$petition.title} - {contact.display_name}
 ', '{assign var="greeting" value="{contact.email_greeting}"}{if $greeting}{$greeting},{/if}
 
@@ -21772,7 +21655,7 @@ on the link below or pasting the link into your browser.
 Email confirmation page: <a href="{$petition.confirmUrl} ">{$petition.confirmUrl}</a></p>
 
 <p>If you did not sign this petition, please ignore this message.</p>
-', @tpl_ovid_petition_confirmation_needed, 0,          1) ;
+', 'petition_confirmation_needed', @tpl_ovid_petition_confirmation_needed, 0,          1) ;
 
   
 INSERT INTO civicrm_msg_template
@@ -23204,28 +23087,18 @@ VALUES
   (@option_group_id_soft_credit_type   , 'Matched Gift', 9, 'matched_gift', 9, 0, 1, 0),
   (@option_group_id_soft_credit_type   , 'Personal Campaign Page', 10, 'pcp', 10, 0, 1, 1),
   (@option_group_id_soft_credit_type   , 'Gift', 11, 'gift', 11, 0, 1, 1);
+
+-- Auto-install core extension.
+-- Note this is a limited interim technique for installing core extensions -  the goal is that core extensions would be installed
+-- in the setup routine based on their tags & using the standard extension install api.
+-- do not try this at home folks.
+INSERT IGNORE INTO civicrm_extension (type, full_name, name, label, file, is_active) VALUES ('module', 'sequentialcreditnotes', 'Sequential credit notes', 'Sequential credit notes', 'sequentialcreditnotes', 1);
 -- +--------------------------------------------------------------------+
--- | CiviCRM version 5                                                  |
--- +--------------------------------------------------------------------+
--- | Copyright CiviCRM LLC (c) 2004-2019                                |
--- +--------------------------------------------------------------------+
--- | This file is a part of CiviCRM.                                    |
+-- | Copyright CiviCRM LLC. All rights reserved.                        |
 -- |                                                                    |
--- | CiviCRM is free software; you can copy, modify, and distribute it  |
--- | under the terms of the GNU Affero General Public License           |
--- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
--- |                                                                    |
--- | CiviCRM is distributed in the hope that it will be useful, but     |
--- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
--- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
--- | See the GNU Affero General Public License for more details.        |
--- |                                                                    |
--- | You should have received a copy of the GNU Affero General Public   |
--- | License and the CiviCRM Licensing Exception along                  |
--- | with this program; if not, contact CiviCRM LLC                     |
--- | at info[AT]civicrm[DOT]org. If you have questions about the        |
--- | GNU Affero General Public License or the licensing of CiviCRM,     |
--- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+-- | This work is published under the GNU AGPLv3 license with some      |
+-- | permitted exceptions and without any warranty. For full license    |
+-- | and copyright information, see https://civicrm.org/licensing       |
 -- +--------------------------------------------------------------------+
 -- Navigation Menu, Preferences and Mail Settings
 --
@@ -23888,7 +23761,7 @@ VALUES
 INSERT INTO `civicrm_report_instance`
     ( `domain_id`, `title`, `report_id`, `description`, `permission`, `form_values`)
 VALUES
-    ( @domainID, 'LYBUNT (last year but not this year)', 'contribute/lybunt', 'Last year but not this year. Provides a list of constituents who donated last year but did not donate during the time period you specify as the current year.', 'access CiviContribute', 'a:19:{s:6:"fields";a:3:{s:9:"sort_name";s:1:"1";s:5:"email";s:1:"1";s:5:"phone";s:1:"1";}s:12:"sort_name_op";s:3:"has";s:15:"sort_name_value";s:0:"";s:6:"yid_op";s:2:"eq";s:9:"yid_value";s:4:"2011";s:25:"contribution_status_id_op";s:2:"in";s:28:"contribution_status_id_value";a:1:{i:0;s:1:"1";}s:6:"gid_op";s:2:"in";s:9:"gid_value";a:0:{}s:8:"tagid_op";s:2:"in";s:11:"tagid_value";a:0:{}s:11:"description";s:157:"Last year but not this year. Provides a list of constituents who donated last year but did not donate during the time period you specify as the current year.";s:13:"email_subject";s:0:"";s:8:"email_to";s:0:"";s:8:"email_cc";s:0:"";s:10:"permission";s:21:"access CiviContribute";s:6:"groups";s:0:"";s:6:"charts";s:0:"";s:9:"domain_id";i:1;}');
+    ( @domainID, 'LYBUNT (last year but not this year)', 'contribute/lybunt', 'Last year but not this year. Provides a list of constituents who donated last year but did not donate during the time period you specify as the current year.', 'access CiviContribute', 'a:19:{s:6:"fields";a:5:{s:9:"sort_name";s:1:"1";s:5:"email";s:1:"1";s:5:"phone";s:1:"1";s:22:"last_year_total_amount";s:1:"1";s:23:"civicrm_life_time_total";s:1:"1";}s:12:"sort_name_op";s:3:"has";s:15:"sort_name_value";s:0:"";s:6:"yid_op";s:2:"eq";s:9:"yid_value";s:4:"2011";s:25:"contribution_status_id_op";s:2:"in";s:28:"contribution_status_id_value";a:1:{i:0;s:1:"1";}s:6:"gid_op";s:2:"in";s:9:"gid_value";a:0:{}s:8:"tagid_op";s:2:"in";s:11:"tagid_value";a:0:{}s:11:"description";s:157:"Last year but not this year. Provides a list of constituents who donated last year but did not donate during the time period you specify as the current year.";s:13:"email_subject";s:0:"";s:8:"email_to";s:0:"";s:8:"email_cc";s:0:"";s:10:"permission";s:21:"access CiviContribute";s:6:"groups";s:0:"";s:6:"charts";s:0:"";s:9:"domain_id";i:1;}');
 
 INSERT INTO `civicrm_report_instance`
     ( `domain_id`, `title`, `report_id`, `description`, `permission`, `form_values`)
@@ -24024,4 +23897,4 @@ INSERT INTO `civicrm_report_instance`
     ( `domain_id`, `title`, `report_id`, `description`, `permission`, `form_values`)
 VALUES
     (  @domainID, 'Survey Details', 'survey/detail', 'Detailed report for canvassing, phone-banking, walk lists or other surveys.', 'access CiviReport', 'a:39:{s:6:"fields";a:2:{s:9:"sort_name";s:1:"1";s:6:"result";s:1:"1";}s:22:"assignee_contact_id_op";s:2:"eq";s:25:"assignee_contact_id_value";s:0:"";s:12:"sort_name_op";s:3:"has";s:15:"sort_name_value";s:0:"";s:17:"street_number_min";s:0:"";s:17:"street_number_max";s:0:"";s:16:"street_number_op";s:3:"lte";s:19:"street_number_value";s:0:"";s:14:"street_name_op";s:3:"has";s:17:"street_name_value";s:0:"";s:15:"postal_code_min";s:0:"";s:15:"postal_code_max";s:0:"";s:14:"postal_code_op";s:3:"lte";s:17:"postal_code_value";s:0:"";s:7:"city_op";s:3:"has";s:10:"city_value";s:0:"";s:20:"state_province_id_op";s:2:"in";s:23:"state_province_id_value";a:0:{}s:13:"country_id_op";s:2:"in";s:16:"country_id_value";a:0:{}s:12:"survey_id_op";s:2:"in";s:15:"survey_id_value";a:0:{}s:12:"status_id_op";s:2:"eq";s:15:"status_id_value";s:1:"1";s:11:"custom_1_op";s:2:"in";s:14:"custom_1_value";a:0:{}s:11:"custom_2_op";s:2:"in";s:14:"custom_2_value";a:0:{}s:17:"custom_3_relative";s:1:"0";s:13:"custom_3_from";s:0:"";s:11:"custom_3_to";s:0:"";s:11:"description";s:75:"Detailed report for canvassing, phone-banking, walk lists or other surveys.";s:13:"email_subject";s:0:"";s:8:"email_to";s:0:"";s:8:"email_cc";s:0:"";s:10:"permission";s:17:"access CiviReport";s:6:"groups";s:0:"";s:9:"domain_id";i:1;}');
-UPDATE civicrm_domain SET version = '5.20.3';
+UPDATE civicrm_domain SET version = '5.28.2';

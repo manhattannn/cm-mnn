@@ -1,0 +1,9 @@
+name = MNN Adult Content Scheduling Restriction
+package = MNN Custom
+description = "creates validation rule so content/airings from programs that are marked as producing adult content can not be scheduled during certain time periods"
+
+core = 7.x
+files[] = mnn_adult_content_scheduling_restriction.module
+configure = admin/config/mnn/mnn_adult_content_scheduling_restriction
+
+

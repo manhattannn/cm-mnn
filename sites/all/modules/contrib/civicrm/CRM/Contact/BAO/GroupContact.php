@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 class CRM_Contact_BAO_GroupContact extends CRM_Contact_DAO_GroupContact {
 
@@ -145,14 +129,13 @@ class CRM_Contact_BAO_GroupContact extends CRM_Contact_DAO_GroupContact {
 
     CRM_Utils_Hook::pre('create', 'GroupContact', $groupId, $contactIds);
 
-    list($numContactsAdded, $numContactsNotAdded)
-      = self::bulkAddContactsToGroup($contactIds, $groupId, $method, $status, $tracking);
-
+    $result = self::bulkAddContactsToGroup($contactIds, $groupId, $method, $status, $tracking);
+    CRM_Contact_BAO_GroupContactCache::invalidateGroupContactCache($groupId);
     CRM_Contact_BAO_Contact_Utils::clearContactCaches();
 
     CRM_Utils_Hook::post('create', 'GroupContact', $groupId, $contactIds);
 
-    return [count($contactIds), $numContactsAdded, $numContactsNotAdded];
+    return [count($contactIds), $result['count_added'], $result['count_not_added']];
   }
 
   /**
@@ -779,7 +762,7 @@ AND    contact_id IN ( $contactStr )
       }
     }
 
-    return [$numContactsAdded, $numContactsNotAdded];
+    return ['count_added' => $numContactsAdded, 'count_not_added' => $numContactsNotAdded];
   }
 
   /**
@@ -795,8 +778,7 @@ AND    contact_id IN ( $contactStr )
    * @return array|bool
    */
   public static function buildOptions($fieldName, $context = NULL, $props = []) {
-
-    $options = CRM_Core_PseudoConstant::get(__CLASS__, $fieldName, $props, $context);
+    $options = CRM_Core_PseudoConstant::get(__CLASS__, $fieldName, [], $context);
 
     // Sort group list by hierarchy
     // TODO: This will only work when api.entity is "group_contact". What about others?

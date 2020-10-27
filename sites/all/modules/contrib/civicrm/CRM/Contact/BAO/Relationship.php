@@ -1,27 +1,11 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
@@ -304,7 +288,7 @@ class CRM_Contact_BAO_Relationship extends CRM_Contact_DAO_Relationship {
     }
     CRM_Utils_Hook::pre($hook, 'Relationship', $params['id'], $params);
 
-    $relationshipTypes = CRM_Utils_Array::value('relationship_type_id', $params);
+    $relationshipTypes = $params['relationship_type_id'] ?? NULL;
     // explode the string with _ to get the relationship type id
     // and to know which contact has to be inserted in
     // contact_id_a and which one in contact_id_b
@@ -491,14 +475,14 @@ class CRM_Contact_BAO_Relationship extends CRM_Contact_DAO_Relationship {
       throw new CRM_Core_Exception('Cannot create relationship, insufficient contact IDs provided');
     }
     if (isset($params['relationship_type_id']) && !is_numeric($params['relationship_type_id'])) {
-      $relationshipTypes = CRM_Utils_Array::value('relationship_type_id', $params);
+      $relationshipTypes = $params['relationship_type_id'] ?? NULL;
       list($relationshipTypeID, $first) = explode('_', $relationshipTypes);
       $returnFields['relationship_type_id'] = $relationshipTypeID;
 
       foreach (['a', 'b'] as $contactLetter) {
         if (empty($params['contact_' . $contactLetter])) {
           if ($first == $contactLetter) {
-            $returnFields['contact_id_' . $contactLetter] = CRM_Utils_Array::value('contact', $ids);
+            $returnFields['contact_id_' . $contactLetter] = $ids['contact'] ?? NULL;
           }
           else {
             $returnFields['contact_id_' . $contactLetter] = $contactID;
@@ -532,16 +516,11 @@ class CRM_Contact_BAO_Relationship extends CRM_Contact_DAO_Relationship {
    * Check if there is data to create the object.
    *
    * @param array $params
-   *   (reference ) an assoc array of name/value pairs.
    *
    * @return bool
    */
-  public static function dataExists(&$params) {
-    // return if no data present
-    if (!is_array(CRM_Utils_Array::value('contact_check', $params))) {
-      return FALSE;
-    }
-    return TRUE;
+  public static function dataExists($params) {
+    return (isset($params['contact_check']) && is_array($params['contact_check']));
   }
 
   /**
@@ -850,7 +829,7 @@ class CRM_Contact_BAO_Relationship extends CRM_Contact_DAO_Relationship {
    * @param int $id
    *   Relationship id.
    *
-   * $returns  returns the contact ids in the realtionship
+   * $returns  returns the contact ids in the relationship
    *
    * @return \CRM_Contact_DAO_Relationship
    */
@@ -947,7 +926,7 @@ class CRM_Contact_BAO_Relationship extends CRM_Contact_DAO_Relationship {
    *   true if record exists else false
    */
   public static function checkDuplicateRelationship(&$params, $id, $contactId = 0, $relationshipId = 0) {
-    $relationshipTypeId = CRM_Utils_Array::value('relationship_type_id', $params);
+    $relationshipTypeId = $params['relationship_type_id'] ?? NULL;
     list($type) = explode('_', $relationshipTypeId);
 
     $queryString = "
@@ -1140,14 +1119,16 @@ WHERE  relationship_type_id = " . CRM_Utils_Type::escape($type, 'Integer');
    *
    * @return array
    *   [select, from, where]
-   * @throws \Exception
+   *
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
    */
   public static function makeURLClause($contactId, $status, $numRelationship, $count, $relationshipId, $direction, $params = []) {
     $select = $from = $where = '';
 
     $select = '( ';
     if ($count) {
-      if ($direction == 'a_b') {
+      if ($direction === 'a_b') {
         $select .= ' SELECT count(DISTINCT civicrm_relationship.id) as cnt1, 0 as cnt2 ';
       }
       else {
@@ -1182,7 +1163,7 @@ WHERE  relationship_type_id = " . CRM_Utils_Type::escape($type, 'Integer');
                               civicrm_relationship.is_permission_b_a as is_permission_b_a,
                               civicrm_relationship.case_id as case_id';
 
-      if ($direction == 'a_b') {
+      if ($direction === 'a_b') {
         $select .= ', civicrm_relationship_type.label_a_b as label_a_b,
                               civicrm_relationship_type.label_b_a as relation ';
       }
@@ -1192,11 +1173,11 @@ WHERE  relationship_type_id = " . CRM_Utils_Type::escape($type, 'Integer');
       }
     }
 
-    $from = "
+    $from = '
       FROM  civicrm_relationship
 INNER JOIN  civicrm_relationship_type ON ( civicrm_relationship.relationship_type_id = civicrm_relationship_type.id )
-INNER JOIN  civicrm_contact ";
-    if ($direction == 'a_b') {
+INNER JOIN  civicrm_contact ';
+    if ($direction === 'a_b') {
       $from .= 'ON ( civicrm_contact.id = civicrm_relationship.contact_id_a ) ';
     }
     else {
@@ -1204,18 +1185,18 @@ INNER JOIN  civicrm_contact ";
     }
 
     if (!$count) {
-      $from .= "
+      $from .= '
 LEFT JOIN  civicrm_address ON (civicrm_address.contact_id = civicrm_contact.id AND civicrm_address.is_primary = 1)
 LEFT JOIN  civicrm_phone   ON (civicrm_phone.contact_id = civicrm_contact.id AND civicrm_phone.is_primary = 1)
 LEFT JOIN  civicrm_email   ON (civicrm_email.contact_id = civicrm_contact.id AND civicrm_email.is_primary = 1)
 LEFT JOIN  civicrm_state_province ON (civicrm_address.state_province_id = civicrm_state_province.id)
 LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
-";
+';
     }
 
     $where = 'WHERE ( 1 )';
     if ($contactId) {
-      if ($direction == 'a_b') {
+      if ($direction === 'a_b') {
         $where .= ' AND civicrm_relationship.contact_id_b = ' . CRM_Utils_Type::escape($contactId, 'Positive');
       }
       else {
@@ -1261,7 +1242,7 @@ LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
         $where .= ' AND relationship_type_id = ' . CRM_Utils_Type::escape($params['relationship_type_id'], 'Positive');
       }
     }
-    if ($direction == 'a_b') {
+    if ($direction === 'a_b') {
       $where .= ' ) UNION ';
     }
     else {
@@ -1295,7 +1276,9 @@ LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
    *
    * @return array|int
    *   relationship records
-   * @throws \Exception
+   *
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
    */
   public static function getRelationship(
     $contactId = NULL,
@@ -1484,7 +1467,7 @@ LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
               if ($values[$rid]['rtype'] == 'b_a') {
                 $replace['clientid'] = $values[$rid]['cid'];
               }
-              $values[$rid]['case'] = '<a href="' . CRM_Utils_System::url('civicrm/case/ajax/details', sprintf('caseId=%d&cid=%d&snippet=4', $values[$rid]['case_id'], $values[$rid]['cid'])) . '" class="action-item crm-hover-button crm-summary-link"><i class="crm-i fa-folder-open-o"></i></a>';
+              $values[$rid]['case'] = '<a href="' . CRM_Utils_System::url('civicrm/case/ajax/details', sprintf('caseId=%d&cid=%d&snippet=4', $values[$rid]['case_id'], $values[$rid]['cid'])) . '" class="action-item crm-hover-button crm-summary-link"><i class="crm-i fa-folder-open-o" aria-hidden="true"></i></a>';
             }
           }
 
@@ -1506,13 +1489,14 @@ LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
   }
 
   /**
-   * Get get list of relationship type based on the target contact type.
+   * Get list of relationship type based on the target contact type.
+   * Both directions of relationships are included if their labels are not the same.
    *
    * @param string $targetContactType
-   *   It's valid contact tpye(may be Individual , Organization , Household).
+   *   A valid contact type (may be Individual, Organization, Household).
    *
    * @return array
-   *   array reference of all relationship types with context to current contact type .
+   *   array reference of all relationship types with context to current contact type.
    */
   public static function getRelationType($targetContactType) {
     $relationshipType = [];
@@ -1521,6 +1505,11 @@ LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
     foreach ($allRelationshipType as $key => $type) {
       if ($type['contact_type_b'] == $targetContactType || empty($type['contact_type_b'])) {
         $relationshipType[$key . '_a_b'] = $type['label_a_b'];
+      }
+      if (($type['contact_type_a'] == $targetContactType || empty($type['contact_type_a']))
+        && $type['label_a_b'] != $type['label_b_a']
+      ) {
+        $relationshipType[$key . '_b_a'] = $type['label_b_a'];
       }
     }
 
@@ -1740,7 +1729,7 @@ LEFT JOIN  civicrm_country ON (civicrm_address.country_id = civicrm_country.id)
             $relIds = [$params['id']];
           }
           else {
-            $relIds = CRM_Utils_Array::value('relationship_ids', $params);
+            $relIds = $params['relationship_ids'] ?? NULL;
           }
           if (self::isRelatedMembershipExpired($relTypeIds, $contactId, $mainRelatedContactId, $relTypeId,
               $relIds) && !empty($membershipValues['owner_membership_id']
@@ -2021,7 +2010,7 @@ AND cc.sort_name LIKE '%$name%'";
   public static function getContactRelationshipSelector(&$params) {
     // format the params
     $params['offset'] = ($params['page'] - 1) * $params['rp'];
-    $params['sort'] = CRM_Utils_Array::value('sortBy', $params);
+    $params['sort'] = $params['sortBy'] ?? NULL;
 
     if ($params['context'] == 'past') {
       $relationshipStatus = CRM_Contact_BAO_Relationship::INACTIVE;
@@ -2238,11 +2227,11 @@ AND cc.sort_name LIKE '%$name%'";
    * @return array
    */
   public static function buildRelationshipTypeOptions($params = []) {
-    $contactId = CRM_Utils_Array::value('contact_id', $params);
+    $contactId = $params['contact_id'] ?? NULL;
     $direction = CRM_Utils_Array::value('relationship_direction', $params, 'a_b');
-    $relationshipId = CRM_Utils_Array::value('relationship_id', $params);
-    $contactType = CRM_Utils_Array::value('contact_type', $params);
-    $isForm = CRM_Utils_Array::value('is_form', $params);
+    $relationshipId = $params['relationship_id'] ?? NULL;
+    $contactType = $params['contact_type'] ?? NULL;
+    $isForm = $params['is_form'] ?? NULL;
     $showAll = FALSE;
 
     // getContactRelationshipType will return an empty set if these are not set

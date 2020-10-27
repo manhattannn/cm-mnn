@@ -1,27 +1,11 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
@@ -45,6 +29,12 @@
  *   API success array
  */
 function civicrm_api3_custom_field_create($params) {
+
+  // Legacy handling for old way of naming serialized fields
+  if (!empty($params['html_type']) && ($params['html_type'] == 'CheckBox' || strpos($params['html_type'], 'Multi-') === 0)) {
+    $params['serialize'] = 1;
+    $params['html_type'] = str_replace('Multi-', '', $params['html_type']);
+  }
 
   // Array created for passing options in params.
   if (isset($params['option_values']) && is_array($params['option_values'])) {
@@ -132,7 +122,26 @@ function civicrm_api3_custom_field_delete($params) {
  * @return array
  */
 function civicrm_api3_custom_field_get($params) {
-  return _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params);
+  if (CRM_Core_BAO_Domain::isDBVersionAtLeast('5.27.alpha1') && ($params['legacy_html_type'] ?? TRUE) && !empty($params['return'])) {
+    if (is_array($params['return'])) {
+      $params['return'][] = 'serialize';
+    }
+    elseif (is_string($params['return'])) {
+      $params['return'] .= ',serialize';
+    }
+  }
+
+  $results = _civicrm_api3_basic_get(_civicrm_api3_get_BAO(__FUNCTION__), $params);
+
+  if (($params['legacy_html_type'] ?? TRUE) && !empty($results['values']) && is_array($results['values'])) {
+    foreach ($results['values'] as $id => $result) {
+      if (!empty($result['serialize']) && !empty($result['html_type'])) {
+        $results['values'][$id]['html_type'] = str_replace('Select', 'Multi-Select', $result['html_type']);
+      }
+    }
+  }
+
+  return $results;
 }
 
 /**

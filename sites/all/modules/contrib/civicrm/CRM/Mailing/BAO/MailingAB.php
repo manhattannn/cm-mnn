@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 
 /**
@@ -50,15 +34,13 @@ class CRM_Mailing_BAO_MailingAB extends CRM_Mailing_DAO_MailingAB {
    *   Form values.
    *
    * @param array $params
-   * @param array $ids
    *
-   * @return object
-   *   $mailingab      The new mailingab object
+   * @return CRM_Mailing_DAO_MailingAB
    */
-  public static function create(&$params, $ids = []) {
+  public static function create(&$params) {
     $transaction = new CRM_Core_Transaction();
 
-    $mailingab = self::add($params, $ids);
+    $mailingab = self::writeRecord($params);
 
     if (is_a($mailingab, 'CRM_Core_Error')) {
       $transaction->rollback();
@@ -66,47 +48,6 @@ class CRM_Mailing_BAO_MailingAB extends CRM_Mailing_DAO_MailingAB {
     }
     $transaction->commit();
     return $mailingab;
-  }
-
-  /**
-   * function to add the mailings.
-   *
-   * @param array $params
-   *   Reference array contains the values submitted by the form.
-   * @param array $ids
-   *   Reference array contains the id.
-   *
-   *
-   * @return object
-   */
-  public static function add(&$params, $ids = []) {
-    $id = CRM_Utils_Array::value('mailingab_id', $ids, CRM_Utils_Array::value('id', $params));
-
-    if ($id) {
-      CRM_Utils_Hook::pre('edit', 'MailingAB', $id, $params);
-    }
-    else {
-      CRM_Utils_Hook::pre('create', 'MailingAB', NULL, $params);
-    }
-
-    $mailingab = new CRM_Mailing_DAO_MailingAB();
-    $mailingab->id = $id;
-    if (!$id) {
-      $mailingab->domain_id = CRM_Utils_Array::value('domain_id', $params, CRM_Core_Config::domainID());
-    }
-
-    $mailingab->copyValues($params);
-
-    $result = $mailingab->save();
-
-    if ($id) {
-      CRM_Utils_Hook::post('edit', 'MailingAB', $mailingab->id, $mailingab);
-    }
-    else {
-      CRM_Utils_Hook::post('create', 'MailingAB', $mailingab->id, $mailingab);
-    }
-
-    return $result;
   }
 
   /**

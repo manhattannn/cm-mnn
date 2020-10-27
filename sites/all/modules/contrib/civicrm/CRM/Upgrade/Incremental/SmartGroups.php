@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  *
  * Class to handled upgrading any saved searches with changed patterns.
  */
@@ -123,7 +107,7 @@ class CRM_Upgrade_Incremental_SmartGroups {
             $hasRelative = TRUE;
           }
           if ($formValue[0] === $relativeFieldName && empty($formValue[2])) {
-            unset($formValues[$index]);;
+            unset($formValues[$index]);
           }
           elseif (in_array($formValue[0], $fieldPossibilities)) {
             if ($isRelative) {
@@ -248,12 +232,11 @@ class CRM_Upgrade_Incremental_SmartGroups {
    * @return mixed
    */
   protected function getSearchesWithField($field) {
-    $savedSearches = civicrm_api3('SavedSearch', 'get', [
+    return civicrm_api3('SavedSearch', 'get', [
       'options' => ['limit' => 0],
       'form_values' => ['LIKE' => "%{$field}%"],
+      'return' => ['id', 'form_values'],
     ])['values'];
-    return $savedSearches;
-
   }
 
   /**
@@ -303,7 +286,7 @@ class CRM_Upgrade_Incremental_SmartGroups {
       foreach ($savedSearches as $savedSearch) {
         $form_values = $savedSearch['form_values'];
         foreach ($form_values as $index => $formValues) {
-          if ($formValues[0] === 'custom_' . $custom_date_fields->id && is_array($formValues[2])) {
+          if (isset($formValues[0]) && $formValues[0] === 'custom_' . $custom_date_fields->id && is_array($formValues[2])) {
             if (isset($formValues[2]['BETWEEN'])) {
               $form_values[] = ['custom_' . $custom_date_fields->id . '_low', '=', $this->getConvertedDateValue($formValues[2]['BETWEEN'][0], FALSE)];
               $form_values[] = ['custom_' . $custom_date_fields->id . '_high', '=', $this->getConvertedDateValue($formValues[2]['BETWEEN'][1], TRUE)];

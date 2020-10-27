@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 class CRM_Activity_BAO_Query {
 
@@ -44,22 +28,13 @@ class CRM_Activity_BAO_Query {
       $query->_tables['civicrm_activity'] = $query->_whereTables['civicrm_activity'] = 1;
     }
 
-    if (!empty($query->_returnProperties['activity_type_id'])) {
-      $query->_select['activity_type_id'] = 'activity_type.value as activity_type_id';
+    if (!empty($query->_returnProperties['activity_type_id'])
+      || !empty($query->_returnProperties['activity_type'])
+    ) {
+      $query->_select['activity_type_id'] = 'civicrm_activity.activity_type_id';
       $query->_element['activity_type_id'] = 1;
       $query->_tables['civicrm_activity'] = 1;
-      $query->_tables['activity_type'] = 1;
       $query->_whereTables['civicrm_activity'] = 1;
-      $query->_whereTables['activity_type'] = 1;
-    }
-
-    if (!empty($query->_returnProperties['activity_type'])) {
-      $query->_select['activity_type'] = 'activity_type.label as activity_type';
-      $query->_element['activity_type'] = 1;
-      $query->_tables['civicrm_activity'] = 1;
-      $query->_tables['activity_type'] = 1;
-      $query->_whereTables['civicrm_activity'] = 1;
-      $query->_whereTables['activity_type'] = 1;
     }
 
     if (!empty($query->_returnProperties['activity_subject'])) {
@@ -148,7 +123,7 @@ class CRM_Activity_BAO_Query {
       $query->_tables['civicrm_activity'] = $query->_whereTables['civicrm_activity'] = 1;
     }
 
-    if (CRM_Utils_Array::value('parent_id', $query->_returnProperties)) {
+    if (!empty($query->_returnProperties['parent_id'])) {
       $query->_tables['parent_id'] = 1;
       $query->_whereTables['parent_id'] = 1;
       $query->_element['parent_id'] = 1;
@@ -167,11 +142,13 @@ class CRM_Activity_BAO_Query {
   /**
    * Given a list of conditions in query generate the required where clause.
    *
-   * @param $query
+   * @param \CRM_Contact_BAO_Query $query
+   *
+   * @throws \CRM_Core_Exception
    */
   public static function where(&$query) {
     foreach (array_keys($query->_params) as $id) {
-      if (substr($query->_params[$id][0], 0, 9) == 'activity_') {
+      if (substr($query->_params[$id][0], 0, 9) === 'activity_') {
         if ($query->_mode == CRM_Contact_BAO_Query::MODE_CONTACTS) {
           $query->_useDistinct = TRUE;
         }
@@ -194,19 +171,16 @@ class CRM_Activity_BAO_Query {
 
     $fields = CRM_Activity_BAO_Activity::exportableFields();
     $fieldSpec = $query->getFieldSpec($name);
+
     $query->_tables['civicrm_activity'] = $query->_whereTables['civicrm_activity'] = 1;
     if ($query->_mode & CRM_Contact_BAO_Query::MODE_ACTIVITY) {
       $query->_skipDeleteClause = TRUE;
     }
-    // @todo we want to do this in a more metadata driven way, and also in contribute.
-    // But for the rc...
-    $namesToConvert = [
-      'activity_status' => 'activity_status_id',
-    ];
-    $name = $namesToConvert[$name] ?? $name;
 
     switch ($name) {
+      case 'activity_type':
       case 'activity_type_id':
+      case 'activity_status':
       case 'activity_status_id':
       case 'activity_engagement_level':
       case 'activity_id':
@@ -215,42 +189,14 @@ class CRM_Activity_BAO_Query {
         // We no longer expect "subject" as a specific criteria (as of CRM-19447),
         // but we still use activity_subject in Activity.Get API
       case 'activity_subject':
-
-        $qillName = $name;
-        if (in_array($name, ['activity_engagement_level', 'activity_id'])) {
-          $name = $qillName = str_replace('activity_', '', $name);
-        }
-        if (in_array($name, [
-          'activity_subject',
-          'activity_priority_id',
-        ])) {
-          $name = str_replace('activity_', '', $name);
-          $qillName = str_replace('_id', '', $qillName);
-        }
-        if ($name == 'activity_campaign_id') {
-          $name = 'campaign_id';
-        }
-
-        $dataType = !empty($fields[$qillName]['type']) ? CRM_Utils_Type::typeToString($fields[$qillName]['type']) : 'String';
-
-        $where = $fieldSpec['where'];
-        if (!$where) {
-          $where = 'civicrm_activity.' . $name;
-        }
-        $query->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause($where, $op, $value, $dataType);
-        list($op, $value) = CRM_Contact_BAO_Query::buildQillForFieldValue('CRM_Activity_DAO_Activity', $name, $value, $op);
-        $query->_qill[$grouping][] = ts('%1 %2 %3', [
-          1 => $fields[$qillName]['title'],
-          2 => $op,
-          3 => $value,
-        ]);
+        $query->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause($fieldSpec['where'], $op, $value, CRM_Utils_Type::typeToString($fieldSpec['type']));
+        $query->_qill[$grouping][]  = $query->getQillForField($fieldSpec['is_pseudofield_for'] ?? $fieldSpec['name'], $value, $op, $fieldSpec);
         break;
 
       case 'activity_text':
         self::whereClauseSingleActivityText($values, $query);
         break;
 
-      case 'activity_type':
       case 'activity_priority':
         $query->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause("$name.label", $op, $value, 'String');
         list($op, $value) = CRM_Contact_BAO_Query::buildQillForFieldValue('CRM_Activity_DAO_Activity', $name, $value, $op);
@@ -461,17 +407,21 @@ class CRM_Activity_BAO_Query {
   /**
    * Get the metadata for fields to be included on the activity search form.
    *
+   * @throws \CiviCRM_API3_Exception
    * @todo ideally this would be a trait included on the activity search & advanced search
    * rather than a static function.
    */
   public static function getSearchFieldMetadata() {
-    $fields = ['activity_type_id', 'activity_date_time', 'priority_id', 'activity_location'];
+    $fields = ['activity_type_id', 'activity_date_time', 'priority_id', 'activity_location', 'activity_status_id'];
     $metadata = civicrm_api3('Activity', 'getfields', [])['values'];
     $metadata = array_intersect_key($metadata, array_flip($fields));
     $metadata['activity_text'] = [
       'title' => ts('Activity Text'),
       'type' => CRM_Utils_Type::T_STRING,
       'is_pseudofield' => TRUE,
+      'html' => [
+        'type' => 'Text',
+      ],
     ];
     return $metadata;
   }
@@ -480,6 +430,9 @@ class CRM_Activity_BAO_Query {
    * Add all the elements shared between case activity search and advanced search.
    *
    * @param CRM_Core_Form_Search $form
+   *
+   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   public static function buildSearchForm(&$form) {
     $form->addSearchFieldMetadata(['Activity' => self::getSearchFieldMetadata()]);
@@ -502,21 +455,13 @@ class CRM_Activity_BAO_Query {
       'flip' => 1,
       'labelColumn' => 'name',
     ]);
-    $form->addSelect('status_id',
-      [
-        'entity' => 'activity',
-        'multiple' => 'multiple',
-        'option_url' => NULL,
-        'placeholder' => ts('- any -'),
-      ]
-    );
     $ssID = $form->get('ssID');
     $status = [$activityStatus['Completed'], $activityStatus['Scheduled']];
     //If status is saved in smart group.
     if (!empty($ssID) && !empty($form->_formValues['activity_status_id'])) {
       $status = $form->_formValues['activity_status_id'];
     }
-    $form->setDefaults(['status_id' => $status]);
+    $form->setDefaults(['activity_status_id' => $status]);
 
     $form->addElement('text', 'activity_text', ts('Activity Text'), CRM_Core_DAO::getAttribute('CRM_Contact_DAO_Contact', 'sort_name'));
 

@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 
 /**
@@ -97,7 +81,7 @@ class CRM_Contribute_Import_Form_MapField extends CRM_Import_Form_MapField {
     $this->assign('dataValues', $this->_dataValues);
 
     $skipColumnHeader = $this->controller->exportValue('DataSource', 'skipColumnHeader');
-    $this->_onDuplicate = $this->get('onDuplicate', isset($onDuplicate) ? $onDuplicate : "");
+    $this->_onDuplicate = $this->get('onDuplicate', $onDuplicate ?? "");
 
     if ($skipColumnHeader) {
       $this->assign('skipColumnHeader', $skipColumnHeader);
@@ -217,7 +201,7 @@ class CRM_Contribute_Import_Form_MapField extends CRM_Import_Form_MapField {
 
             $mappingHeader = array_keys($this->_mapperFields, $mappingName[$i]);
             // reusing contact_type field array for soft credit
-            $softField = isset($mappingContactType[$i]) ? $mappingContactType[$i] : 0;
+            $softField = $mappingContactType[$i] ?? 0;
 
             if (!$softField) {
               $js .= "{$formName}['mapper[$i][1]'].style.display = 'none';\n";
@@ -354,7 +338,7 @@ class CRM_Contribute_Import_Form_MapField extends CRM_Import_Form_MapField {
       ];
       $params = [
         'used' => 'Unsupervised',
-        'contact_type' => isset($contactTypes[$contactTypeId]) ? $contactTypes[$contactTypeId] : '',
+        'contact_type' => $contactTypes[$contactTypeId] ?? '',
       ];
       list($ruleFields, $threshold) = CRM_Dedupe_BAO_RuleGroup::dedupeRuleFieldsWeight($params);
       $weightSum = 0;
@@ -400,7 +384,7 @@ class CRM_Contribute_Import_Form_MapField extends CRM_Import_Form_MapField {
     }
 
     if (!empty($fields['saveMapping'])) {
-      $nameField = CRM_Utils_Array::value('saveMappingName', $fields);
+      $nameField = $fields['saveMappingName'] ?? NULL;
       if (empty($nameField)) {
         $errors['saveMappingName'] = ts('Name is required to save Import Mapping');
       }
@@ -462,8 +446,8 @@ class CRM_Contribute_Import_Form_MapField extends CRM_Import_Form_MapField {
           $softCreditFields[$i] = $mapperSoftCredit[$i];
         }
         $mapperSoftCreditType[$i] = [
-          'value' => isset($mapperKeys[$i][2]) ? $mapperKeys[$i][2] : '',
-          'label' => isset($softCreditTypes[$mapperKeys[$i][2]]) ? $softCreditTypes[$mapperKeys[$i][2]] : '',
+          'value' => $mapperKeys[$i][2] ?? '',
+          'label' => $softCreditTypes[$mapperKeys[$i][2]] ?? '',
         ];
       }
       else {
@@ -499,7 +483,7 @@ class CRM_Contribute_Import_Form_MapField extends CRM_Import_Form_MapField {
         $updateMappingFields->name = $mapper[$i];
 
         //reuse contact_type field in db to store fields associated with soft credit
-        $updateMappingFields->contact_type = isset($mapperSoftCredit[$i]) ? $mapperSoftCredit[$i] : NULL;
+        $updateMappingFields->contact_type = $mapperSoftCredit[$i] ?? NULL;
         $updateMappingFields->save();
       }
     }
@@ -520,7 +504,7 @@ class CRM_Contribute_Import_Form_MapField extends CRM_Import_Form_MapField {
         $saveMappingFields->name = $mapper[$i];
 
         //reuse contact_type field in db to store fields associated with soft credit
-        $saveMappingFields->contact_type = isset($mapperSoftCredit[$i]) ? $mapperSoftCredit[$i] : NULL;
+        $saveMappingFields->contact_type = $mapperSoftCredit[$i] ?? NULL;
         $saveMappingFields->save();
       }
       $this->set('savedMapping', $saveMappingFields->mapping_id);

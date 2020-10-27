@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
 
@@ -112,6 +96,9 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
    * Get where clause.
    *
    * @param CRM_Contact_BAO_Query $query
+   *
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
    */
   public static function where(&$query) {
     self::initializeAnySoftCreditClause($query);
@@ -122,18 +109,6 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
       if (substr($query->_params[$id][0], 0, 13) == 'contribution_' || substr($query->_params[$id][0], 0, 10) == 'financial_'  || substr($query->_params[$id][0], 0, 8) == 'payment_') {
         if ($query->_mode == CRM_Contact_BAO_Query::MODE_CONTACTS) {
           $query->_useDistinct = TRUE;
-        }
-        // CRM-12065
-        if (
-          $query->_params[$id][0] == 'contribution_type_id' ||
-          $query->_params[$id][0] == 'contribution_type'
-        ) {
-          CRM_Core_Session::setStatus(
-            ts('The contribution type criteria is now obsolete, please update your smart group'),
-            '',
-            'alert'
-          );
-          continue;
         }
 
         self::whereClauseSingle($query->_params[$id], $query);
@@ -304,12 +279,18 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
         }
         elseif ($value == 'both_related') {
           $query->_where[$grouping][] = "contribution_search_scredit_combined.filter_id IS NOT NULL";
-          $query->_qill[$grouping][] = ts('Contributions OR Soft Credits? - Soft Credits with related Hard Credit');
+          $query->_qill[$grouping][] = ts('Contributions OR Soft Credits? - Contributions and their related soft credit');
           $query->_tables['civicrm_contribution'] = $query->_whereTables['civicrm_contribution'] = 1;
           $query->_tables['civicrm_contribution_soft'] = $query->_whereTables['civicrm_contribution_soft'] = 1;
         }
         elseif ($value == 'both') {
-          $query->_qill[$grouping][] = ts('Contributions OR Soft Credits? - Both');
+          $query->_qill[$grouping][] = ts('Contributions OR Soft Credits? - All');
+          $query->_tables['civicrm_contribution'] = $query->_whereTables['civicrm_contribution'] = 1;
+          $query->_tables['civicrm_contribution_soft'] = $query->_whereTables['civicrm_contribution_soft'] = 1;
+        }
+        elseif ($value == 'only_contribs_unsoftcredited') {
+          $query->_where[$grouping][] = "contribution_search_scredit_combined.filter_id IS NULL";
+          $query->_qill[$grouping][] = ts('Contributions OR Soft Credits? - Contributions without a soft credit');
           $query->_tables['civicrm_contribution'] = $query->_whereTables['civicrm_contribution'] = 1;
           $query->_tables['civicrm_contribution_soft'] = $query->_whereTables['civicrm_contribution_soft'] = 1;
         }
@@ -522,7 +503,7 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
     switch ($name) {
       case 'civicrm_contribution':
         $from = " $side JOIN civicrm_contribution ON civicrm_contribution.contact_id = contact_a.id ";
-        if (in_array(self::$_contribOrSoftCredit, ["only_scredits", "both_related", "both"])) {
+        if (in_array(self::$_contribOrSoftCredit, ["only_scredits", "both_related", "both", "only_contribs_unsoftcredited"])) {
           // switch the from table if its only soft credit search
           $from = " $side JOIN " . \Civi::$statics[__CLASS__]['soft_credit_temp_table_name'] . " as contribution_search_scredit_combined ON contribution_search_scredit_combined.contact_id = contact_a.id ";
           $from .= " $side JOIN civicrm_contribution ON civicrm_contribution.id = contribution_search_scredit_combined.id ";
@@ -607,13 +588,13 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
         break;
 
       case 'civicrm_contribution_soft':
-        if (!in_array(self::$_contribOrSoftCredit, ["only_scredits", "both_related", "both"])) {
+        if (!in_array(self::$_contribOrSoftCredit, ["only_scredits", "both_related", "both", "only_contribs_unsoftcredited"])) {
           $from = " $side JOIN civicrm_contribution_soft ON civicrm_contribution_soft.contribution_id = civicrm_contribution.id";
         }
         break;
 
       case 'civicrm_contribution_soft_contact':
-        if (in_array(self::$_contribOrSoftCredit, ["only_scredits", "both_related", "both"])) {
+        if (in_array(self::$_contribOrSoftCredit, ["only_scredits", "both_related", "both", "only_contribs_unsoftcredited"])) {
           $from .= " $side JOIN civicrm_contact civicrm_contact_d ON (civicrm_contribution.contact_id = civicrm_contact_d.id )
             AND contribution_search_scredit_combined.scredit_id IS NOT NULL";
         }
@@ -688,7 +669,7 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
       }
     }
     if (in_array(self::$_contribOrSoftCredit,
-      ["only_scredits", "both_related", "both"])) {
+      ["only_scredits", "both_related", "both", "only_contribs_unsoftcredited"])) {
       if (!isset(\Civi::$statics[__CLASS__]['soft_credit_temp_table_name'])) {
         // build a temp table which is union of contributions and soft credits
         // note: group-by in first part ensures uniqueness in counts
@@ -911,8 +892,11 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
       'invoice_number',
       'receive_date',
       'contribution_cancel_date',
+      'contribution_page_id',
+      'contribution_id',
     ];
     $metadata = civicrm_api3('Contribution', 'getfields', [])['values'];
+    $metadata['contribution_id'] = $metadata['id'];
     return array_intersect_key($metadata, array_flip($fields));
   }
 
@@ -952,12 +936,6 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
       ['entity' => 'contribution', 'multiple' => 'multiple', 'context' => 'search', 'options' => $financialTypes]
     );
 
-    $form->add('select', 'contribution_page_id',
-      ts('Contribution Page'),
-      CRM_Contribute_PseudoConstant::contributionPage(),
-      FALSE, ['class' => 'crm-select2', 'multiple' => 'multiple', 'placeholder' => ts('- any -')]
-    );
-
     // use contribution_payment_instrument_id instead of payment_instrument_id
     // Contribution Edit form (pop-up on contribution/Contact(display Result as Contribution) open on search form),
     // then payment method change action not working properly because of same html ID present two time on one page
@@ -984,7 +962,6 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
     $form->addYesNo('contribution_recurring', ts('Contribution is Recurring?'), TRUE);
 
     $form->addYesNo('contribution_test', ts('Contribution is a Test?'), TRUE);
-
     // Add field for transaction ID search
     $form->addElement('text', 'contribution_trxn_id', ts("Transaction ID"));
     $form->addElement('text', 'contribution_check_number', ts('Check Number'));
@@ -996,8 +973,9 @@ class CRM_Contribute_BAO_Query extends CRM_Core_BAO_Query {
     $options = [
       'only_contribs' => ts('Contributions Only'),
       'only_scredits' => ts('Soft Credits Only'),
-      'both_related' => ts('Soft Credits with related Hard Credit'),
-      'both' => ts('Both'),
+      'both_related' => ts('Contributions and their related soft credit'),
+      'both' => ts('All'),
+      'only_contribs_unsoftcredited' => ts('Contributions without a soft credit'),
     ];
     $form->add('select', 'contribution_or_softcredits', ts('Contributions OR Soft Credits?'), $options, FALSE, ['class' => "crm-select2"]);
     $form->addSelect(

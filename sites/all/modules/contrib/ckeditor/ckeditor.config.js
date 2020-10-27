@@ -12,8 +12,7 @@ CKEDITOR.editorConfig = function(config) {
 
   // [ Left, Center, Right, Justified ]
   config.justifyClasses = [ 'rteleft', 'rtecenter', 'rteright', 'rtejustify' ];
-	  //(added by openflows per https://www.drupal.org/node/2624208  Allow all content and do not strip iframes.
-	  config.allowedContent = true;
+
   // The minimum editor width, in pixels, when resizing it with the resize handle.
   config.resize_minWidth = 450;
 
@@ -28,6 +27,9 @@ CKEDITOR.editorConfig = function(config) {
   // [#1762328] Uncomment the line below to protect <code> tags in CKEditor (hide them in wysiwyg mode).
   // config.protectedSource.push(/<code>[\s\S]*?<\/code>/gi);
   config.extraPlugins = '';
+
+  // Insert all Smiley image paths as relative or they may fail on SSL pages.
+  config.smiley_path = window.CKEDITOR_BASEPATH + 'plugins/smiley/images/';
 
   /*
     * Append here extra CSS rules that should be applied into the editing area.

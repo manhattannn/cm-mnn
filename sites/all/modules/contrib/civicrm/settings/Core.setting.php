@@ -1,34 +1,18 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 5                                                  |
- +--------------------------------------------------------------------+
- | Copyright CiviCRM LLC (c) 2004-2019                                |
- +--------------------------------------------------------------------+
- | This file is a part of CiviCRM.                                    |
+ | Copyright CiviCRM LLC. All rights reserved.                        |
  |                                                                    |
- | CiviCRM is free software; you can copy, modify, and distribute it  |
- | under the terms of the GNU Affero General Public License           |
- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
- |                                                                    |
- | CiviCRM is distributed in the hope that it will be useful, but     |
- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
- | See the GNU Affero General Public License for more details.        |
- |                                                                    |
- | You should have received a copy of the GNU Affero General Public   |
- | License and the CiviCRM Licensing Exception along                  |
- | with this program; if not, contact CiviCRM LLC                     |
- | at info[AT]civicrm[DOT]org. If you have questions about the        |
- | GNU Affero General Public License or the licensing of CiviCRM,     |
- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+ | This work is published under the GNU AGPLv3 license with some      |
+ | permitted exceptions and without any warranty. For full license    |
+ | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
 
 /**
  *
  * @package CRM
- * @copyright CiviCRM LLC (c) 2004-2019
+ * @copyright CiviCRM LLC (c) 2004-2020
  */
 
 /**
@@ -115,7 +99,7 @@ return [
     'pseudoconstant' => [
       'optionGroupName' => 'address_options',
     ],
-    'default' => '123456891011',
+    'default' => '12345689101112',
     'add' => '4.1',
     'title' => ts('Address Fields'),
     'is_domain' => 1,
@@ -187,7 +171,7 @@ return [
     'default' => FALSE,
     'html_type' => 'radio',
     'add' => '4.7',
-    'title' => 'Accept profile submissions from external sites',
+    'title' => ts('Accept profile submissions from external sites'),
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => ts('If enabled, CiviCRM will permit submissions from external sites to profiles. This is disabled by default to limit abuse.'),
@@ -202,7 +186,7 @@ return [
     'default' => TRUE,
     'html_type' => 'radio',
     'add' => '4.7',
-    'title' => 'Allow alerts to auto-dismiss?',
+    'title' => ts('Allow alerts to auto-dismiss?'),
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => ts('If disabled, CiviCRM will not automatically dismiss any alerts after 10 seconds.'),
@@ -254,6 +238,28 @@ return [
     'is_contact' => 0,
     'description' => NULL,
     'help_text' => NULL,
+  ],
+  'defaultExternUrl' => [
+    'group_name' => 'CiviCRM Preferences',
+    'group' => 'core',
+    'name' => 'defaultExternUrl',
+    'type' => 'String',
+    'quick_form_type' => 'Select',
+    'html_type' => 'Select',
+    'html_attributes' => [
+      'class' => 'crm-select2',
+    ],
+    'default' => 'router',
+    'add' => '5.27',
+    'title' => ts('Extern URL Style'),
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => ts('This setting provides transitional support. It should be set to "Prefer normal router." If your deployment requires "Prefer standalone script", then please ensure that the issue is tracked in <code>lab.civicrm.org</code>.'),
+    'help_text' => NULL,
+    'options' => [
+      'standalone' => ts('Prefer standalone scripts'),
+      'router' => ts('Prefer normal router'),
+    ],
   ],
   'activity_assignee_notification' => [
     'group_name' => 'CiviCRM Preferences',
@@ -538,7 +544,7 @@ return [
     'html_type' => 'text',
     'default' => NULL,
     'add' => '4.3',
-    'title' => ts('Recaptcha Options'),
+    'title' => ts('reCAPTCHA Options'),
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => ts('You can specify the reCAPTCHA theme options as comma separated data.(eg: theme:\'blackglass\', lang : \'fr\' ). Check the available options at <a href="https://developers.google.com/recaptcha/docs/display#config">Customizing the Look and Feel of reCAPTCHA</a>.'),
@@ -557,7 +563,7 @@ return [
     'html_type' => 'text',
     'default' => NULL,
     'add' => '4.3',
-    'title' => ts('Recaptcha Site Key'),
+    'title' => ts('reCAPTCHA Site Key'),
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => NULL,
@@ -591,7 +597,7 @@ return [
     'html_type' => 'text',
     'default' => NULL,
     'add' => '4.3',
-    'title' => ts('Recaptcha Secret Key'),
+    'title' => ts('reCAPTCHA Secret Key'),
     'is_domain' => 1,
     'is_contact' => 0,
     'description' => NULL,
