@@ -310,7 +310,7 @@ function reservations_prepare(&$node) {
  * the validation hook was not being called for every reservation node
  */
 function reservations_validate($node, $form, &$form_state) {
-  // Admin override allows bypathing all validation.
+  // Admin override allows bypassing all validation.
   if (isset($form_state['values']['admin_override']) && $form_state['values']['admin_override']) {
     return;
   }
@@ -600,6 +600,12 @@ function reservations_validate($node, $form, &$form_state) {
           reservations_load_user();
           drupal_goto('node/' . $form_state['values']['nid'] . '/edit', $options);
       }
+
+    // If no variances selected.
+    if (empty($form_state['values']['field_reservable_variances']['und'][0]['tid'])) {
+      // Clear the variance reason field
+      $form_state['values']['field_variance_reason']['und'][0]["value"] = '';
+    }
   } finally {
       reservations_load_user();
   }
@@ -717,8 +723,9 @@ function reservations_form($node, &$form_state) {
 
     $checkout_options = array(
       NULL => '-- select item ---',
-      1 => 'Check-in all items on the reservation',
-      2 => 'Extend all or part of the reservation'
+      1 => t('Check-in all items on the reservation'),
+      2 => t('Extend all or part of the reservation'),
+      3 => t('Add an item - change status to reserved/confirmed'),
     );
     $form['choice_wrapper']['checkout_options'] = array(
       '#title' => t('Check in options'),
@@ -1102,7 +1109,7 @@ function reservations_form_alter(&$form, $form_state, $form_id) {
           $form['admin_override'] = array(
             '#type' => 'checkbox',
             '#title' => 'Admin Override Validation',
-            '#description' => 'This will bypath all validation (available to site admins only).',
+            '#description' => 'This will bypass all validation (available to site admins only).',
             '#default_value' => FALSE,
             '#weight' => -97,
             '#columns' => 0,

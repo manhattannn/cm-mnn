@@ -165,7 +165,7 @@ function reservations_inventory_admin_settings($form, &$form_state) {
         $form['reservations_hours'][$term_tid]['hours']['day-' . $day]
         ['reservations_inventory_force_hours_' . $day . '_' . $term_tid] = array(
           '#title' => t('Force Check-out at these times'),
-          '#description' => t('Use a comma between the hours, use 24 hour format such as 11:00, 14:00.'),
+          '#description' => t('Use a comma between the hours, use 24 hour format such as 11:00,14:00.'),
           '#default_value' => isset($restricted_hours_of_operation[$term_tid][$num]['force_hours']) ?
             implode(',', $restricted_hours_of_operation[$term_tid][$num]['force_hours']) : '',
           '#type' => 'textfield',
@@ -209,7 +209,7 @@ function reservations_inventory_admin_settings($form, &$form_state) {
     $form['reservations_hours'][$term_tid]['restrictions'] = array(
       '#type' => 'fieldset',
       '#title' => t($term->name . ' Inventory - Restrictions'),
-      '#description' => t('Below are reservation restrictions for this inventory.'),
+      '#description' => t('Below are reservation restrictions for this inventory.</br>Important Note: These settings are not dependent on the "Hours of operations" set to "Restricted hours of operations".'),
       '#collapsible' => TRUE,
     );
 
@@ -369,6 +369,8 @@ function reservations_inventory_admin_settings_submit($form, &$form_state) {
           $restricted_hours_of_operation[$term_tid][$num]['force_hours'] = NULL;
         } else {
           $force_hours = explode(',', $force_hours);
+          // trim white space
+          $force_hours = array_map('trim', $force_hours);
           $restricted_hours_of_operation[$term_tid][$num]['force_hours'] = $force_hours;
         }
 

@@ -26,9 +26,9 @@
   Drupal.behaviors.reservationConfirmation = {
       attach: function (context, settings) {
 
-        //If we have a the charity poll overlay
+        //If we have a the reservations dialog
         if ($('#reservations_dialog').length > 0) {
-            // Open the overlay and set the dialog settings.
+            // Open the dialog and set the dialog settings.
             $('#reservations_dialog').dialog({
                 modal: true,
                 resizable: false,
@@ -55,6 +55,37 @@
         }
 
       }
+  };
+
+  Drupal.behaviors.variationDetails = {
+    attach: function (context, settings) {
+      $(document).ready(function() {
+        hideVariationDetails();
+      });
+
+      $( document ).delegate( '#edit-field-reservable-variances .multiselect_remove', 'click', function(e) {
+        hideVariationDetails();
+      });
+
+      $( document ).delegate( '#edit-field-reservable-variances .multiselect_add', 'click', function(e) {
+        hideVariationDetails();
+      });
+
+      function hideVariationDetails() {
+        var variance_selected = $("#edit-field-reservable-variances .field_reservable_variances_sel").children();
+
+        //has the variance select options box got any values?
+        if (variance_selected.length > 0 ) {
+          $('#edit-field-variance-reason').show();
+          $('#edit-field-variance-date').show();
+        } else {
+          $('#edit-field-variance-reason').hide();
+          $('#edit-field-variance-date').hide();
+        }
+
+
+      }
+    }
   };
 
 }) (jQuery);
