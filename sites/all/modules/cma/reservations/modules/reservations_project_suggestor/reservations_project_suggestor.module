@@ -127,6 +127,7 @@ function reservations_project_suggestor_ajax_callback($user_name) {
     drupal_add_js(drupal_get_path('module', 'reservations_project_suggestor')
 		  . '/reservations_project_suggestor.js');
 
+  $html = '';
 
   $user = user_load_by_name($user_name);
   if ($user) {
@@ -146,13 +147,18 @@ function reservations_project_suggestor_ajax_callback($user_name) {
       $gid = $result->gid;
       $project = node_load($gid);
       $status = $project->group_group[LANGUAGE_NONE][0]['value'];
-      $inactive_reason =
-	$project->field_reason_not_active[LANGUAGE_NONE][0]['tid'];
-
+      // This field may not exist or point to an empty taxonomy.
+      if (isset($project->field_reason_not_active) && !empty(($project->field_reason_not_active)) ) {
+        $inactive_reason =
+          $project->field_reason_not_active[LANGUAGE_NONE][0]['tid'];
+      }
+      else {
+        $inactive_reason = 0;
+      }
       if ($project && $status && !$inactive_reason) {
-	$html .= '<input type="button" id="rps_proj_button_'.$gid.'" '.
-	  'class="rps_pick" value="Pick" name="'.$project->title.'"> ';
-	$html .= "<strong>".$project->title." ($gid) </strong><br/><br/>";
+        $html .= '<input type="button" id="rps_proj_button_' . $gid . '" ' .
+          'class="rps_pick" value="Pick" name="' . $project->title . '"> ';
+        $html .= "<strong>" . $project->title . " ($gid) </strong><br/><br/>";
 
       }
     }
