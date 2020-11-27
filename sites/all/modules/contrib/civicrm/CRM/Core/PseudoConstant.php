@@ -857,7 +857,7 @@ WHERE  id = %1";
    * @param bool $excludeHidden
    * @return array
    */
-  public static function nestedGroup($checkPermissions = TRUE, $groupType = NULL, $excludeHidden = TRUE) {
+  public static function nestedGroup(bool $checkPermissions = TRUE, $groupType = NULL, bool $excludeHidden = TRUE) {
     $groups = $checkPermissions ? self::group($groupType, $excludeHidden) : self::allGroup($groupType, $excludeHidden);
     return CRM_Contact_BAO_Group::getGroupsHierarchy($groups, NULL, '&nbsp;&nbsp;', TRUE);
   }
@@ -950,6 +950,23 @@ WHERE  id = %1";
     }
 
     return self::$relationshipType[$cacheKey];
+  }
+
+  /**
+   * Name => Label pairs for all relationship types
+   *
+   * @return array
+   */
+  public static function relationshipTypeOptions() {
+    $relationshipTypes = [];
+    $relationshipLabels = self::relationshipType();
+    foreach (self::relationshipType('name') as $id => $type) {
+      $relationshipTypes[$type['name_a_b']] = $relationshipLabels[$id]['label_a_b'];
+      if ($type['name_b_a'] && $type['name_b_a'] != $type['name_a_b']) {
+        $relationshipTypes[$type['name_b_a']] = $relationshipLabels[$id]['label_b_a'];
+      }
+    }
+    return $relationshipTypes;
   }
 
   /**

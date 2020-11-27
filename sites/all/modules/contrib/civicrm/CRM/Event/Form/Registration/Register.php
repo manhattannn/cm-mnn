@@ -45,9 +45,9 @@ class CRM_Event_Form_Registration_Register extends CRM_Event_Form_Registration {
    * Skip duplicate check.
    *
    * This can be set using hook_civicrm_buildForm() to override the registration dupe check.
-   * CRM-7604
    *
    * @var bool
+   * @see https://issues.civicrm.org/jira/browse/CRM-7604
    */
   public $_skipDupeRegistrationCheck = FALSE;
 
@@ -391,8 +391,7 @@ class CRM_Event_Form_Registration_Register extends CRM_Event_Form_Registration {
       self::buildAmount($this);
     }
 
-    $pps = $this->getProcessors();
-    if ($this->getContactID() === 0 && !$this->_values['event']['is_multiple_registrations']) {
+    if ($contactID === 0 && !$this->_values['event']['is_multiple_registrations']) {
       //@todo we are blocking for multiple registrations because we haven't tested
       $this->addCIDZeroOptions();
     }
@@ -405,9 +404,7 @@ class CRM_Event_Form_Registration_Register extends CRM_Event_Form_Registration {
 
     $this->assign('bypassPayment', $bypassPayment);
 
-    $userID = $this->getContactID();
-
-    if (!$userID) {
+    if (!$contactID) {
       $createCMSUser = FALSE;
 
       if ($this->_values['custom_pre_id']) {
@@ -566,7 +563,7 @@ class CRM_Event_Form_Registration_Register extends CRM_Event_Form_Registration {
 
       // CRM-14492 Admin price fields should show up on event registration if user has 'administer CiviCRM' permissions
       $adminFieldVisible = FALSE;
-      if (CRM_Core_Permission::check('administer CiviCRM')) {
+      if (CRM_Core_Permission::check('administer CiviCRM data')) {
         $adminFieldVisible = TRUE;
       }
 
@@ -580,6 +577,7 @@ class CRM_Event_Form_Registration_Register extends CRM_Event_Form_Registration {
         if (CRM_Utils_Array::value('visibility', $field) == 'public' ||
           (CRM_Utils_Array::value('visibility', $field) == 'admin' && $adminFieldVisible == TRUE) ||
           $className == 'CRM_Event_Form_Participant' ||
+          $className === 'CRM_Event_Form_Task_Register' ||
           $className == 'CRM_Event_Form_ParticipantFeeSelection'
         ) {
           $fieldId = $field['id'];
@@ -592,7 +590,7 @@ class CRM_Event_Form_Registration_Register extends CRM_Event_Form_Registration {
 
           //user might modified w/ hook.
           $options = $field['options'] ?? NULL;
-          $formClasses = ['CRM_Event_Form_Participant', 'CRM_Event_Form_ParticipantFeeSelection'];
+          $formClasses = ['CRM_Event_Form_Participant', 'CRM_Event_Form_Task_Register', 'CRM_Event_Form_ParticipantFeeSelection'];
 
           if (!is_array($options)) {
             continue;
@@ -629,6 +627,7 @@ class CRM_Event_Form_Registration_Register extends CRM_Event_Form_Registration {
           }
         }
       }
+      $form->_priceSet['id'] = $form->_priceSet['id'] ?? $form->_priceSetId;
       $form->assign('priceSet', $form->_priceSet);
     }
     else {
@@ -638,7 +637,7 @@ class CRM_Event_Form_Registration_Register extends CRM_Event_Form_Registration {
 
           //CRM-7632, CRM-6201
           $totalAmountJs = NULL;
-          if ($className == 'CRM_Event_Form_Participant') {
+          if ($className == 'CRM_Event_Form_Participant' || $className === 'CRM_Event_Form_Task_Register') {
             $totalAmountJs = ['onClick' => "fillTotalAmount(" . $fee['value'] . ")"];
           }
 
@@ -757,7 +756,7 @@ class CRM_Event_Form_Registration_Register extends CRM_Event_Form_Registration {
       }
 
       //ignore option full for offline registration.
-      if ($className == 'CRM_Event_Form_Participant') {
+      if ($className == 'CRM_Event_Form_Participant' || $className === 'CRM_Event_Form_Task_Register') {
         $optionFullIds = [];
       }
 

@@ -511,7 +511,7 @@ class CRM_Utils_System {
     }
 
     self::setHttpHeader('Location', $url);
-    self::civiExit();
+    self::civiExit(0, ['url' => $url, 'context' => 'redirect']);
   }
 
   /**
@@ -600,7 +600,7 @@ class CRM_Utils_System {
     // also make sure the key is sent and is valid
     $key = trim(CRM_Utils_Array::value('key', $_REQUEST));
 
-    $docAdd = "More info at:" . CRM_Utils_System::docURL2("Managing Scheduled Jobs", TRUE, NULL, NULL, NULL, "wiki");
+    $docAdd = "More info at: " . CRM_Utils_System::docURL2('sysadmin/setup/jobs', TRUE);
 
     if (!$key) {
       return self::authenticateAbort(
@@ -717,15 +717,12 @@ class CRM_Utils_System {
      * process typically done in CLI and cron scripts. See: CRM-12648
      *
      * Q: Can we move this to the userSystem class so that it can be tuned
-     * per-CMS? For example, when dealing with UnitTests UF, there's no
-     * userFrameworkDSN.
+     * per-CMS? For example, when dealing with UnitTests UF, does it need to
+     * do this session write since the original issue was for Drupal.
      */
     $session = CRM_Core_Session::singleton();
     $session->set('civicrmInitSession', TRUE);
 
-    if ($config->userFrameworkDSN) {
-      $dbDrupal = DB::connect($config->userFrameworkDSN);
-    }
     return $config->userSystem->authenticate($name, $password, $loadCMSBootstrap, $realPath);
   }
 
@@ -1390,7 +1387,7 @@ class CRM_Utils_System {
     }
 
     if (!isset($params['text']) or $params['text'] === NULL) {
-      $params['text'] = ts('(learn more...)');
+      $params['text'] = ts('(Learn more...)');
     }
 
     if (!isset($params['style']) || $params['style'] === NULL) {
@@ -1419,7 +1416,7 @@ class CRM_Utils_System {
    * @return mixed
    */
   public static function formatDocUrl($url) {
-    return preg_replace('#^(user|sysadmin|dev)/#', '\1/en/stable/', $url);
+    return preg_replace('#^(installation|user|sysadmin|dev)/#', '\1/en/latest/', $url);
   }
 
   /**
@@ -1497,7 +1494,7 @@ class CRM_Utils_System {
         = CRM_Contribute_BAO_Contribution::$_exportableFields
           = CRM_Pledge_BAO_Pledge::$_exportableFields
             = CRM_Core_BAO_CustomField::$_importFields
-              = CRM_Core_BAO_Cache::$_cache = CRM_Core_DAO::$_dbColumnValueCache = NULL;
+              = CRM_Core_DAO::$_dbColumnValueCache = NULL;
 
     CRM_Core_OptionGroup::flushAll();
     CRM_Utils_PseudoConstant::flushAll();
@@ -1916,6 +1913,13 @@ class CRM_Utils_System {
    */
   public static function sendResponse(\Psr\Http\Message\ResponseInterface $response) {
     $config = CRM_Core_Config::singleton()->userSystem->sendResponse($response);
+  }
+
+  /**
+   * Perform any necessary actions prior to redirecting via POST.
+   */
+  public static function prePostRedirect() {
+    CRM_Core_Config::singleton()->userSystem->prePostRedirect();
   }
 
 }

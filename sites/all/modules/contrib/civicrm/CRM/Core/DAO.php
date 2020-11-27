@@ -121,11 +121,12 @@ class CRM_Core_DAO extends DB_DataObject {
 
   /**
    * Returns localized title of this entity.
+   *
    * @return string
    */
   public static function getEntityTitle() {
     $className = static::class;
-    Civi::log()->warning("$className needs to be regeneraged. Missing getEntityTitle method.", ['civi.tag' => 'deprecated']);
+    Civi::log()->warning("$className needs to be regenerated. Missing getEntityTitle method.", ['civi.tag' => 'deprecated']);
     return CRM_Core_DAO_AllCoreTables::getBriefName($className);
   }
 
@@ -146,10 +147,21 @@ class CRM_Core_DAO extends DB_DataObject {
   }
 
   /**
-   * Empty definition for virtual function.
+   * Returns the name of this table
+   *
+   * @return string
    */
   public static function getTableName() {
-    return NULL;
+    return self::getLocaleTableName(static::$_tableName ?? NULL);
+  }
+
+  /**
+   * Returns if this table needs to be logged
+   *
+   * @return bool
+   */
+  public function getLog() {
+    return static::$_log ?? FALSE;
   }
 
   /**
@@ -161,8 +173,14 @@ class CRM_Core_DAO extends DB_DataObject {
   public static function init($dsn) {
     Civi::$statics[__CLASS__]['init'] = 1;
     $options = &PEAR::getStaticProperty('DB_DataObject', 'options');
+    $dsn = CRM_Utils_SQL::autoSwitchDSN($dsn);
     $options['database'] = $dsn;
     $options['quote_identifiers'] = TRUE;
+    if (CRM_Utils_SQL::isSSLDSN($dsn)) {
+      // There are two different options arrays.
+      $other_options = &PEAR::getStaticProperty('DB', 'options');
+      $other_options['ssl'] = TRUE;
+    }
     if (defined('CIVICRM_DAO_DEBUG')) {
       self::DebugLevel(CIVICRM_DAO_DEBUG);
     }
@@ -547,7 +565,8 @@ class CRM_Core_DAO extends DB_DataObject {
 
     // Exclude fields yet not added by pending upgrades
     $dbVer = \CRM_Core_BAO_Domain::version();
-    if ($fields && version_compare($dbVer, \CRM_Utils_System::version()) < 0) {
+    $daoExt = defined(static::class . '::EXT') ? constant(static::class . '::EXT') : NULL;
+    if ($fields && $daoExt === 'civicrm' && version_compare($dbVer, \CRM_Utils_System::version()) < 0) {
       $fields = array_filter($fields, function($field) use ($dbVer) {
         $add = $field['add'] ?? '1.0.0';
         if (substr_count($add, '.') < 2) {
@@ -964,6 +983,7 @@ class CRM_Core_DAO extends DB_DataObject {
    *   true if exists, else false
    */
   public static function checkFieldExists($tableName, $columnName, $i18nRewrite = TRUE) {
+    CRM_Core_Error::deprecatedFunctionWarning('CRM_Core_BAO_SchemaHandler::checkIfFieldExists');
     return CRM_Core_BAO_SchemaHandler::checkIfFieldExists($tableName, $columnName, $i18nRewrite);
   }
 
@@ -1143,6 +1163,23 @@ class CRM_Core_DAO extends DB_DataObject {
   }
 
   /**
+   * Checks if this DAO's table ought to exist.
+   *
+   * If there are pending DB updates, this function compares the CiviCRM version of the table to the current schema version.
+   *
+   * @return bool
+   * @throws CRM_Core_Exception
+   */
+  public static function tableHasBeenAdded() {
+    if (CRM_Utils_System::version() === CRM_Core_BAO_Domain::version()) {
+      return TRUE;
+    }
+    $daoExt = defined(static::class . '::EXT') ? constant(static::class . '::EXT') : NULL;
+    $daoVersion = defined(static::class . '::TABLE_ADDED') ? constant(static::class . '::TABLE_ADDED') : '1.0';
+    return !($daoExt === 'civicrm' && version_compare(CRM_Core_BAO_Domain::version(), $daoVersion, '<'));
+  }
+
+  /**
    * Check if there is a given table in the database.
    *
    * @param string $tableName
@@ -1175,15 +1212,12 @@ LIKE %1
 
   /**
    * @param $version
-   *
+   * @deprecated
    * @return bool
    */
   public function checkVersion($version) {
-    $query = "
-SELECT version
-FROM   civicrm_domain
-";
-    $dbVersion = CRM_Core_DAO::singleValueQuery($query);
+    CRM_Core_Error::deprecatedFunctionWarning('CRM_Core_BAO_Domain::version');
+    $dbVersion = CRM_Core_BAO_Domain::version();
     return trim($version) == trim($dbVersion);
   }
 
@@ -1518,6 +1552,7 @@ FROM   civicrm_domain
     }
 
     if ($trapException) {
+      CRM_Core_Error::deprecatedFunctionWarning('calling functions should handle exceptions');
       $errorScope = CRM_Core_TemporaryErrorScope::ignoreException();
     }
 
@@ -1533,6 +1568,7 @@ FROM   civicrm_domain
     }
 
     if (is_a($result, 'DB_Error')) {
+      CRM_Core_Error::deprecatedFunctionWarning('calling functions should handle exceptions');
       return $result;
     }
 
@@ -2702,11 +2738,11 @@ SELECT contact_id
    */
   public function getFieldSpec($fieldName) {
     $fields = $this->fields();
-    $fieldKeys = $this->fieldKeys();
 
     // Support "unique names" as well as sql names
     $fieldKey = $fieldName;
     if (empty($fields[$fieldKey])) {
+      $fieldKeys = $this->fieldKeys();
       $fieldKey = $fieldKeys[$fieldName] ?? NULL;
     }
     // If neither worked then this field doesn't exist. Return false.
@@ -2806,7 +2842,7 @@ SELECT contact_id
   /**
    * @see http://issues.civicrm.org/jira/browse/CRM-9150
    * support for other syntaxes is discussed in ticket but being put off for now
-   * @return array
+   * @return string[]
    */
   public static function acceptedSQLOperators() {
     return [
@@ -3103,6 +3139,16 @@ SELECT contact_id
     if (isset($this->name)) {
       unset(self::$_dbColumnValueCache[$daoName]['name'][$this->name]);
     }
+  }
+
+  /**
+   * Return a mapping from field-name to the corresponding key (as used in fields()).
+   *
+   * @return array
+   *   Array(string $name => string $uniqueName).
+   */
+  public static function fieldKeys() {
+    return array_flip(CRM_Utils_Array::collect('name', static::fields()));
   }
 
 }

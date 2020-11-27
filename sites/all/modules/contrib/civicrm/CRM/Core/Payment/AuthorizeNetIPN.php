@@ -35,61 +35,121 @@ class CRM_Core_Payment_AuthorizeNetIPN extends CRM_Core_Payment_BaseIPN {
    * @return bool|void
    */
   public function main($component = 'contribute') {
+    try {
+      //we only get invoice num as a key player from payment gateway response.
+      //for ARB we get x_subscription_id and x_subscription_paynum
+      $x_subscription_id = $this->retrieve('x_subscription_id', 'String');
+      $ids = $objects = $input = [];
 
-    //we only get invoice num as a key player from payment gateway response.
-    //for ARB we get x_subscription_id and x_subscription_paynum
-    $x_subscription_id = $this->retrieve('x_subscription_id', 'String');
-    $ids = $objects = $input = [];
+      if ($x_subscription_id) {
+        // Presence of the id means it is approved.
+        $input['component'] = $component;
 
-    if ($x_subscription_id) {
-      // Presence of the id means it is approved.
-      $input['component'] = $component;
+        // load post vars in $input
+        $this->getInput($input, $ids);
 
-      // load post vars in $input
-      $this->getInput($input, $ids);
+        // load post ids in $ids
+        $this->getIDs($ids, $input);
 
-      // load post ids in $ids
-      $this->getIDs($ids, $input);
-
-      // Attempt to get payment processor ID from URL
-      if (!empty($this->_inputParameters['processor_id'])) {
-        $paymentProcessorID = $this->_inputParameters['processor_id'];
-      }
-      else {
-        // This is an unreliable method as there could be more than one instance.
-        // Recommended approach is to use the civicrm/payment/ipn/xx url where xx is the payment
-        // processor id & the handleNotification function (which should call the completetransaction api & by-pass this
-        // entirely). The only thing the IPN class should really do is extract data from the request, validate it
-        // & call completetransaction or call fail? (which may not exist yet).
-        Civi::log()->warning('Unreliable method used to get payment_processor_id for AuthNet IPN - this will cause problems if you have more than one instance');
-        $paymentProcessorTypeID = CRM_Core_DAO::getFieldValue('CRM_Financial_DAO_PaymentProcessorType',
-          'AuthNet', 'id', 'name'
-        );
-        $paymentProcessorID = (int) civicrm_api3('PaymentProcessor', 'getvalue', [
-          'is_test' => 0,
-          'options' => ['limit' => 1],
-          'payment_processor_type_id' => $paymentProcessorTypeID,
-          'return' => 'id',
-        ]);
-      }
-
-      if (!$this->validateData($input, $ids, $objects, TRUE, $paymentProcessorID)) {
-        return FALSE;
-      }
-      if (!empty($ids['paymentProcessor']) && $objects['contributionRecur']->payment_processor_id != $ids['paymentProcessor']) {
-        Civi::log()->warning('Payment Processor does not match the recurring processor id.', ['civi.tag' => 'deprecated']);
-      }
-
-      if ($component == 'contribute' && $ids['contributionRecur']) {
-        // check if first contribution is completed, else complete first contribution
-        $first = TRUE;
-        if ($objects['contribution']->contribution_status_id == 1) {
-          $first = FALSE;
+        // Attempt to get payment processor ID from URL
+        if (!empty($this->_inputParameters['processor_id'])) {
+          $paymentProcessorID = $this->_inputParameters['processor_id'];
         }
-        return $this->recur($input, $ids, $objects, $first);
+        else {
+          // This is an unreliable method as there could be more than one instance.
+          // Recommended approach is to use the civicrm/payment/ipn/xx url where xx is the payment
+          // processor id & the handleNotification function (which should call the completetransaction api & by-pass this
+          // entirely). The only thing the IPN class should really do is extract data from the request, validate it
+          // & call completetransaction or call fail? (which may not exist yet).
+          Civi::log()->warning('Unreliable method used to get payment_processor_id for AuthNet IPN - this will cause problems if you have more than one instance');
+          $paymentProcessorTypeID = CRM_Core_DAO::getFieldValue('CRM_Financial_DAO_PaymentProcessorType',
+            'AuthNet', 'id', 'name'
+          );
+          $paymentProcessorID = (int) civicrm_api3('PaymentProcessor', 'getvalue', [
+            'is_test' => 0,
+            'options' => ['limit' => 1],
+            'payment_processor_type_id' => $paymentProcessorTypeID,
+            'return' => 'id',
+          ]);
+        }
+
+        // Check if the contribution exists
+        // make sure contribution exists and is valid
+        $contribution = new CRM_Contribute_BAO_Contribution();
+        $contribution->id = $ids['contribution'];
+        if (!$contribution->find(TRUE)) {
+          throw new CRM_Core_Exception('Failure: Could not find contribution record for ' . (int) $contribution->id, NULL, ['context' => "Could not find contribution record: {$contribution->id} in IPN request: " . print_r($input, TRUE)]);
+        }
+
+        // make sure contact exists and is valid
+        // use the contact id from the contribution record as the id in the IPN may not be valid anymore.
+        $contact = new CRM_Contact_BAO_Contact();
+        $contact->id = $contribution->contact_id;
+        $contact->find(TRUE);
+        if ($contact->id != $ids['contact']) {
+          // If the ids do not match then it is possible the contact id in the IPN has been merged into another contact which is why we use the contact_id from the contribution
+          CRM_Core_Error::debug_log_message("Contact ID in IPN {$ids['contact']} not found but contact_id found in contribution {$contribution->contact_id} used instead");
+          echo "WARNING: Could not find contact record: {$ids['contact']}<p>";
+          $ids['contact'] = $contribution->contact_id;
+        }
+
+        if (!empty($ids['contributionRecur'])) {
+          $contributionRecur = new CRM_Contribute_BAO_ContributionRecur();
+          $contributionRecur->id = $ids['contributionRecur'];
+          if (!$contributionRecur->find(TRUE)) {
+            CRM_Core_Error::debug_log_message("Could not find contribution recur record: {$ids['ContributionRecur']} in IPN request: " . print_r($input, TRUE));
+            echo "Failure: Could not find contribution recur record: {$ids['ContributionRecur']}<p>";
+            return FALSE;
+          }
+        }
+
+        $objects['contact'] = &$contact;
+        $objects['contribution'] = &$contribution;
+
+        // CRM-19478: handle oddity when p=null is set in place of contribution page ID,
+        if (!empty($ids['contributionPage']) && !is_numeric($ids['contributionPage'])) {
+          // We don't need to worry if about removing contribution page id as it will be set later in
+          //  CRM_Contribute_BAO_Contribution::loadRelatedObjects(..) using $objects['contribution']->contribution_page_id
+          unset($ids['contributionPage']);
+        }
+
+        $this->loadObjects($input, $ids, $objects, TRUE, $paymentProcessorID);
+
+        if (!empty($ids['paymentProcessor']) && $objects['contributionRecur']->payment_processor_id != $ids['paymentProcessor']) {
+          Civi::log()->warning('Payment Processor does not match the recurring processor id.', ['civi.tag' => 'deprecated']);
+        }
+
+        if ($component == 'contribute' && $ids['contributionRecur']) {
+          // check if first contribution is completed, else complete first contribution
+          $first = TRUE;
+          if ($objects['contribution']->contribution_status_id == 1) {
+            $first = FALSE;
+            //load new contribution object if required.
+            // create a contribution and then get it processed
+            $contribution = new CRM_Contribute_BAO_Contribution();
+            $contribution->contact_id = $ids['contact'];
+            $contribution->financial_type_id = $objects['contributionType']->id;
+            $contribution->contribution_page_id = $ids['contributionPage'];
+            $contribution->contribution_recur_id = $ids['contributionRecur'];
+            $contribution->receive_date = $input['receive_date'];
+            $contribution->currency = $objects['contribution']->currency;
+            $contribution->amount_level = $objects['contribution']->amount_level;
+            $contribution->address_id = $objects['contribution']->address_id;
+            $contribution->campaign_id = $objects['contribution']->campaign_id;
+            $contribution->_relatedObjects = $objects['contribution']->_relatedObjects;
+
+            $objects['contribution'] = &$contribution;
+          }
+          $input['payment_processor_id'] = $paymentProcessorID;
+          return $this->recur($input, $ids, $objects, $first);
+        }
       }
+      return TRUE;
     }
-    return TRUE;
+    catch (CRM_Core_Exception $e) {
+      Civi::log()->debug($e->getMessage());
+      echo 'Invalid or missing data';
+    }
   }
 
   /**
@@ -99,43 +159,21 @@ class CRM_Core_Payment_AuthorizeNetIPN extends CRM_Core_Payment_BaseIPN {
    * @param $first
    *
    * @return bool
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
    */
-  public function recur(&$input, &$ids, &$objects, $first) {
-    $this->_isRecurring = TRUE;
+  public function recur($input, $ids, $objects, $first) {
     $recur = &$objects['contributionRecur'];
-    $paymentProcessorObject = $objects['contribution']->_relatedObjects['paymentProcessor']['object'];
 
     // do a subscription check
     if ($recur->processor_id != $input['subscription_id']) {
-      CRM_Core_Error::debug_log_message("Unrecognized subscription.");
-      echo "Failure: Unrecognized subscription<p>";
-      return FALSE;
+      throw new CRM_Core_Exception('Unrecognized subscription.');
     }
 
     $contributionStatus = CRM_Contribute_PseudoConstant::contributionStatus(NULL, 'name');
 
-    $transaction = new CRM_Core_Transaction();
-
     $now = date('YmdHis');
 
-    //load new contribution object if required.
-    if (!$first) {
-      // create a contribution and then get it processed
-      $contribution = new CRM_Contribute_BAO_Contribution();
-      $contribution->contact_id = $ids['contact'];
-      $contribution->financial_type_id = $objects['contributionType']->id;
-      $contribution->contribution_page_id = $ids['contributionPage'];
-      $contribution->contribution_recur_id = $ids['contributionRecur'];
-      $contribution->receive_date = $input['receive_date'];
-      $contribution->currency = $objects['contribution']->currency;
-      $contribution->payment_instrument_id = $objects['contribution']->payment_instrument_id;
-      $contribution->amount_level = $objects['contribution']->amount_level;
-      $contribution->address_id = $objects['contribution']->address_id;
-      $contribution->campaign_id = $objects['contribution']->campaign_id;
-      $contribution->_relatedObjects = $objects['contribution']->_relatedObjects;
-
-      $objects['contribution'] = &$contribution;
-    }
     $objects['contribution']->invoice_id = md5(uniqid(rand(), TRUE));
     $objects['contribution']->total_amount = $input['amount'];
     $objects['contribution']->trxn_id = $input['trxn_id'];
@@ -148,18 +186,17 @@ class CRM_Core_Payment_AuthorizeNetIPN extends CRM_Core_Payment_BaseIPN {
         $recur->trxn_id = $recur->processor_id;
         $isFirstOrLastRecurringPayment = CRM_Core_Payment::RECURRING_PAYMENT_START;
       }
-      $statusName = 'In Progress';
+
       if (($recur->installments > 0) &&
         ($input['subscription_paynum'] >= $recur->installments)
       ) {
         // this is the last payment
-        $statusName = 'Completed';
         $recur->end_date = $now;
         $isFirstOrLastRecurringPayment = CRM_Core_Payment::RECURRING_PAYMENT_END;
+        // This end date update should occur in ContributionRecur::updateOnNewPayment
+        // testIPNPaymentRecurNoReceipt has test cover.
+        $recur->save();
       }
-      $recur->modified_date = $now;
-      $recur->contribution_status_id = array_search($statusName, $contributionStatus);
-      $recur->save();
     }
     else {
       // Declined
@@ -168,7 +205,7 @@ class CRM_Core_Payment_AuthorizeNetIPN extends CRM_Core_Payment_BaseIPN {
       $recur->cancel_date = $now;
       $recur->save();
 
-      $message = ts("Subscription payment failed - %1", [1 => htmlspecialchars($input['response_reason_text'])]);
+      $message = ts('Subscription payment failed - %1', [1 => htmlspecialchars($input['response_reason_text'])]);
       CRM_Core_Error::debug_log_message($message);
 
       // the recurring contribution has declined a payment or has failed
@@ -180,13 +217,16 @@ class CRM_Core_Payment_AuthorizeNetIPN extends CRM_Core_Payment_BaseIPN {
 
     // check if contribution is already completed, if so we ignore this ipn
     if ($objects['contribution']->contribution_status_id == 1) {
-      $transaction->commit();
       CRM_Core_Error::debug_log_message("Returning since contribution has already been handled.");
-      echo "Success: Contribution has already been handled<p>";
+      echo 'Success: Contribution has already been handled<p>';
       return TRUE;
     }
 
-    $this->completeTransaction($input, $ids, $objects, $transaction, $recur);
+    CRM_Contribute_BAO_Contribution::completeOrder($input, [
+      'related_contact' => $ids['related_contact'] ?? NULL,
+      'participant' => !empty($objects['participant']) ? $objects['participant']->id : NULL,
+      'contributionRecur' => !empty($objects['contributionRecur']) ? $objects['contributionRecur']->id : NULL,
+    ], ['contribution' => $objects['contribution']]);
 
     // Only Authorize.net does this so it is on the a.net class. If there is a need for other processors
     // to do this we should make it available via the api, e.g as a parameter, changing the nuance
@@ -203,11 +243,10 @@ class CRM_Core_Payment_AuthorizeNetIPN extends CRM_Core_Payment_BaseIPN {
    * Get the input from passed in fields.
    *
    * @param array $input
-   * @param array $ids
    *
    * @throws \CRM_Core_Exception
    */
-  public function getInput(&$input, &$ids) {
+  public function getInput(&$input) {
     $input['amount'] = $this->retrieve('x_amount', 'String');
     $input['subscription_id'] = $this->retrieve('x_subscription_id', 'Integer');
     $input['response_code'] = $this->retrieve('x_response_code', 'Integer');
@@ -215,7 +254,6 @@ class CRM_Core_Payment_AuthorizeNetIPN extends CRM_Core_Payment_BaseIPN {
     $input['response_reason_code'] = $this->retrieve('x_response_reason_code', 'String', FALSE);
     $input['response_reason_text'] = $this->retrieve('x_response_reason_text', 'String', FALSE);
     $input['subscription_paynum'] = $this->retrieve('x_subscription_paynum', 'Integer', FALSE, 0);
-    $input['trxn_id'] = $this->retrieve('x_trans_id', 'String', FALSE);
     $input['trxn_id'] = $this->retrieve('x_trans_id', 'String', FALSE);
     $input['receive_date'] = $this->retrieve('receive_date', 'String', FALSE, date('YmdHis', strtotime('now')));
 
@@ -229,7 +267,7 @@ class CRM_Core_Payment_AuthorizeNetIPN extends CRM_Core_Payment_BaseIPN {
       $input['trxn_id'] = md5(uniqid(rand(), TRUE));
     }
 
-    $billingID = $ids['billing'] = CRM_Core_BAO_LocationType::getBilling();
+    $billingID = CRM_Core_BAO_LocationType::getBilling();
     $params = [
       'first_name' => 'x_first_name',
       'last_name' => 'x_last_name',

@@ -27,12 +27,12 @@ class CRM_Contact_BAO_Contact extends CRM_Contact_DAO_Contact {
   const DROP_STRIP_FUNCTION_43 = "DROP FUNCTION IF EXISTS civicrm_strip_non_numeric";
 
   const CREATE_STRIP_FUNCTION_43 = "
-    CREATE FUNCTION civicrm_strip_non_numeric(input VARCHAR(255) CHARACTER SET utf8)
-      RETURNS VARCHAR(255) CHARACTER SET utf8
+    CREATE FUNCTION civicrm_strip_non_numeric(input VARCHAR(255))
+      RETURNS VARCHAR(255)
       DETERMINISTIC
       NO SQL
     BEGIN
-      DECLARE output   VARCHAR(255) CHARACTER SET utf8 DEFAULT '';
+      DECLARE output   VARCHAR(255) DEFAULT '';
       DECLARE iterator INT          DEFAULT 1;
       WHILE iterator < (LENGTH(input) + 1) DO
         IF SUBSTRING(input, iterator, 1) IN ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9') THEN
@@ -304,7 +304,7 @@ class CRM_Contact_BAO_Contact extends CRM_Contact_DAO_Contact {
       }
     }
 
-    if (array_key_exists('group', $params)) {
+    if (!empty($params['group'])) {
       $contactIds = [$params['contact_id']];
       foreach ($params['group'] as $groupId => $flag) {
         if ($flag == 1) {
@@ -370,9 +370,6 @@ class CRM_Contact_BAO_Contact extends CRM_Contact_DAO_Contact {
         CRM_Core_BAO_Note::add($noteParams);
       }
     }
-
-    // update the UF user_unique_id if that has changed
-    CRM_Core_BAO_UFMatch::updateUFName($contact->id);
 
     if (!empty($params['custom']) &&
       is_array($params['custom'])
@@ -1543,14 +1540,17 @@ WHERE     civicrm_contact.id = " . CRM_Utils_Type::escape($id, 'Integer');
             [
               'name' => 'organization_name',
               'title' => ts('Current Employer'),
+              'type' => CRM_Utils_Type::T_STRING,
             ],
         ]);
 
+        // This probably would be added anyway by appendPseudoConstantsToFields.
         $locationType = [
           'location_type' => [
             'name' => 'location_type',
             'where' => 'civicrm_location_type.name',
             'title' => ts('Location Type'),
+            'type' => CRM_Utils_Type::T_STRING,
           ],
         ];
 
@@ -1559,12 +1559,17 @@ WHERE     civicrm_contact.id = " . CRM_Utils_Type::escape($id, 'Integer');
             'name' => 'im_provider',
             'where' => 'civicrm_im.provider_id',
             'title' => ts('IM Provider'),
+            'type' => CRM_Utils_Type::T_STRING,
           ],
         ];
 
+        $phoneFields = CRM_Core_DAO_Phone::export();
+        // This adds phone_type to the exportable fields and make it available for export.
+        // with testing the same can be done to the other entities.
+        CRM_Core_DAO::appendPseudoConstantsToFields($phoneFields);
         $locationFields = array_merge($locationType,
           CRM_Core_DAO_Address::export(),
-          CRM_Core_DAO_Phone::export(),
+          $phoneFields,
           CRM_Core_DAO_Email::export(),
           $IMProvider,
           CRM_Core_DAO_IM::export(TRUE),
@@ -1605,7 +1610,6 @@ WHERE     civicrm_contact.id = " . CRM_Utils_Type::escape($id, 'Integer');
             );
           }
         }
-        $fields['current_employer_id']['title'] = ts('Current Employer ID');
         //fix for CRM-791
         if ($export) {
           $fields = array_merge($fields, [
@@ -1958,10 +1962,14 @@ ORDER BY civicrm_email.is_primary DESC";
    *
    * @return int
    *   contact id created/edited
+   *
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
+   * @throws \Civi\API\Exception\UnauthorizedException
    */
   public static function createProfileContact(
     &$params,
-    &$fields = [],
+    $fields = [],
     $contactID = NULL,
     $addToGroupID = NULL,
     $ufGroupId = NULL,
@@ -2021,7 +2029,7 @@ ORDER BY civicrm_email.is_primary DESC";
     }
 
     // Process group and tag
-    if (!empty($fields['group'])) {
+    if (isset($params['group'])) {
       $method = 'Admin';
       // this for sure means we are coming in via profile since i added it to fix
       // removing contacts from user groups -- lobo
@@ -2048,8 +2056,6 @@ ORDER BY civicrm_email.is_primary DESC";
       $contactIds = [$contactID];
       CRM_Contact_BAO_GroupContact::addContactsToGroup($contactIds, $addToGroupID);
     }
-
-    CRM_Contact_BAO_GroupContactCache::opportunisticCacheFlush();
 
     if ($editHook) {
       CRM_Utils_Hook::post('edit', 'Profile', $contactID, $params);
@@ -2557,33 +2563,6 @@ LEFT JOIN civicrm_email    ON ( civicrm_contact.id = civicrm_email.contact_id )
       $email = $dao->email;
     }
     return $email;
-  }
-
-  /**
-   * Function to get primary OpenID of the contact.
-   *
-   * @param int $contactID
-   *   Contact id.
-   *
-   * @return string
-   *   >openid   OpenID if present else null
-   */
-  public static function getPrimaryOpenId($contactID) {
-    // fetch the primary OpenID
-    $query = "
-SELECT    civicrm_openid.openid as openid
-FROM      civicrm_contact
-LEFT JOIN civicrm_openid ON ( civicrm_contact.id = civicrm_openid.contact_id )
-WHERE     civicrm_contact.id = %1
-AND       civicrm_openid.is_primary = 1";
-    $p = [1 => [$contactID, 'Integer']];
-    $dao = CRM_Core_DAO::executeQuery($query, $p);
-
-    $openId = NULL;
-    if ($dao->fetch()) {
-      $openId = $dao->openid;
-    }
-    return $openId;
   }
 
   /**
@@ -3401,15 +3380,6 @@ LEFT JOIN civicrm_address ON ( civicrm_address.contact_id = civicrm_contact.id )
    * @see CRM_Core_DAO::triggerRebuild
    */
   public static function triggerInfo(&$info, $tableName = NULL) {
-    //during upgrade, first check for valid version and then create triggers
-    //i.e the columns created_date and modified_date are introduced in 4.3.alpha1 so dont create triggers for older version
-    if (CRM_Core_Config::isUpgradeMode()) {
-      $currentVer = CRM_Core_BAO_Domain::version(TRUE);
-      //if current version is less than 4.3.alpha1 dont create below triggers
-      if (version_compare($currentVer, '4.3.alpha1') < 0) {
-        return;
-      }
-    }
 
     // Modifications to these records should update the contact timestamps.
     \Civi\Core\SqlTrigger\TimestampTriggers::create('civicrm_contact', 'Contact')
@@ -3558,6 +3528,9 @@ LEFT JOIN civicrm_address ON ( civicrm_address.contact_id = civicrm_contact.id )
         if ($dao->fetch()) {
           $dao->is_primary = 1;
           $dao->save();
+          if ($type === 'Email') {
+            CRM_Core_BAO_UFMatch::updateUFName($dao->contact_id);
+          }
         }
       }
     }

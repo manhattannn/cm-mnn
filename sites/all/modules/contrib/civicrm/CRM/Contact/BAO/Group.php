@@ -118,7 +118,7 @@ class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
    */
   public static function getGroupContacts($id) {
     $params = [['group', 'IN', [1 => $id], 0, 0]];
-    list($contacts, $_) = CRM_Contact_BAO_Query::apiQuery($params, ['contact_id']);
+    [$contacts] = CRM_Contact_BAO_Query::apiQuery($params, ['contact_id']);
     return $contacts;
   }
 
@@ -1055,7 +1055,7 @@ class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
     $groups = [];
     $args = [1 => [$groupIdString, 'String']];
     $query = "
-SELECT id, title, description, visibility, parents
+SELECT id, title, description, visibility, parents, saved_search_id
 FROM   civicrm_group
 WHERE  id IN $groupIdString
 ";
@@ -1081,7 +1081,7 @@ WHERE  id IN $groupIdString
         $parent = self::filterActiveGroups($parentArray);
         $tree[$parent][] = [
           'id' => $dao->id,
-          'title' => $dao->title,
+          'title' => empty($dao->saved_search_id) ? $dao->title : '* ' . $dao->title,
           'visibility' => $dao->visibility,
           'description' => $dao->description,
         ];
@@ -1089,7 +1089,7 @@ WHERE  id IN $groupIdString
       else {
         $roots[] = [
           'id' => $dao->id,
-          'title' => $dao->title,
+          'title' => empty($dao->saved_search_id) ? $dao->title : '* ' . $dao->title,
           'visibility' => $dao->visibility,
           'description' => $dao->description,
         ];
@@ -1100,6 +1100,7 @@ WHERE  id IN $groupIdString
     for ($i = 0; $i < count($roots); $i++) {
       self::buildGroupHierarchy($hierarchy, $roots[$i], $tree, $titleOnly, $spacer, 0);
     }
+
     return $hierarchy;
   }
 
@@ -1122,8 +1123,9 @@ WHERE  id IN $groupIdString
       $hierarchy[$group['id']] = $spaces . $group['title'];
     }
     else {
-      $hierarchy[$group['id']] = [
-        'title' => $spaces . $group['title'],
+      $hierarchy[] = [
+        'id' => $group['id'],
+        'text' => $spaces . $group['title'],
         'description' => $group['description'],
         'visibility' => $group['visibility'],
       ];
@@ -1219,6 +1221,14 @@ WHERE {$whereClause}";
     $parentsOnly = $params['parentsOnly'] ?? NULL;
     if ($parentsOnly) {
       $clauses[] = '`groups`.parents IS NULL';
+    }
+
+    $savedSearch = $params['savedSearch'] ?? NULL;
+    if ($savedSearch == 1) {
+      $clauses[] = '`groups`.saved_search_id IS NOT NULL';
+    }
+    elseif ($savedSearch == 2) {
+      $clauses[] = '`groups`.saved_search_id IS NULL';
     }
 
     // only show child groups of a specific parent group
@@ -1327,7 +1337,7 @@ WHERE {$whereClause}";
       $this->{$fieldName} = "NULL";
     }
     else {
-      parent::assignTestValues($fieldName, $fieldDef, $counter);
+      parent::assignTestValue($fieldName, $fieldDef, $counter);
     }
   }
 
