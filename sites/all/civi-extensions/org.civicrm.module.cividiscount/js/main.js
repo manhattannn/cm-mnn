@@ -25,9 +25,16 @@ CRM.$(function($) {
     function skipPaymentMethod() {
       var flag = false;
       $('.price-set-option-content input').each( function(){
+        if (!$(this)[0].hasAttribute("data-amount")) return;
         currentTotal = $(this).attr('data-amount').replace(/[^\/\d]/g,'');
-        if( $(this).is(':checked') && currentTotal == 0 ) {
+        if ($(this).is(':checked')) {
+          if (currentTotal == 0 ) {
             flag = true;
+          }
+          else {
+            flag = false;
+            return false;
+          }
         }
       });
       $('.price-set-option-content input').change( function () {

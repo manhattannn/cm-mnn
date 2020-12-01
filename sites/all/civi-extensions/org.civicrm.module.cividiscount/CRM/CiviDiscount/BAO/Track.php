@@ -14,17 +14,10 @@ class CRM_CiviDiscount_BAO_Track extends CRM_CiviDiscount_DAO_Track {
    * @return CRM_CiviDiscount_DAO_Track
    */
   public static function create($params) {
-    $hook = empty($params['id']) ? 'create' : 'edit';
-    CRM_Utils_Hook::pre($hook, 'DiscountTrack', CRM_Utils_Array::value('id', $params), $params);
-
-    $dao = new CRM_CiviDiscount_DAO_Track();
-    $dao->copyValues($params);
-    $dao->save();
-
-    if ($hook == 'create') {
+    $dao = self::writeRecord($params);
+    if (empty($params['id'])) {
       CRM_CiviDiscount_BAO_Item::incrementUsage($dao->item_id);
     }
-    CRM_Utils_Hook::post($hook, 'DiscountTrack', $dao->id, $dao);
     return $dao;
   }
 
@@ -38,9 +31,7 @@ class CRM_CiviDiscount_BAO_Track extends CRM_CiviDiscount_DAO_Track {
    * @param array $params (reference) an assoc array of name/value pairs
    * @param array $defaults (reference) an assoc array to hold the flattened values
    *
-   * @return object CRM_CiviDiscount_BAO_Item object on success, null otherwise
-   * @access public
-   * @static
+   * @return CRM_CiviDiscount_BAO_Item
    */
   public static function retrieve(&$params, &$defaults) {
     $item = new CRM_CiviDiscount_DAO_Track();
@@ -72,20 +63,19 @@ SELECT    t.item_id as item_id,
       t.contribution_id as contribution_id,
       t.entity_table as entity_table,
       t.entity_id as entity_id,
-      t.description as description ";
+      i.description as description ";
 
     $from = " FROM cividiscount_track AS t ";
+    $from .= " LEFT JOIN cividiscount_item AS i ON (i.id = t.item_id) ";
 
     if ($orgid) {
       $sql .= ", i.code ";
-      $where = " LEFT JOIN cividiscount_item AS i ON (i.id = t.item_id) ";
-      $where .= " WHERE i.organization_id = " . CRM_Utils_Type::escape($orgid, 'Integer');
+      $where = " WHERE i.organization_id = " . CRM_Utils_Type::escape($orgid, 'Integer');
     }
     else {
       if ($cid) {
         $sql .= ", i.code ";
-        $where = " LEFT JOIN cividiscount_item AS i ON (i.id = t.item_id) ";
-        $where .= " WHERE t.contact_id = " . CRM_Utils_Type::escape($cid, 'Integer');
+        $where = " WHERE t.contact_id = " . CRM_Utils_Type::escape($cid, 'Integer');
       }
       else {
         $where = " WHERE t.item_id = " . CRM_Utils_Type::escape($id, 'Integer');
@@ -152,9 +142,7 @@ SELECT    t.item_id as item_id,
    *
    * @param  int $trackID ID of the discount code track to be deleted.
    *
-   * @access public
-   * @static
-   * @return true on success else false
+   * @return bool
    */
   public static function del($trackID) {
     if (!CRM_Utils_Rule::positiveInteger($trackID)) {
