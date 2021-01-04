@@ -393,7 +393,7 @@ function reservations_resource_chart_form($form, $form_state, $arg_string = FALS
           $result->end_time = $end_object->format('Y-m-d H:i:s');
         }
 
-        $chart_reservations[$date_index] = $chart_reservations[$date_index] ?
+        $chart_reservations[$date_index] = !empty($chart_reservations[$date_index]) ?
           $chart_reservations[$date_index] : [];
 
         $chart_reservations[$date_index][] = clone $result;
@@ -425,8 +425,8 @@ function reservations_resource_chart_form($form, $form_state, $arg_string = FALS
 
     // Get the day & int the reservation item arrays.
     $day = $date_object->format('Y-m-d');
-    $bucket_res[$day] = $bucket_res[$day] ? $bucket_res[$day] : [];
-    $resource_res[$day] = $resource_res[$day] ? $resource_res[$day] : [];
+    $bucket_res[$day] = !empty($bucket_res[$day]) ? $bucket_res[$day] : [];
+    $resource_res[$day] = !empty($resource_res[$day]) ? $resource_res[$day] : [];
 
     // Populate the two reservation item arrays (bucket & resource).
     reservations_resource_chart_get_item_reservations($day,
@@ -552,6 +552,11 @@ function reservations_resource_chart_form($form, $form_state, $arg_string = FALS
         'header' => [],
         'rows' => $rows,
         'attributes' => [],
+        'sticky' => FALSE,
+        'empty' => '',
+        'caption' => '',
+        'colgroups' => array(),
+
       ]);
     $markup .= $legend;
   }
@@ -1057,7 +1062,12 @@ function reservations_resource_chart_get_chart_html($bucket_categories,
 
       // Get the list of Bucket Item reservations for the curant reservable type (bucket)
       // and currant day.
-      $todays_reservations = $bucket_res[$bucket_name];
+      if (isset($bucket_res[$bucket_name])) {
+        $todays_reservations = $bucket_res[$bucket_name];
+      }
+      else {
+        $todays_reservations = FALSE;
+      }
 
 
       /***** Assign the reservations to the bucket Items  *****/
@@ -1080,7 +1090,7 @@ function reservations_resource_chart_get_chart_html($bucket_categories,
           foreach ($bucket_items as $key => $bucket_item) {
             // @todo - not clear what this is doing.
             $var_name = 'last_end_time_' . $bucket_item->type . '_' . $key;
-            if (!$$var_name) {
+            if (!isset($$var_name) || !$$var_name) {
               $$var_name = 0;
             }
             // @todo - $tmp not used.
@@ -1292,27 +1302,22 @@ function reservations_resource_chart_get_chart_html($bucket_categories,
           //only here if you there needs to be logging for debugging
         }
 
+        // Init the error variable.
+        $errors = '';
+
         $overlap_errors =
           reservations_resource_chart_overlap_check($original_reserve_times,
             $reservation_start_blocks);
         if ($has_reservations) {
           //only here if you there needs to be logging for debugging
         }
-        if ($wrong_day_error) {
-          $errors .= $wrong_day_error;
-          $wrong_day_error = NULL;
-        }
-        if ($future_checkout_time_error) {
+        if (isset($future_checkout_time_error)) {
           $errors .= $future_checkout_time_error;
           $future_checkout_time_error = NULL;
         }
         if ($overlap_errors) {
           $errors .= $overlap_errors;
           $overlap_errors = NULL;
-        }
-        if ($reversed_check_in_error) {
-          $errors .= $reversed_check_in_error;
-          $reversed_check_in_error = NULL;
         }
 
         /** build the Row label **/
@@ -1542,6 +1547,9 @@ function reservations_resource_chart_get_chart_html($bucket_categories,
     'rows' => $rows,
     'attributes' => $attributes,
     'sticky' => TRUE,
+    'empty' => '',
+    'caption' => '',
+    'colgroups' => array(),
   ]);
 
   return $table;
@@ -1766,7 +1774,7 @@ function reservations_resource_chart_get_item_reservations($day,
 
       // Determine the type of the item.
       $type = $item_result['type'];
-      $bucket_res[$day][$type] = $bucket_res[$day][$type] ?
+      $bucket_res[$day][$type] = !empty($bucket_res[$day][$type]) ?
         $bucket_res[$day][$type] : [];
 
       // Add the item to the appropriate array.
@@ -1891,7 +1899,9 @@ function reservations_resource_chart_get_items_for_type(&$reservation_items,
 
       $item->nid = $result->nid;
       $item->type = $bucket_content_type;
-      $item->code = $result->code;
+      if (isset($item->code)) {
+        $item->code = $result->code;
+      }
       $item->status = $result->reservations_default_availability;
       $item->category = $category_id;
 
@@ -1953,7 +1963,7 @@ function reservations_resource_chart_get_items_for_type(&$reservation_items,
 
   foreach ($items as $item) {
     //if we aren't a bucket, stick the item's reservations on the item
-    if (reservations_type_setting($result->type) != 'bucket') {
+    if (reservations_type_setting($item->type) != 'bucket') {
       if (isset($reservation_items[$item->nid])) {
         $item->reservations = $reservation_items[$item->nid];
       }
@@ -1996,7 +2006,12 @@ function reservations_resource_chart_overlap_check(&$original_reserve_times,
       ($reservations && (count($reservations) > 0))) {
       $first_time = FALSE;
       $start_time = array_shift($block_keys);
-      $reservations = $reservation_start_blocks[$start_time];
+      if (isset($reservation_start_blocks[$start_time])) {
+        $reservations = $reservation_start_blocks[$start_time];
+      }
+      else {
+        $reservations = FALSE;
+      }
 
       $res_keys = [];
       if ($reservations) {

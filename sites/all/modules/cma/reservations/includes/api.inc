@@ -1151,7 +1151,7 @@ function reservations_record_status($code = NULL, $include_STATUS_EMPTY = FALSE)
     RESERVATIONS_STATUS_DENIED => t('Denied'),
     RESERVATIONS_STATUS_CANCELLED => t('Cancelled'),
   );
-  if (!$include_STATUS_EMPTY &&  empty($code)) {
+  if (!$include_STATUS_EMPTY &&  !isset($code)) {
     unset($types[RESERVATIONS_STATUS_EMPTY]);
   }
 
