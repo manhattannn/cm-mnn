@@ -24,7 +24,7 @@ class CRM_Utils_System_WordPress extends CRM_Utils_System_Base {
    * Get a normalized version of the wpBasePage.
    */
   public static function getBasePage() {
-    return rtrim(Civi::settings()->get('wpBasePage'), '/');
+    return strtolower(rtrim(Civi::settings()->get('wpBasePage'), '/'));
   }
 
   /**
@@ -1242,6 +1242,14 @@ class CRM_Utils_System_WordPress extends CRM_Utils_System_Base {
 
     header($header, FALSE);
     $_COOKIE[$name] = $value;
+  }
+
+  /**
+   * Return the CMS-specific url for its permissions page
+   * @return array
+   */
+  public function getCMSPermissionsUrlParams() {
+    return ['ufAccessURL' => CRM_Utils_System::url('civicrm/admin/access/wp-permissions', 'reset=1')];
   }
 
 }

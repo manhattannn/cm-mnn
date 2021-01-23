@@ -1033,4 +1033,28 @@ AND    u.status = 1
     $e->list[] = 'js/crm.backdrop.js';
   }
 
+  /**
+   * Start a new session.
+   */
+  public function sessionStart() {
+    if (function_exists('backdrop_session_start')) {
+      // https://issues.civicrm.org/jira/browse/CRM-14356
+      if (!(isset($GLOBALS['lazy_session']) && $GLOBALS['lazy_session'] == TRUE)) {
+        backdrop_session_start();
+      }
+      $_SESSION = [];
+    }
+    else {
+      session_start();
+    }
+  }
+
+  /**
+   * Return the CMS-specific url for its permissions page
+   * @return array
+   */
+  public function getCMSPermissionsUrlParams() {
+    return ['ufAccessURL' => url('admin/config/people/permissions')];
+  }
+
 }
