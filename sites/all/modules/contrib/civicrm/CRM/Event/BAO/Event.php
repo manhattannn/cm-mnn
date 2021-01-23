@@ -1130,7 +1130,7 @@ WHERE civicrm_event.is_active = 1
           $participantParams
         );
 
-        $sessions = CRM_Event_Cart_BAO_Conference::get_participant_sessions($participantId);
+                $sessions = CRM_Event_Cart_BAO_Conference::get_participant_sessions($participantId);
 
         // @todo - the goal is that all params available to the message template are explicitly defined here rather than
         // 'in a smattering of places'. Note that leakage can happen between mailings when not explicitly defined.

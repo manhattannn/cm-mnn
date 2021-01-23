@@ -1,0 +1,11 @@
+name = Webform Steps W3
+description = Webform 3 backport for the webform progress bar.
+core = 7.x
+
+dependencies[] = webform
+
+; Information added by Drupal.org packaging script on 2020-05-19
+version = "7.x-2.4"
+core = "7.x"
+project = "webform_steps"
+datestamp = "1589901497"
