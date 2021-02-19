@@ -22,6 +22,14 @@ require_once 'BaseUnitTestClass.php';
  */
 class CRM_CivitokenTest extends BaseUnitTestClass implements HeadlessInterface, HookInterface, TransactionalInterface {
 
+  public $ids;
+
+  /**
+   * Set up for headless tests.
+   *
+   * @return \Civi\Test\CiviEnvBuilder
+   * @throws \CRM_Extension_Exception_ParseException
+   */
   public function setUpHeadless() {
     // Civi\Test has many helpers, like install(), uninstall(), sql(), and sqlFile().
     // See: https://github.com/civicrm/org.civicrm.testapalooza/blob/master/civi-test.md
@@ -50,6 +58,9 @@ class CRM_CivitokenTest extends BaseUnitTestClass implements HeadlessInterface, 
 
   /**
    * Test token hook function is limited if a setting is used.
+   *
+   * @throws \CRM_Core_Exception
+   * @throws \CiviCRM_API3_Exception
    */
   public function testTokenHookAlteredBySetting() {
     $tokens = array();
@@ -60,11 +71,13 @@ class CRM_CivitokenTest extends BaseUnitTestClass implements HeadlessInterface, 
 
   /**
    * Test whether the relationship tokens work.
+   *
+   * @throws \CiviCRM_API3_Exception
    */
   public function testRelationShipTokens() {
-    $tokens = array();
+    $tokens = [];
     civitoken_civicrm_tokens($tokens);
-    $this->assertTrue(!empty($tokens));
+    $this->assertNotEmpty($tokens);
 
     $relationships = relationships_get_relationship_list();
     foreach($relationships as $id => $label) {
@@ -79,18 +92,52 @@ class CRM_CivitokenTest extends BaseUnitTestClass implements HeadlessInterface, 
 
   /**
    * Test token hook function is limited if a setting is used in this case for relationship.
+   *
+   * @throws \CiviCRM_API3_Exception
+   * @throws \CRM_Core_Exception
    */
   public function testRelationShipTokensAlteredBySettings() {
-    $tokens = array();
-    $tokens_to_enable = array();
+    $tokens = [];
+    $tokens_to_enable = [];
     $relationships = relationships_get_relationship_list();
     foreach($relationships as $id => $label) {
       $tokens_to_enable[] = 'relationships.first_name_'.$id;
     }
-    $this->callAPISuccess('Setting', 'create', array('civitoken_enabled_tokens' => $tokens_to_enable));
+    $this->callAPISuccess('Setting', 'create', ['civitoken_enabled_tokens' => $tokens_to_enable]);
     civitoken_civicrm_tokens($tokens);
     foreach($relationships as $id => $label) {
       $this->assertEquals($label . ' : First Name of first contact found', $tokens['relationships']['relationships.first_name_' . $id]);
     }
+  }
+
+  /**
+   * Test contribution tokens for a contact with no contributions.
+   *
+   * This tests that regression from https://github.com/eileenmcnaughton/nz.co.fuzion.civitoken/pull/18
+   * whereby an exception was thrown for contact without contributions stays fixed.
+   *
+   * @throws \CRM_Core_Exception
+   */
+  public function testContributionTokenNull() {
+    $contributionTokens = [
+      'latestcontribs.softcredit_name',
+      'latestcontribs.softcredit_type',
+    ];
+    $this->callAPISuccess('Setting', 'create', ['civitoken_enabled_tokens' => $contributionTokens]);
+    $this->ids['contact'][0] = $this->callAPISuccess('Contact', 'create', ['contact_type' => 'Individual', 'first_name' => 'bob'])['id'];
+    $this->ids['contact'][1] = $this->callAPISuccess('Contact', 'create', ['contact_type' => 'Individual', 'first_name' => 'bob'])['id'];
+    $this->ids['contribution'][0] = $this->callAPISuccess('Contribution', 'create', [
+      'api.ContributionSoft.create' => ['amount' => 5, 'contact_id' => $this->ids['contact'][1], 'soft_credit_type_id' => 'in_memory_of'],
+      'total_amount' => 10,
+      'contact_id' => $this->ids['contact'][0],
+      'financial_type_id' => 'Donation',
+    ]);
+    $values = [];
+    civitoken_civicrm_tokenValues($values, [$this->ids['contact'][0]], NULL, ['latestcontribs' => ['softcredit_name', 'softcredit_type']]);
+    $this->assertEquals('In Memory of', $values[$this->ids['contact'][0]]['latestcontribs.softcredit_type']);
+  }
+
+  public function testSoftCreditToken() {
+
   }
 }

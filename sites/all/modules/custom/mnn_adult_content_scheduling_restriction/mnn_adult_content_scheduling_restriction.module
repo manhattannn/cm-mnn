@@ -53,14 +53,17 @@ function mnn_adult_content_scheduling_restriction_form_validate($form, &$form_st
     // n 
 //    $no_adult_content_start_time = date("H:i:s",strtotime("08:00:00"));
 //    $no_adult_content_end_time = date("H:i:s",strtotime("21:00:00"));
+    dsm($form_state);
     $no_adult_content_start_time = variable_get('mnn_adult_content_scheduling_restriction_start');
     $no_adult_content_end_time = variable_get('mnn_adult_content_scheduling_restriction_end');
     $airing_start_time = $form_state['values']['field_airing_date']['und'][0]['value'];
-    $airing_end_time = $form_state['values']['field_airing_date']['und'][0]['value2'];
-//     dsm(date("H:i:s",strtotime($no_adult_content_start_time)));
-//     dsm(date("H:i:s",strtotime($no_adult_content_end_time)));
-//     dsm(date("H:i:s",strtotime($airing_start_time)));
-//     dsm(date("H:i:s",strtotime($airing_end_time)));
+    $airing_end_time = $form_state['complete form']['field_airing_date']['und'][0]['value2'];
+    dsm(date("H:i:s",strtotime($no_adult_content_start_time)));
+    dsm(date("H:i:s",strtotime($no_adult_content_end_time)));
+    dsm(date("H:i:s",strtotime($airing_start_time)));
+    dsm(date("H:i:s",strtotime($airing_end_time)));
+    $row = array();
+//    $airingIthink = mnn_airing_grid_detail_date_view_field($row[)
         
     if (date("H:i:s",strtotime($airing_start_time))  > $no_adult_content_start_time && date("H:i:s",strtotime($airing_start_time)) < $no_adult_content_end_time) {
  //     dsm("This project has adult content and this airing starts during restricted time period");

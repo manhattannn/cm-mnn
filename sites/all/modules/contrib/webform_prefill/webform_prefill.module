@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * @file
+ * Webform prefill module.
+ */
+
+/**
+ * Implements hook_libraries_info().
+ */
+function webform_prefill_libraries_info() {
+  $libraries['jquery.formprefill'] = [
+    'name' => 'jQuery form prefill',
+    'vendor url' => 'https://github.com/moreonion/jquery.formprefill',
+    'download url' => 'https://github.com/moreonion/jquery.formprefill',
+    'version arguments' => [
+      'file' => 'package.json',
+      'pattern' => '/"version":\s*"(\d+.\d+.\d+)"/',
+      'lines' => 5,
+    ],
+  ];
+  $libraries['jquery.formprefill']['files']['js']['jquery.formprefill.min.js'] = [
+    'every_page' => TRUE,
+    'group' => JS_LIBRARY,
+  ];
+  return $libraries;
+}
+
+/**
+ * Implements hook_page_build().
+ *
+ * We use hook_page_build() to load libraries as we only want them loaded for
+ * HTML pages (not AJAX calls, private files, …).
+ */
+function webform_prefill_page_build(&$page) {
+  $settings['map'] = variable_get_value('webform_prefill_map');
+  $settings['cookieDomain'] = variable_get_value('webform_prefill_cookie_domain');
+  $settings['cookieMaxAge'] = variable_get_value('webform_prefill_cookie_max_age');
+  $storage = variable_get_value('webform_prefill_storage');
+  $settings['storage'] = is_array($storage) ? array_values($storage) : [$storage];
+  $settings['webform_prefill'] = $settings;
+  drupal_add_js($settings, ['type' => 'setting']);
+
+  libraries_load('jquery.formprefill');
+}
+
+/**
+ * Implements hook_webform_component_render_alter().
+ */
+function webform_prefill_webform_component_render_alter(array &$element, array $component) {
+  if ($element['#type'] == 'select_or_other') {
+    $element['#process'][] = 'webform_prefill_element_process_select_or_other';
+  }
+}
+
+/**
+ * Element process callback for select_or_other elements.
+ */
+function webform_prefill_element_process_select_or_other(array $element, array &$form_state) {
+  $element['#attributes']['class'][] = $element['#multiple'] ? 'form-prefill-list' : 'form-prefill';
+  $element['select']['#attributes']['class'][] = 'webform-prefill-exclude';
+  $element['other']['#attributes']['class'][] = 'webform-prefill-exclude';
+  $element['#attributes']['data-form-prefill-keys'][] = end($element['#array_parents']);
+  return $element;
+}
