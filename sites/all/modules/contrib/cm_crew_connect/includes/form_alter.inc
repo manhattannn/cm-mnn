@@ -56,9 +56,11 @@ http://cm-testing.mnn.openflows.com/node/779616/edit?destination=user/207293/cm_
       //UNSETTING THESE FIELDS AS THE CONDITIONAL TMP VALUES WILL COLLECT 
       //THEM AND THEN IN PRESAVE WE WILL SET THESE FIELDS BASED ON THE TMP 
       //FIELDS. 
+      dsm($form);
       $form['field_crew_location'] = array();
       $form['field_crew_positions'] = array();
       $form['field_which_studio_is_this_in_'] = array();
+      dsm($form);
       // THESE VALUES ARE ONLY SET THE FIRST TIME THROUGH
       if (!$nid) {
 
@@ -117,7 +119,7 @@ http://cm-testing.mnn.openflows.com/node/779616/edit?destination=user/207293/cm_
             ['value']['#default_value'] = $public_email;      
         
       }
-  return $form;
+  
   }
 /*************************  
  // STUB FOR INTERSTERTIAL FORM
