@@ -116,17 +116,21 @@
         // Add the numbered suffix to the join conditions
         // If this is a deep join, also add the base entity prefix
         var prefix = alias.replace(new RegExp('_?' + join.alias + '_?\\d?\\d?$'), '');
-        _.each(result.conditions, function(condition) {
+        function replaceRefs(condition) {
           if (_.isArray(condition)) {
             _.each(condition, function(ref, side) {
-              if (side !== 1 && _.includes(ref, '.')) {
-                condition[side] = ref.replace(join.alias + '.', alias + '.');
-              } else if (side !== 1 && prefix.length && !_.includes(ref, '"') && !_.includes(ref, "'")) {
-                condition[side] = prefix + '.' + ref;
+              if (side !== 1 && typeof ref === 'string') {
+                if (_.includes(ref, '.')) {
+                  condition[side] = ref.replace(join.alias + '.', alias + '.');
+                } else if (prefix.length && !_.includes(ref, '"') && !_.includes(ref, "'")) {
+                  condition[side] = prefix + '.' + ref;
+                }
               }
             });
           }
-        });
+        }
+        _.each(result.conditions, replaceRefs);
+        _.each(result.defaults, replaceRefs);
         return result;
       }
       function getFieldAndJoin(fieldName, entityName) {
@@ -162,26 +166,31 @@
         }
       }
       function parseExpr(expr) {
-        var result = {fn: null, modifier: ''},
-          fieldName = expr,
-          bracketPos = expr.indexOf('(');
-        if (bracketPos >= 0) {
-          var parsed = expr.substr(bracketPos).match(/[ ]?([A-Z]+[ ]+)?([\w.:]+)/);
-          fieldName = parsed[2];
-          result.fn = _.find(CRM.crmSearchAdmin.functions, {name: expr.substring(0, bracketPos)});
-          result.modifier = _.trim(parsed[1]);
+        if (!expr) {
+          return;
         }
-        var fieldAndJoin = expr ? getFieldAndJoin(fieldName, searchEntity) : undefined;
-        if (fieldAndJoin.field) {
+        var splitAs = expr.split(' AS '),
+          info = {fn: null, modifier: '', field: {}},
+          fieldName = splitAs[0],
+          bracketPos = splitAs[0].indexOf('(');
+        if (bracketPos >= 0) {
+          var parsed = splitAs[0].substr(bracketPos).match(/[ ]?([A-Z]+[ ]+)?([\w.:]+)/);
+          fieldName = parsed[2];
+          info.fn = _.find(CRM.crmSearchAdmin.functions, {name: expr.substring(0, bracketPos)});
+          info.modifier = _.trim(parsed[1]);
+        }
+        var fieldAndJoin = getFieldAndJoin(fieldName, searchEntity);
+        if (fieldAndJoin) {
           var split = fieldName.split(':'),
             prefixPos = split[0].lastIndexOf(fieldAndJoin.field.name);
-          result.path = split[0];
-          result.prefix = prefixPos > 0 ? result.path.substring(0, prefixPos) : '';
-          result.suffix = !split[1] ? '' : ':' + split[1];
-          result.field = fieldAndJoin.field;
-          result.join = fieldAndJoin.join;
+          info.path = split[0];
+          info.prefix = prefixPos > 0 ? info.path.substring(0, prefixPos) : '';
+          info.suffix = !split[1] ? '' : ':' + split[1];
+          info.field = fieldAndJoin.field;
+          info.join = fieldAndJoin.join;
+          info.alias = splitAs[1] || (info.fn ? info.fn.name + ':' + info.path : split[0]);
         }
-        return result;
+        return info;
       }
       return {
         getEntity: getEntity,

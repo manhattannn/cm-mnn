@@ -2,6 +2,13 @@
   min-height: 200px;
 }
 
+#civicrm-dashboard > .crm-flex-box > .crm-flex-2 {
+  min-width: 300px;
+}
+#civicrm-dashboard > .crm-flex-box > .crm-flex-3 {
+  min-width: 450px;
+}
+
 .crm-container .crm-dashlet {
   margin: 10px;
   box-shadow: 1px 1px 4px 1px rgba(0,0,0,0.2);
@@ -84,7 +91,9 @@ fieldset.crm-inactive-dashlet-fieldset legend {
 #civicrm-dashboard .ui-sortable-placeholder {
   border: 2px dashed grey;
   visibility: visible !important;
-  height: 80px !important;
+  width: 226px;
+  height: 66px !important;
+  vertical-align: bottom;
 }
 
 #civicrm-dashboard .ui-sortable-placeholder * {
