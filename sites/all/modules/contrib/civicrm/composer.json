@@ -38,11 +38,11 @@
   "include-path": ["vendor/tecnickcom"],
   "config": {
     "platform": {
-      "php": "7.1"
+      "php": "7.2"
     }
   },
   "require": {
-    "php": "~7.1",
+    "php": "~7.2",
     "cache/integration-tests": "~0.17.0",
     "dompdf/dompdf" : "~0.8",
     "electrolinux/phpquery": "^0.9.6",
@@ -215,7 +215,8 @@
       },
       "monaco-editor": {
         "url": "https://registry.npmjs.org/monaco-editor/-/monaco-editor-0.16.2.tgz",
-        "path": "bower_components/monaco-editor"
+        "path": "bower_components/monaco-editor",
+        "ignore": ["dev", "esm"]
       },
       "google-code-prettify": {
         "url": "https://github.com/tcollard/google-code-prettify/archive/v1.0.5.zip",
@@ -228,7 +229,7 @@
         "url": "https://github.com/components/jqueryui/archive/1.12.1.zip"
       },
       "jquery-validation": {
-        "url": "https://github.com/jquery-validation/jquery-validation/archive/1.19.1.zip",
+        "url": "https://github.com/jquery-validation/jquery-validation/archive/1.19.3.zip",
         "ignore": [".*", "node_modules", "bower_components", "test", "demo", "lib"]
       },
       "json-formatter": {

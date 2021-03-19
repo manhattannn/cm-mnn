@@ -168,6 +168,15 @@ function financialacls_civicrm_pre($op, $objectName, $id, &$params) {
       throw new API_Exception('You do not have permission to ' . $op . ' this line item');
     }
   }
+  if ($objectName === 'FinancialType' && !empty($params['id']) && !empty($params['name'])) {
+    $prevName = CRM_Core_DAO::getFieldValue('CRM_Financial_DAO_FinancialType', $params['id']);
+    if ($prevName !== $params['name']) {
+      CRM_Core_Session::setStatus(ts("Changing the name of a Financial Type will result in losing the current permissions associated with that Financial Type.
+            Before making this change you should likely note the existing permissions at Administer > Users and Permissions > Permissions (Access Control),
+            then clicking the Access Control link for your Content Management System, then noting down the permissions for 'CiviCRM: {financial type name} view', etc.
+            Then after making the change of name, reset the permissions to the way they were."), ts('Warning'), 'warning');
+    }
+  }
 }
 
 /**
@@ -179,15 +188,20 @@ function financialacls_civicrm_selectWhereClause($entity, &$clauses) {
   if (!financialacls_is_acl_limiting_enabled()) {
     return;
   }
-  if ($entity === 'LineItem') {
-    $types = [];
-    CRM_Financial_BAO_FinancialType::getAvailableFinancialTypes($types);
-    if ($types) {
-      $clauses['financial_type_id'] = 'IN (' . implode(',', array_keys($types)) . ')';
-    }
-    else {
-      $clauses['financial_type_id'] = '= 0';
-    }
+
+  switch ($entity) {
+    case 'LineItem':
+    case 'MembershipType':
+      $types = [];
+      CRM_Financial_BAO_FinancialType::getAvailableFinancialTypes($types);
+      if ($types) {
+        $clauses['financial_type_id'] = 'IN (' . implode(',', array_keys($types)) . ')';
+      }
+      else {
+        $clauses['financial_type_id'] = '= 0';
+      }
+      break;
+
   }
 
 }
@@ -288,7 +302,7 @@ function financialacls_civicrm_fieldOptions($entity, $field, &$options, $params)
  *
  * @return bool
  */
-function financialacls_is_acl_limiting_enabled() {
+function financialacls_is_acl_limiting_enabled(): bool {
   return (bool) Civi::settings()->get('acl_financial_type');
 }
 
