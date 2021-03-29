@@ -20,6 +20,7 @@ class CRM_Report_Form_ActivitySummary extends CRM_Report_Form {
   protected $_phoneField = FALSE;
   protected $_tempTableName;
   protected $_tempDurationSumTableName;
+  protected $totalRows;
 
   /**
    * This report has not been optimised for group filtering.
@@ -28,9 +29,8 @@ class CRM_Report_Form_ActivitySummary extends CRM_Report_Form {
    * all reports have been adjusted to take care of it. This report has not
    * and will run an inefficient query until fixed.
    *
-   * CRM-19170
-   *
    * @var bool
+   * @see https://issues.civicrm.org/jira/browse/CRM-19170
    */
   protected $groupFilterNotOptimised = TRUE;
 
@@ -428,6 +428,10 @@ class CRM_Report_Form_ActivitySummary extends CRM_Report_Form {
       $this->_select .= ", $clause ";
     }
 
+    CRM_Core_DAO::disableFullGroupByMode();
+    $this->totalRows = CRM_Core_DAO::singleValueQuery("SELECT COUNT(*) FROM ({$this->_select} {$this->_from} {$this->_where} {$this->_groupBy} {$this->_having} {$this->_orderBy}) temp");
+    CRM_Core_DAO::reenableFullGroupByMode();
+
     if ($applyLimit && empty($this->_params['charts'])) {
       $this->limit();
     }
@@ -493,6 +497,16 @@ class CRM_Report_Form_ActivitySummary extends CRM_Report_Form {
     $this->where();
 
     return $sql;
+  }
+
+  /**
+   * Set pager.
+   *
+   * @param int $rowCount
+   */
+  public function setPager($rowCount = self::ROW_COUNT_LIMIT) {
+    $this->_rowsFound = $this->totalRows;
+    parent::setPager($rowCount);
   }
 
   /**

@@ -13,7 +13,7 @@ namespace Civi\FlexMailer;
 /**
  * Test that content produced by CiviMail looks the way it's expected.
  *
- * @copyright CiviCRM LLC (c) 2004-2017
+ * @copyright CiviCRM LLC https://civicrm.org/licensing
  * @version $Id: Job.php 30879 2010-11-22 15:45:55Z shot $
  *
  */
@@ -108,6 +108,28 @@ class FlexMailerSystemTest extends \CRM_Mailing_BaseMailingSystemTest {
     $params
   ) {
     parent::testUrlTracking($inputHtml, $htmlUrlRegex, $textUrlRegex, $params);
+  }
+
+  /**
+   *
+   * This takes CiviMail's own ones, but removes one that tested for a
+   * non-feature (i.e. that tokenised links are not handled).
+   *
+   * @return array
+   */
+  public function urlTrackingExamples() {
+    $cases = parent::urlTrackingExamples();
+
+    // When it comes to URLs with embedded tokens, support diverges - Flexmailer
+    // can track them, but BAO mailer cannot.
+    $cases[6] = [
+      '<p><a href="http://example.net/?id={contact.contact_id}">Foo</a></p>',
+      ';<p><a href=[\'"].*(extern/url.php|civicrm/mailing/url)(\?|&amp\\;)u=\d+.*&amp\\;id=\d+.*[\'"]>Foo</a></p>;',
+      ';\\[1\\] .*(extern/url.php|civicrm/mailing/url)[\?&]u=\d+.*&id=\d+.*;',
+      ['url_tracking' => 1],
+    ];
+
+    return $cases;
   }
 
   public function testBasicHeaders() {

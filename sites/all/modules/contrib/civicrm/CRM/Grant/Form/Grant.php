@@ -40,8 +40,6 @@ class CRM_Grant_Form_Grant extends CRM_Core_Form {
 
   /**
    * Set variables up before form is built.
-   *
-   * @return void
    */
   public function preProcess() {
 
@@ -109,13 +107,13 @@ class CRM_Grant_Form_Grant extends CRM_Core_Form {
 
       // fix the display of the monetary value, CRM-4038
       if (isset($defaults['amount_total'])) {
-        $defaults['amount_total'] = CRM_Utils_Money::format($defaults['amount_total'], NULL, '%a');
+        $defaults['amount_total'] = CRM_Utils_Money::formatLocaleNumericRoundedForDefaultCurrency($defaults['amount_total']);
       }
       if (isset($defaults['amount_requested'])) {
-        $defaults['amount_requested'] = CRM_Utils_Money::format($defaults['amount_requested'], NULL, '%a');
+        $defaults['amount_requested'] = CRM_Utils_Money::formatLocaleNumericRoundedForDefaultCurrency($defaults['amount_requested']);
       }
       if (isset($defaults['amount_granted'])) {
-        $defaults['amount_granted'] = CRM_Utils_Money::format($defaults['amount_granted'], NULL, '%a');
+        $defaults['amount_granted'] = CRM_Utils_Money::formatLocaleNumericRoundedForDefaultCurrency($defaults['amount_granted']);
       }
     }
     else {
@@ -263,6 +261,16 @@ class CRM_Grant_Form_Grant extends CRM_Core_Form {
       'civicrm_grant',
       $this->_id
     );
+    $moneyFields = [
+      'amount_total',
+      'amount_granted',
+      'amount_requested',
+    ];
+    foreach ($moneyFields as $field) {
+      if (isset($params[$field])) {
+        $params[$field] = CRM_Utils_Rule::cleanMoney($params[$field]);
+      }
+    }
 
     $grant = CRM_Grant_BAO_Grant::create($params, $ids);
 

@@ -13,8 +13,6 @@
  *
  * @package CRM
  * @copyright CiviCRM LLC https://civicrm.org/licensing
- * $Id$
- *
  */
 
 /**
@@ -36,21 +34,6 @@ class CRM_Contact_Import_Form_DataSource extends CRM_Core_Form {
    * @throws \CRM_Core_Exception
    */
   public function preProcess() {
-
-    //Test database user privilege to create table(Temporary) CRM-4725
-    $errorScope = CRM_Core_TemporaryErrorScope::ignoreException();
-    $daoTestPrivilege = new CRM_Core_DAO();
-    $tempTable1 = CRM_Utils_SQL_TempTable::build()->getName();
-    $tempTable2 = CRM_Utils_SQL_TempTable::build()->getName();
-    $daoTestPrivilege->query("CREATE TEMPORARY TABLE {$tempTable1} (test int) ENGINE=InnoDB");
-    $daoTestPrivilege->query("CREATE TEMPORARY TABLE {$tempTable2} (test int) ENGINE=InnoDB");
-    $daoTestPrivilege->query("DROP TEMPORARY TABLE IF EXISTS {$tempTable1}, {$tempTable2}");
-    unset($errorScope);
-
-    if ($daoTestPrivilege->_lastError) {
-      $this->invalidConfig(ts('Database Configuration Error: Insufficient permissions. Import requires that the CiviCRM database user has permission to create temporary tables. Contact your site administrator for assistance.'));
-    }
-
     $results = [];
     $config = CRM_Core_Config::singleton();
     $handler = opendir($config->uploadDir);
@@ -139,23 +122,12 @@ class CRM_Contact_Import_Form_DataSource extends CRM_Core_Form {
     );
 
     // duplicate handling options
-    $duplicateOptions = [];
-    $duplicateOptions[] = $this->createElement('radio',
-      NULL, NULL, ts('Skip'), CRM_Import_Parser::DUPLICATE_SKIP
-    );
-    $duplicateOptions[] = $this->createElement('radio',
-      NULL, NULL, ts('Update'), CRM_Import_Parser::DUPLICATE_UPDATE
-    );
-    $duplicateOptions[] = $this->createElement('radio',
-      NULL, NULL, ts('Fill'), CRM_Import_Parser::DUPLICATE_FILL
-    );
-    $duplicateOptions[] = $this->createElement('radio',
-      NULL, NULL, ts('No Duplicate Checking'), CRM_Import_Parser::DUPLICATE_NOCHECK
-    );
-
-    $this->addGroup($duplicateOptions, 'onDuplicate',
-      ts('For Duplicate Contacts')
-    );
+    $this->addRadio('onDuplicate', ts('For Duplicate Contacts'), [
+      CRM_Import_Parser::DUPLICATE_SKIP => ts('Skip'),
+      CRM_Import_Parser::DUPLICATE_UPDATE => ts('Update'),
+      CRM_Import_Parser::DUPLICATE_FILL => ts('Fill'),
+      CRM_Import_Parser::DUPLICATE_NOCHECK => ts('No Duplicate Checking'),
+    ]);
 
     $mappingArray = CRM_Core_BAO_Mapping::getMappings('Import Contact');
 
@@ -164,26 +136,20 @@ class CRM_Contact_Import_Form_DataSource extends CRM_Core_Form {
 
     $js = ['onClick' => "buildSubTypes();buildDedupeRules();"];
     // contact types option
-    $contactOptions = [];
+    $contactTypeOptions = $contactTypeAttributes = [];
     if (CRM_Contact_BAO_ContactType::isActive('Individual')) {
-      $contactOptions[] = $this->createElement('radio',
-        NULL, NULL, ts('Individual'), CRM_Import_Parser::CONTACT_INDIVIDUAL, $js
-      );
+      $contactTypeOptions[CRM_Import_Parser::CONTACT_INDIVIDUAL] = ts('Individual');
+      $contactTypeAttributes[CRM_Import_Parser::CONTACT_INDIVIDUAL] = $js;
     }
     if (CRM_Contact_BAO_ContactType::isActive('Household')) {
-      $contactOptions[] = $this->createElement('radio',
-        NULL, NULL, ts('Household'), CRM_Import_Parser::CONTACT_HOUSEHOLD, $js
-      );
+      $contactTypeOptions[CRM_Import_Parser::CONTACT_HOUSEHOLD] = ts('Household');
+      $contactTypeAttributes[CRM_Import_Parser::CONTACT_HOUSEHOLD] = $js;
     }
     if (CRM_Contact_BAO_ContactType::isActive('Organization')) {
-      $contactOptions[] = $this->createElement('radio',
-        NULL, NULL, ts('Organization'), CRM_Import_Parser::CONTACT_ORGANIZATION, $js
-      );
+      $contactTypeOptions[CRM_Import_Parser::CONTACT_ORGANIZATION] = ts('Organization');
+      $contactTypeAttributes[CRM_Import_Parser::CONTACT_ORGANIZATION] = $js;
     }
-
-    $this->addGroup($contactOptions, 'contactType',
-      ts('Contact Type')
-    );
+    $this->addRadio('contactType', ts('Contact Type'), $contactTypeOptions, [], NULL, FALSE, $contactTypeAttributes);
 
     $this->addElement('select', 'subType', ts('Subtype'));
     $this->addElement('select', 'dedupe', ts('Dedupe Rule'));
@@ -200,7 +166,7 @@ class CRM_Contact_Import_Form_DataSource extends CRM_Core_Form {
 
     $this->addElement('text', 'fieldSeparator', ts('Import Field Separator'), ['size' => 2]);
 
-    if (Civi::settings()->get('address_standardization_provider') == 'USPS') {
+    if (Civi::settings()->get('address_standardization_provider') === 'USPS') {
       $this->addElement('checkbox', 'disableUSPS', ts('Disable USPS address validation during import?'));
     }
 
@@ -267,7 +233,7 @@ class CRM_Contact_Import_Form_DataSource extends CRM_Core_Form {
     while (($dataSourceFile = readdir($dataSourceHandle)) !== FALSE) {
       $fileType = filetype($dataSourceDir . $dataSourceFile);
       $matches = [];
-      if (($fileType == 'file' || $fileType == 'link') &&
+      if (($fileType === 'file' || $fileType === 'link') &&
         preg_match('/^(.+)\.php$/', $dataSourceFile, $matches)
       ) {
         $dataSourceClass = "CRM_Import_DataSource_" . $matches[1];
@@ -312,8 +278,7 @@ class CRM_Contact_Import_Form_DataSource extends CRM_Core_Form {
       $this->set('dataSource', $this->_params['dataSource']);
       $this->set('skipColumnHeader', CRM_Utils_Array::value('skipColumnHeader', $this->_params));
 
-      $session = CRM_Core_Session::singleton();
-      $session->set('dateTypes', $storeParams['dateFormats']);
+      CRM_Core_Session::singleton()->set('dateTypes', $storeParams['dateFormats']);
 
       // Get the PEAR::DB object
       $dao = new CRM_Core_DAO();
@@ -412,10 +377,9 @@ class CRM_Contact_Import_Form_DataSource extends CRM_Core_Form {
   /**
    * Return a descriptive name for the page, used in wizard header
    *
-   *
    * @return string
    */
-  public function getTitle() {
+  public function getTitle(): string {
     return ts('Choose Data Source');
   }
 

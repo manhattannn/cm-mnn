@@ -132,7 +132,7 @@ INSERT INTO {$componentTable} SELECT distinct gc.contact_id FROM civicrm_group_c
 
     $addPaymentHeader = FALSE;
 
-    list($outputColumns, $metadata) = $processor->getExportStructureArrays();
+    list($outputColumns) = $processor->getExportStructureArrays();
 
     if ($processor->isMergeSameAddress()) {
       foreach (array_keys($processor->getAdditionalFieldsForSameAddressMerge()) as $field) {
@@ -185,7 +185,7 @@ INSERT INTO {$componentTable} SELECT distinct gc.contact_id FROM civicrm_group_c
       while ($iterationDAO->fetch()) {
         $count++;
         $rowsThisIteration++;
-        $row = $processor->buildRow($query, $iterationDAO, $outputColumns, $metadata, $paymentDetails, $addPaymentHeader);
+        $row = $processor->buildRow($query, $iterationDAO, $outputColumns, $paymentDetails, $addPaymentHeader);
         if ($row === FALSE) {
           continue;
         }
@@ -438,7 +438,11 @@ VALUES $sqlValueString
 
       $relationshipJoin = $relationshipClause = '';
       if (!$selectAll && $componentTable) {
-        $relationshipJoin = " INNER JOIN {$componentTable} ctTable ON ctTable.contact_id = {$contactA}";
+        $field = 'contact_id';
+        if ($componentTable === 'civicrm_contact') {
+          $field = 'id';
+        }
+        $relationshipJoin = " INNER JOIN {$componentTable} ctTable ON ctTable.$field = {$contactA}";
       }
       elseif (!empty($relIDs)) {
         $relID = implode(',', $relIDs);

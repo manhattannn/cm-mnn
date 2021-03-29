@@ -86,12 +86,8 @@ class CRM_Core_Config extends CRM_Core_Config_MagicMerge {
    */
   public static function &singleton($loadFromDB = TRUE, $force = FALSE) {
     if (self::$_singleton === NULL || $force) {
-      $GLOBALS['civicrm_default_error_scope'] = CRM_Core_TemporaryErrorScope::create(['CRM_Core_Error', 'handle']);
+      $GLOBALS['civicrm_default_error_scope'] = CRM_Core_TemporaryErrorScope::create(['CRM_Core_Error', 'exceptionHandler'], 1);
       $errorScope = CRM_Core_TemporaryErrorScope::create(['CRM_Core_Error', 'simpleHandler']);
-
-      if (defined('E_DEPRECATED')) {
-        error_reporting(error_reporting() & ~E_DEPRECATED);
-      }
 
       self::$_singleton = new CRM_Core_Config();
       \Civi\Core\Container::boot($loadFromDB);
@@ -271,7 +267,7 @@ class CRM_Core_Config extends CRM_Core_Config_MagicMerge {
 
   /**
    * Do general cleanup of caches, temp directories and temp tables
-   * CRM-8739
+   * @see https://issues.civicrm.org/jira/browse/CRM-8739
    *
    * @param bool $sessionReset
    */
@@ -349,10 +345,6 @@ class CRM_Core_Config extends CRM_Core_Config_MagicMerge {
       CRM_Core_DAO::executeQuery($query);
     }
 
-    if ($adapter = CRM_Utils_Constant::value('CIVICRM_BAO_CACHE_ADAPTER')) {
-      return $adapter::clearDBCache();
-    }
-
     // also delete all the import and export temp tables
     self::clearTempTables();
   }
@@ -410,6 +402,11 @@ class CRM_Core_Config extends CRM_Core_Config_MagicMerge {
    */
   public static function isUpgradeMode($path = NULL) {
     if (defined('CIVICRM_UPGRADE_ACTIVE')) {
+      return TRUE;
+    }
+
+    $upgradeInProcess = CRM_Core_Session::singleton()->get('isUpgradePending');
+    if ($upgradeInProcess) {
       return TRUE;
     }
 

@@ -126,7 +126,8 @@ function mnn_project_export_get_projects_query() {
   $query->fields('n', array('nid', 'title', 'status', 'created', 'changed'))
     ->condition('n.status', 1)
     ->condition('n.type', 'cm_project')
-    ->condition('tos.field_internet_archive_tos_value', 1);
+    ->condition('tos.field_internet_archive_tos_value', 1)
+    ->condition('tos.field_project_hide_from_api', 0);
   return $query;
 }
 

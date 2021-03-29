@@ -46,7 +46,7 @@ class CRM_Utils_Check_Component_Case extends CRM_Utils_Check_Component {
   /**
    * Check that the case-type names don't rely on double-munging.
    *
-   * @return array<CRM_Utils_Check_Message>
+   * @return CRM_Utils_Check_Message[]
    *   An empty array, or a list of warnings
    */
   public function checkCaseTypeNameConsistency() {
@@ -105,7 +105,7 @@ class CRM_Utils_Check_Component_Case extends CRM_Utils_Check_Component {
   /**
    * Check that the timestamp columns are populated. (CRM-20958)
    *
-   * @return array<CRM_Utils_Check_Message>
+   * @return CRM_Utils_Check_Message[]
    *   An empty array, or a list of warnings
    */
   public function checkNullTimestamps() {
@@ -149,7 +149,7 @@ class CRM_Utils_Check_Component_Case extends CRM_Utils_Check_Component {
   /**
    * Check that the relationship types aren't going to cause problems.
    *
-   * @return array<CRM_Utils_Check_Message>
+   * @return CRM_Utils_Check_Message[]
    *   An empty array, or a list of warnings
    */
   public function checkRelationshipTypeProblems() {
@@ -342,7 +342,7 @@ class CRM_Utils_Check_Component_Case extends CRM_Utils_Check_Component {
       + array_column($relationshipTypes, 'id', 'label_b_a');
     $missing = [];
     foreach ($caseTypes as $caseType) {
-      foreach ($caseType['definition']['caseRoles'] as $role) {
+      foreach ($caseType['definition']['caseRoles'] ?? [] as $role) {
         if (!isset($allConfigured[$role['name']])) {
           $missing[$role['name']] = $role['name'];
         }
@@ -387,7 +387,7 @@ class CRM_Utils_Check_Component_Case extends CRM_Utils_Check_Component {
    * We don't have to think about edge cases because there are already
    * status checks above for those.
    *
-   * @return array<CRM_Utils_Check_Message>
+   * @return CRM_Utils_Check_Message[]
    *   An empty array, or a list of warnings
    */
   public function checkExternalXmlFileRoleNames() {
@@ -486,6 +486,34 @@ class CRM_Utils_Check_Component_Case extends CRM_Utils_Check_Component {
             'fa-code'
           );
         }
+      }
+    }
+    return $messages;
+  }
+
+  /**
+   * At some point the valid names changed so that you can't have e.g. spaces.
+   * For systems upgraded that use external xml files it's then not clear why
+   * the other messages about outdated filenames are coming up because when
+   * you then fix it as suggested it then gives a red error just saying it
+   * can't find it.
+   */
+  public function checkCaseTypeNameValidity() {
+    $messages = [];
+    $dao = CRM_Core_DAO::executeQuery("SELECT id, name, title FROM civicrm_case_type");
+    while ($dao->fetch()) {
+      if (!CRM_Case_BAO_CaseType::isValidName($dao->name)) {
+        $messages[] = new CRM_Utils_Check_Message(
+          __FUNCTION__ . "invalidcasetypename",
+          '<p>' . ts('Case Type "<em>%1</em>" has invalid characters in the internal machine name (<em>%2</em>). Only letters, numbers, and underscore are allowed.',
+          [
+            1 => htmlspecialchars(empty($dao->title) ? $dao->id : $dao->title),
+            2 => htmlspecialchars($dao->name),
+          ]) . '</p>',
+          ts('Invalid Case Type Name'),
+          \Psr\Log\LogLevel::ERROR,
+          'fa-exclamation'
+        );
       }
     }
     return $messages;

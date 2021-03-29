@@ -1,0 +1,14 @@
+name = "Webform Structured Text"
+description = "A text component that specifies a structured format."
+core = 7.x
+package = Webform
+
+dependencies[] = webform
+
+php = 5.3
+; Information added by Drupal.org packaging script on 2016-11-06
+version = "7.x-1.9"
+core = "7.x"
+project = "webform_structured_text"
+datestamp = "1478471941"
+

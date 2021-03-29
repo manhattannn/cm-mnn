@@ -187,7 +187,7 @@ WHERE civicrm_case.id = %1";
    *   is successful
    */
   public static function deleteCase($caseId, $moveToTrash = FALSE) {
-    CRM_Utils_Hook::pre('delete', 'Case', $caseId, CRM_Core_DAO::$_nullArray);
+    CRM_Utils_Hook::pre('delete', 'Case', $caseId);
 
     //delete activities
     $activities = self::getCaseActivityDates($caseId);
@@ -1890,6 +1890,7 @@ HERESQL;
         'case_id' => $dao->id,
         'case_type' => $dao->case_type,
         'client_name' => $clientView,
+        'status_id' => $dao->status_id,
         'case_status' => $statuses[$dao->status_id],
         'links' => $caseView,
       ];
@@ -2069,7 +2070,7 @@ SELECT  id
         CRM_Core_DAO::storeValues($otherActivity, $mainActVals);
         $mainActivity->copyValues($mainActVals);
         $mainActivity->id = NULL;
-        $mainActivity->activity_date_time = CRM_Utils_Date::isoToMysql($otherActivity->activity_date_time);
+        $mainActivity->activity_date_time = $otherActivity->activity_date_time;
         $mainActivity->source_record_id = CRM_Utils_Array::value($mainActivity->source_record_id,
           $activityMappingIds
         );
@@ -2783,35 +2784,20 @@ WHERE id IN (' . implode(',', $copiedActivityIds) . ')';
   }
 
   /**
-   * Used during case component enablement and during ugprade.
+   * Used during case component enablement and during upgrade.
    *
    * @return bool
    */
   public static function createCaseViews() {
-    $errorScope = CRM_Core_TemporaryErrorScope::ignoreException();
     $dao = new CRM_Core_DAO();
+    try {
+      $sql = self::createCaseViewsQuery('upcoming');
+      $dao->query($sql);
 
-    $sql = self::createCaseViewsQuery('upcoming');
-    $dao->query($sql);
-    if (PEAR::getStaticProperty('DB_DataObject', 'lastError')) {
-      return FALSE;
+      $sql = self::createCaseViewsQuery('recent');
+      $dao->query($sql);
     }
-
-    // Above error doesn't get caught?
-    $doublecheck = $dao->singleValueQuery("SELECT count(id) FROM civicrm_view_case_activity_upcoming");
-    if (is_null($doublecheck)) {
-      return FALSE;
-    }
-
-    $sql = self::createCaseViewsQuery('recent');
-    $dao->query($sql);
-    if (PEAR::getStaticProperty('DB_DataObject', 'lastError')) {
-      return FALSE;
-    }
-
-    // Above error doesn't get caught?
-    $doublecheck = $dao->singleValueQuery("SELECT count(id) FROM civicrm_view_case_activity_recent");
-    if (is_null($doublecheck)) {
+    catch (Exception $e) {
       return FALSE;
     }
 

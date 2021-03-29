@@ -61,7 +61,8 @@ class CRM_Admin_Form_Setting_UF extends CRM_Admin_Form_Setting {
         $config->dsn != $config->userFrameworkDSN || !empty($drupal_prefix)
       )
     ) {
-      $dsnArray = DB::parseDSN($config->dsn);
+      $dsn = CRM_Utils_SQL::autoSwitchDSN($config->dsn);
+      $dsnArray = DB::parseDSN($dsn);
       $tableNames = CRM_Core_DAO::getTableNames();
       asort($tableNames);
       $tablePrefixes = '$databases[\'default\'][\'default\'][\'prefix\']= array(';
@@ -73,6 +74,9 @@ class CRM_Admin_Form_Setting_UF extends CRM_Admin_Form_Setting {
       $prefix = "";
       if ($config->dsn != $config->userFrameworkDSN) {
         $prefix = "`{$dsnArray['database']}`.";
+        if ($config->userFramework === 'Backdrop') {
+          $prefix = "{$dsnArray['database']}.";
+        }
       }
       foreach ($tableNames as $tableName) {
         $tablePrefixes .= "\n  '" . str_pad($tableName . "'", 41) . " => '{$prefix}',";

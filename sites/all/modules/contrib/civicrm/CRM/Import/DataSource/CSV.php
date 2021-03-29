@@ -43,6 +43,8 @@ class CRM_Import_DataSource_CSV extends CRM_Import_DataSource {
    * uploaded to the temporary table in the DB.
    *
    * @param CRM_Core_Form $form
+   *
+   * @throws \CRM_Core_Exception
    */
   public function buildQuickForm(&$form) {
     $form->add('hidden', 'hidden_dataSource', 'CRM_Import_DataSource_CSV');
@@ -56,7 +58,7 @@ class CRM_Import_DataSource_CSV extends CRM_Import_DataSource {
     }
     $uploadSize = round(($uploadFileSize / (1024 * 1024)), 2);
     $form->assign('uploadSize', $uploadSize);
-    $form->add('File', 'uploadFile', ts('Import Data File'), 'size=30 maxlength=255', TRUE);
+    $form->add('File', 'uploadFile', ts('Import Data File'), NULL, TRUE);
     $form->setMaxFileSize($uploadFileSize);
     $form->addRule('uploadFile', ts('File size should be less than %1 MBytes (%2 bytes)', [
       1 => $uploadSize,
@@ -74,6 +76,8 @@ class CRM_Import_DataSource_CSV extends CRM_Import_DataSource {
    * @param array $params
    * @param string $db
    * @param \CRM_Core_Form $form
+   *
+   * @throws \CRM_Core_Exception
    */
   public function postProcess(&$params, &$db, &$form) {
     $file = $params['uploadFile']['name'];
@@ -100,19 +104,20 @@ class CRM_Import_DataSource_CSV extends CRM_Import_DataSource {
    *   File name to load.
    * @param bool $headers
    *   Whether the first row contains headers.
-   * @param string $table
+   * @param string $tableName
    *   Name of table from which data imported.
    * @param string $fieldSeparator
    *   Character that separates the various columns in the file.
    *
-   * @return string
+   * @return array
    *   name of the created table
+   * @throws \CRM_Core_Exception
    */
   private static function _CsvToTable(
     &$db,
     $file,
     $headers = FALSE,
-    $table = NULL,
+    $tableName = NULL,
     $fieldSeparator = ','
   ) {
     $result = [];
@@ -124,10 +129,9 @@ class CRM_Import_DataSource_CSV extends CRM_Import_DataSource {
       throw new CRM_Core_Exception("$file is empty. Please upload a valid file.");
     }
 
-    $config = CRM_Core_Config::singleton();
     // support tab separated
-    if (strtolower($fieldSeparator) == 'tab' ||
-      strtolower($fieldSeparator) == '\t'
+    if (strtolower($fieldSeparator) === 'tab' ||
+      strtolower($fieldSeparator) === '\t'
     ) {
       $fieldSeparator = "\t";
     }
@@ -182,16 +186,15 @@ class CRM_Import_DataSource_CSV extends CRM_Import_DataSource {
       }
     }
 
-    // FIXME: we should regen this table's name if it exists rather than drop it
-    if (!$table) {
-      $table = 'civicrm_import_job_' . md5(uniqid(rand(), TRUE));
+    if ($tableName) {
+      CRM_Core_DAO::executeQuery("DROP TABLE IF EXISTS $tableName");
     }
-
-    $db->query("DROP TABLE IF EXISTS $table");
+    $table = CRM_Utils_SQL_TempTable::build()->setDurable();
+    $tableName = $table->getName();
+    CRM_Core_DAO::executeQuery("DROP TABLE IF EXISTS $tableName");
+    $table->createWithColumns(implode(' text, ', $columns) . ' text');
 
     $numColumns = count($columns);
-    $create = "CREATE TABLE $table (" . implode(' text, ', $columns) . " text) ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci";
-    $db->query($create);
 
     // the proper approach, but some MySQL installs do not have this enabled
     // $load = "LOAD DATA LOCAL INFILE '$file' INTO TABLE $table FIELDS TERMINATED BY '$fieldSeparator' OPTIONALLY ENCLOSED BY '\"'";
@@ -219,17 +222,13 @@ class CRM_Import_DataSource_CSV extends CRM_Import_DataSource {
       $first = FALSE;
 
       // CRM-17859 Trim non-breaking spaces from columns.
-      $row = array_map(
-        function($string) {
-          return trim($string, chr(0xC2) . chr(0xA0));
-        }, $row);
+      $row = array_map(['CRM_Import_DataSource_CSV', 'trimNonBreakingSpaces'], $row);
       $row = array_map(['CRM_Core_DAO', 'escapeString'], $row);
       $sql .= "('" . implode("', '", $row) . "')";
       $count++;
 
       if ($count >= self::NUM_ROWS_TO_INSERT && !empty($sql)) {
-        $sql = "INSERT IGNORE INTO $table VALUES $sql";
-        $db->query($sql);
+        CRM_Core_DAO::executeQuery("INSERT IGNORE INTO $tableName VALUES $sql");
 
         $sql = NULL;
         $first = TRUE;
@@ -238,16 +237,39 @@ class CRM_Import_DataSource_CSV extends CRM_Import_DataSource {
     }
 
     if (!empty($sql)) {
-      $sql = "INSERT IGNORE INTO $table VALUES $sql";
-      $db->query($sql);
+      CRM_Core_DAO::executeQuery("INSERT IGNORE INTO $tableName VALUES $sql");
     }
 
     fclose($fd);
 
     //get the import tmp table name.
-    $result['import_table_name'] = $table;
+    $result['import_table_name'] = $tableName;
 
     return $result;
+  }
+
+  /**
+   * Trim non-breaking spaces in a multibyte-safe way.
+   * See also dev/core#2127 - avoid breaking strings ending in à or any other
+   * unicode character sharing the same 0xA0 byte as a non-breaking space.
+   *
+   * @param string $string
+   * @return string The trimmed string
+   */
+  public static function trimNonBreakingSpaces(string $string): string {
+    $encoding = mb_detect_encoding($string, NULL, TRUE);
+    if ($encoding === FALSE) {
+      // This could mean a couple things. One is that the string is
+      // ASCII-encoded but contains a non-breaking space, which causes
+      // php to fail to detect the encoding. So let's just do what we
+      // did before which works in that situation and is at least no
+      // worse in other situations.
+      return trim($string, chr(0xC2) . chr(0xA0));
+    }
+    elseif ($encoding !== 'UTF-8') {
+      $string = mb_convert_encoding($string, 'UTF-8', [$encoding]);
+    }
+    return preg_replace("/^(\u{a0})+|(\u{a0})+$/", '', $string);
   }
 
 }

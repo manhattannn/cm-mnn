@@ -28,29 +28,37 @@ namespace Civi\Api4;
  * Creating a new address requires at minimum a contact's ID and location type ID
  *  and other attributes (although optional) like street address, city, country etc.
  *
+ * @ui_join_filters location_type_id
+ *
  * @package Civi\Api4
  */
 class Address extends Generic\DAOEntity {
 
   /**
-   * @return \Civi\Api4\Action\Address\Create
+   * @param bool $checkPermissions
+   * @return Action\Address\Create
    */
-  public static function create() {
-    return new \Civi\Api4\Action\Address\Create(__CLASS__, __FUNCTION__);
+  public static function create($checkPermissions = TRUE) {
+    return (new Action\Address\Create(__CLASS__, __FUNCTION__))
+      ->setCheckPermissions($checkPermissions);
   }
 
   /**
-   * @return \Civi\Api4\Action\Address\Save
+   * @param bool $checkPermissions
+   * @return Action\Address\Save
    */
-  public static function save() {
-    return new \Civi\Api4\Action\Address\Save(__CLASS__, __FUNCTION__);
+  public static function save($checkPermissions = TRUE) {
+    return (new Action\Address\Save(__CLASS__, __FUNCTION__))
+      ->setCheckPermissions($checkPermissions);
   }
 
   /**
-   * @return \Civi\Api4\Action\Address\Update
+   * @param bool $checkPermissions
+   * @return Action\Address\Update
    */
-  public static function update() {
-    return new \Civi\Api4\Action\Address\Update(__CLASS__, __FUNCTION__);
+  public static function update($checkPermissions = TRUE) {
+    return (new Action\Address\Update(__CLASS__, __FUNCTION__))
+      ->setCheckPermissions($checkPermissions);
   }
 
 }

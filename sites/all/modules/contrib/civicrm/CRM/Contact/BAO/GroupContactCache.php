@@ -9,6 +9,8 @@
  +--------------------------------------------------------------------+
  */
 
+use Civi\Api4\Query\SqlExpression;
+
 /**
  *
  * @package CRM
@@ -65,7 +67,7 @@ class CRM_Contact_BAO_GroupContactCache extends CRM_Contact_DAO_GroupContactCach
    * @return string
    *   the sql query which lists the groups that need to be refreshed
    */
-  public static function groupRefreshedClause($groupIDClause = NULL, $includeHiddenGroups = FALSE) {
+  public static function groupRefreshedClause($groupIDClause = NULL, $includeHiddenGroups = FALSE): string {
     $smartGroupCacheTimeoutDateTime = self::getCacheInvalidDateTime();
 
     $query = "
@@ -76,7 +78,6 @@ AND     g.is_active = 1
 AND (
   g.cache_date IS NULL
   OR cache_date <= $smartGroupCacheTimeoutDateTime
-  OR NOW() >= g.refresh_date
 )";
 
     if (!$includeHiddenGroups) {
@@ -150,7 +151,7 @@ AND (
     $limitClause = $orderClause = NULL;
     if ($limit > 0) {
       $limitClause = " LIMIT 0, $limit";
-      $orderClause = " ORDER BY g.cache_date, g.refresh_date";
+      $orderClause = " ORDER BY g.cache_date";
     }
     // We ignore hidden groups and disabled groups
     $query .= "
@@ -175,12 +176,10 @@ AND (
 
     if (!empty($refreshGroupIDs)) {
       $refreshGroupIDString = CRM_Core_DAO::escapeString(implode(', ', $refreshGroupIDs));
-      $time = self::getRefreshDateTime();
       $query = "
 UPDATE civicrm_group g
-SET    g.refresh_date = $time
+SET    g.cache_date = NOW()
 WHERE  g.id IN ( {$refreshGroupIDString} )
-AND    g.refresh_date IS NULL
 ";
       CRM_Core_DAO::executeQuery($query);
     }
@@ -250,17 +249,15 @@ AND    g.refresh_date IS NULL
     if ($processed) {
       // also update the group with cache date information
       $now = date('YmdHis');
-      $refresh = 'null';
     }
     else {
       $now = 'null';
-      $refresh = 'null';
     }
 
     $groupIDs = implode(',', $groupID);
     $sql = "
 UPDATE civicrm_group
-SET    cache_date = $now, refresh_date = $refresh
+SET    cache_date = $now
 WHERE  id IN ( $groupIDs )
 ";
     CRM_Core_DAO::executeQuery($sql);
@@ -282,7 +279,7 @@ WHERE  id IN ( $groupIDs )
 
     $update = "
   UPDATE civicrm_group g
-    SET    cache_date = null, refresh_date = null
+    SET    cache_date = null
     WHERE  id = %1 ";
 
     $params = [
@@ -314,36 +311,19 @@ WHERE  id IN ( $groupIDs )
       return;
     }
     $params = [1 => [self::getCacheInvalidDateTime(), 'String']];
-    // @todo this is consistent with previous behaviour but as the first query could take several seconds the second
-    // could become inaccurate. It seems to make more sense to fetch them first & delete from an array (which would
-    // also reduce joins). If we do this we should also consider how best to iterate the groups. If we do them one at
-    // a time we could call a hook, allowing people to manage the frequency on their groups, or possibly custom searches
-    // might do that too. However, for 2000 groups that's 2000 iterations. If we do all once we potentially create a
-    // slow query. It's worth noting the speed issue generally relates to the size of the group but if one slow group
-    // is in a query with 500 fast ones all 500 get locked. One approach might be to calculate group size or the
-    // number of groups & then process all at once or many query runs depending on what is found. Of course those
-    // preliminary queries would need speed testing.
-    CRM_Core_DAO::executeQuery(
-      "
-        DELETE gc
-        FROM civicrm_group_contact_cache gc
-        INNER JOIN civicrm_group g ON g.id = gc.group_id
-        WHERE g.cache_date <= %1
-      ",
-      $params
-    );
+    $groupsDAO = CRM_Core_DAO::executeQuery("SELECT id FROM civicrm_group WHERE cache_date <= %1", $params);
+    $expiredGroups = [];
+    while ($groupsDAO->fetch()) {
+      $expiredGroups[] = $groupsDAO->id;
+    }
+    if (!empty($expiredGroups)) {
+      $expiredGroups = implode(',', $expiredGroups);
+      CRM_Core_DAO::executeQuery("DELETE FROM civicrm_group_contact_cache WHERE group_id IN ({$expiredGroups})");
 
-    // Clear these out without resetting them because we are not building caches here, only clearing them,
-    // so the state is 'as if they had never been built'.
-    CRM_Core_DAO::executeQuery(
-      "
-        UPDATE civicrm_group g
-        SET    cache_date = NULL,
-        refresh_date = NULL
-        WHERE  g.cache_date <= %1
-      ",
-      $params
-    );
+      // Clear these out without resetting them because we are not building caches here, only clearing them,
+      // so the state is 'as if they had never been built'.
+      CRM_Core_DAO::executeQuery("UPDATE civicrm_group SET cache_date = NULL WHERE id IN ({$expiredGroups})");
+    }
     $lock->release();
   }
 
@@ -396,9 +376,7 @@ WHERE  id IN ( $groupIDs )
   public static function deterministicCacheFlush() {
     if (self::smartGroupCacheTimeout() == 0) {
       CRM_Core_DAO::executeQuery("TRUNCATE civicrm_group_contact_cache");
-      CRM_Core_DAO::executeQuery("
-        UPDATE civicrm_group g
-        SET cache_date = null, refresh_date = null");
+      CRM_Core_DAO::executeQuery("UPDATE civicrm_group SET cache_date = NULL");
     }
     else {
       self::flushCaches();
@@ -601,38 +579,20 @@ AND  civicrm_group_contact.group_id = $groupID ";
    * it ensure that all contact groups are loaded in the cache
    *
    * @param int $contactID
-   * @param bool $showHidden
-   *   Hidden groups are shown only if this flag is set.
    *
    * @return array
    *   an array of groups that this contact belongs to
    */
-  public static function contactGroup($contactID, $showHidden = FALSE) {
-    if (empty($contactID)) {
-      return NULL;
-    }
-
-    if (is_array($contactID)) {
-      $contactIDs = $contactID;
-    }
-    else {
-      $contactIDs = [$contactID];
-    }
+  public static function contactGroup(int $contactID): array {
 
     self::loadAll();
 
-    $hiddenClause = '';
-    if (!$showHidden) {
-      $hiddenClause = ' AND (g.is_hidden = 0 OR g.is_hidden IS NULL) ';
-    }
-
-    $contactIDString = CRM_Core_DAO::escapeString(implode(', ', $contactIDs));
     $sql = "
 SELECT     gc.group_id, gc.contact_id, g.title, g.children, g.description
 FROM       civicrm_group_contact_cache gc
 INNER JOIN civicrm_group g ON g.id = gc.group_id
-WHERE      gc.contact_id IN ($contactIDString)
-           $hiddenClause
+WHERE      gc.contact_id = $contactID
+            AND (g.is_hidden = 0 OR g.is_hidden IS NULL)
 ORDER BY   gc.contact_id, g.children
 ";
 
@@ -666,12 +626,10 @@ ORDER BY   gc.contact_id, g.children
       $contactGroup[$prevContactID]['groupTitle'] = implode(', ', $contactGroup[$prevContactID]['groupTitle']);
     }
 
-    if ((!empty($contactGroup[$contactID]) && is_numeric($contactID))) {
+    if ((!empty($contactGroup[$contactID]))) {
       return $contactGroup[$contactID];
     }
-    else {
-      return $contactGroup;
-    }
+    return $contactGroup;
   }
 
   /**
@@ -687,23 +645,12 @@ ORDER BY   gc.contact_id, g.children
   }
 
   /**
-   * Get the date when the cache should be refreshed from.
-   *
-   * Ie. now + the offset & we will delete anything prior to then.
-   *
-   * @return string
-   */
-  public static function getRefreshDateTime() {
-    return date('YmdHis', strtotime("+ " . self::smartGroupCacheTimeout() . " Minutes"));
-  }
-
-  /**
    * Invalidates the smart group cache for a particular group
    * @param int $groupID - Group to invalidate
    */
   public static function invalidateGroupContactCache($groupID) {
     CRM_Core_DAO::executeQuery("UPDATE civicrm_group
-      SET cache_date = NULL, refresh_date = NULL
+      SET cache_date = NULL
       WHERE id = %1", [
         1 => [$groupID, 'Positive'],
       ]);
@@ -720,16 +667,18 @@ ORDER BY   gc.contact_id, g.children
    */
   protected static function getApiSQL(array $savedSearch, string $addSelect, string $excludeClause) {
     $apiParams = $savedSearch['api_params'] + ['select' => ['id'], 'checkPermissions' => FALSE];
-    list($idField) = explode(' AS ', $apiParams['select'][0]);
-    $apiParams['select'] = [
-      $addSelect,
-      $idField,
-    ];
+    $idField = SqlExpression::convert($apiParams['select'][0], TRUE)->getAlias();
+    // Unless there's a HAVING clause, we don't care about other columns
+    if (empty($apiParams['having'])) {
+      $apiParams['select'] = array_slice($apiParams['select'], 0, 1);
+    }
     $api = \Civi\API\Request::create($savedSearch['api_entity'], 'get', $apiParams);
     $query = new \Civi\Api4\Query\Api4SelectQuery($api);
     $query->forceSelectId = FALSE;
     $query->getQuery()->having("$idField $excludeClause");
-    return $query->getSql();
+    $sql = $query->getSql();
+    // Place sql in a nested sub-query, otherwise HAVING is impossible on any field other than contact_id
+    return "SELECT $addSelect, `$idField` AS contact_id FROM ($sql) api_query";
   }
 
   /**

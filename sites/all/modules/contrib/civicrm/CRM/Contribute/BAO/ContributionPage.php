@@ -45,6 +45,7 @@ class CRM_Contribute_BAO_ContributionPage extends CRM_Contribute_DAO_Contributio
       CRM_Price_BAO_PriceFieldValue::updateFinancialType($params['id'], 'civicrm_contribution_page', $params['financial_type_id']);
     }
     CRM_Utils_Hook::post($hook, 'ContributionPage', $dao->id, $dao);
+    CRM_Core_PseudoConstant::flush();
     return $dao;
   }
 
@@ -363,13 +364,12 @@ class CRM_Contribute_BAO_ContributionPage extends CRM_Contribute_DAO_Contributio
         'contributionStatus' => $values['contribution_status'] ?? NULL,
       ];
 
-      if ($contributionTypeId = CRM_Utils_Array::value('financial_type_id', $values)) {
-        $tplParams['financialTypeId'] = $contributionTypeId;
+      if (!empty($values['financial_type_id'])) {
+        $tplParams['financialTypeId'] = $values['financial_type_id'];
         $tplParams['financialTypeName'] = CRM_Core_DAO::getFieldValue('CRM_Financial_DAO_FinancialType',
-          $contributionTypeId);
+          $values['financial_type_id']);
         // Legacy support
         $tplParams['contributionTypeName'] = $tplParams['financialTypeName'];
-        $tplParams['contributionTypeId'] = $contributionTypeId;
       }
 
       if ($contributionPageId = CRM_Utils_Array::value('id', $values)) {
@@ -842,8 +842,7 @@ LEFT JOIN  civicrm_premiums            ON ( civicrm_premiums.entity_id = civicrm
     $tsLocale = CRM_Core_I18n::getLocale();
     $config = CRM_Core_Config::singleton();
     $json = $jsonDecode = NULL;
-    $domain = new CRM_Core_DAO_Domain();
-    $domain->find(TRUE);
+    $multilingual = CRM_Core_I18n::isMultilingual();
 
     $moduleDataFormat = [
       'soft_credit' => [
@@ -866,7 +865,7 @@ LEFT JOIN  civicrm_premiums            ON ( civicrm_premiums.entity_id = civicrm
     if ($setDefault) {
       $jsonDecode = json_decode($params);
       $jsonDecode = (array) $jsonDecode->$module;
-      if (!$domain->locales && !empty($jsonDecode['default'])) {
+      if (!$multilingual && !empty($jsonDecode['default'])) {
         //monolingual state
         $jsonDecode += (array) $jsonDecode['default'];
         unset($jsonDecode['default']);
@@ -882,7 +881,7 @@ LEFT JOIN  civicrm_premiums            ON ( civicrm_premiums.entity_id = civicrm
     }
 
     //check and handle multilingual honoree params
-    if (!$domain->locales) {
+    if (!$multilingual) {
       //if in singlelingual state simply return the array format
       $json = [$module => NULL];
       foreach ($moduleDataFormat[$module] as $key => $attribute) {
@@ -904,9 +903,9 @@ LEFT JOIN  civicrm_premiums            ON ( civicrm_premiums.entity_id = civicrm
       $json = [$module => NULL];
       foreach ($moduleDataFormat[$module] as $key => $attribute) {
         if ($key === 'multilingual') {
-          $json[$module][$config->lcMessages] = [];
+          $json[$module][$tsLocale] = [];
           foreach ($attribute as $attr) {
-            $json[$module][$config->lcMessages][$attr] = $params[$attr];
+            $json[$module][$tsLocale][$attr] = $params[$attr];
           }
         }
         else {
