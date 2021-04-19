@@ -1,13 +1,13 @@
 /*
  +---------------------------------------------------------------------------+
  | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
- |                                                                           |
+ |                                                                           |  
  | This work is published under the GNU AGPLv3 license without any           |
  | warranty. For full license and copyright information, see                 |
  | https://www.gnu.org/licenses/agpl-3.0.html                                |
- +---------------------------------------------------------------------------+
+ +---------------------------------------------------------------------------+  
  */
-
+ 
 (function ($) {
   Drupal.behaviors.checkinoptions = {
     attach: function (context, settings) {
@@ -120,31 +120,6 @@
           //$(this).trigger('formUpdated');
 
           break;
-
-          case '3':
-            // Change status to reserved/confirmed.
-
-            //Hide extend date
-            extend_date.fadeOut();
-
-            //Disable end date
-            $("#edit-field-reservations-date-und-0-value2-datepicker-popup-0").prop( "disabled", true );
-            $("#edit-field-reservations-date-und-0-value2-timeEntry-popup-1").prop( "disabled", true );
-
-            //Un-Check all items.
-            $(".reservations-check-in").attr('checked', false);
-
-            //disable checkboxes
-            $("#reservations-check-all").prop( "disabled", true );
-            $(".reservations-check-in").prop( "disabled", true );
-
-            //Set and disable the status
-            $("#edit-reservations-reservation-status-2").prop("checked", true);
-            $('input[name ="reservations_reservation_status"').prop( "disabled", true );
-
-
-          break;
-
         default :
           // -- select item ---
 

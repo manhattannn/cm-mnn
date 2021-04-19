@@ -17,7 +17,6 @@
 /**
  * returns the number of items currently checked out for each content type
  * TODO: change this to a views view.
- * @todo - this should be an inc file.
  */
 function theme_reservations_ui_current_inventory() {
 
@@ -79,16 +78,15 @@ function theme_reservations_ui_current_inventory() {
       $include = FALSE;
     }
     else {
-      if ($inventory) {
-        $tids = $reservable_type['inventory_tids'];
-        if (!empty($tids)) {
-          foreach ($tids as $tid) {
-            if ($tid == $inventory) {
-              $include = TRUE;
-            }
+       if ($inventory) {
+        foreach ($reservable_type['inventory_tids'] as $tid) {
+
+          if ($tid == $inventory) {
+            $include = TRUE;
           }
         }
-      } else {
+      }
+      else {
         // if there is no inventory, include everything
         $include = TRUE;
       }

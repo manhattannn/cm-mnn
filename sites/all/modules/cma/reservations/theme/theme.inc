@@ -3,14 +3,14 @@
 /**
  * @file
  * Reservations - Managed Equipment Reservation Checkout and Inventory
-+---------------------------------------------------------------------------+
-| Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
-| Additionally, Kevin Reynen + Dane Powell                                  |
-|                                                                           |
-| This work is published under the GNU AGPLv3 license without any           |
-| warranty. For full license and copyright information, see                 |
-| https://www.gnu.org/licenses/agpl-3.0.html                                |
-+---------------------------------------------------------------------------+
+ +---------------------------------------------------------------------------+
+ | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
+ | Additionally, Kevin Reynen + Dane Powell                                  |
+ |                                                                           |
+ | This work is published under the GNU AGPLv3 license without any           |
+ | warranty. For full license and copyright information, see                 |
+ | https://www.gnu.org/licenses/agpl-3.0.html                                |
+ +---------------------------------------------------------------------------+
  */
 
 function template_preprocess_reservations_conflict_grid(&$variables) {
@@ -31,7 +31,7 @@ function template_preprocess_reservations_conflict_grid(&$variables) {
 
     // get hours of operation
     $hours_of_operation_inv = module_invoke(
-      'reservations_inventory', 'get_hours_of_operation', $inventory_tid);
+            'reservations_inventory', 'get_hours_of_operation', $inventory_tid);
 
     $exist_inventory_hrs = $hours_of_operation_inv['exist_inventory_hrs'];
 
@@ -43,14 +43,15 @@ function template_preprocess_reservations_conflict_grid(&$variables) {
     if (isset($restrictions['cleaning_buffer'])) {
       $cleaning_buffer = $restrictions['cleaning_buffer'];
     }
-    $show_expanded_chart = user_access('create reservations outside hours of operation');
 
-    if ($exist_inventory_hrs && $show_expanded_chart) {
+
+    if ($exist_inventory_hrs
+            && user_access('create reservations outside hours of operation')) {
       // Use expanded (admin) hours.
-      $adminhours = explode('-', variable_get('reservations_hours_admin', '07:00-22:00'));
+      $adminhours = $hours_of_operation_inv['admin'];
       for ($day = 0; $day < 7; $day++) {
-        $hours[$day]['open'] = $adminhours[0];
-        $hours[$day]['close'] = $adminhours[1];
+        $hours[$day]['open'] = $adminhours['open'];
+        $hours[$day]['close'] = $adminhours['close'];
       }
     }
     else {
@@ -63,7 +64,7 @@ function template_preprocess_reservations_conflict_grid(&$variables) {
   }
 
   if (!$exist_inventory_hrs) {
-    if ($show_expanded_chart) {
+    if (user_access('create reservations outside hours of operation')) {
       $adminhours = explode('-', variable_get('reservations_hours_admin', '07:00-23:00'));
 
       for ($day = 0; $day < 7; $day++) {
@@ -86,7 +87,7 @@ function template_preprocess_reservations_conflict_grid(&$variables) {
 
   // Do we have restricted hours?
   if (isset($restrictions['restricted_hours_of_operations'])
-    && $restrictions['restricted_hours_of_operations'] && !$show_expanded_chart) {
+    && $restrictions['restricted_hours_of_operations']) {
     // Load the restricted hours.
     $restricted_hours = module_invoke(
       'reservations_inventory', 'get_restricted_hours_of_operation', $inventory_tid);
@@ -233,7 +234,7 @@ function template_preprocess_reservations_conflict_grid(&$variables) {
       //avoids overflow to next day
       if($time < '01:00') {
         break;
-      }
+       }
     }
   }
 
@@ -279,8 +280,8 @@ function theme_reservations_build_reservation_table_display($variables) {
 
     if ($values['reservations_item_nid']['#type'] == 'value') {
       $item = ($values['display_item_title']['#markup']) ?
-        drupal_render($values['display_item_title']) :
-        t('SPECIFIC ITEM NOT SELECTED');
+	drupal_render($values['display_item_title']) :
+	t('SPECIFIC ITEM NOT SELECTED');
     }
     else {
       $item = drupal_render($values['reservations_item_nid']);
@@ -309,11 +310,11 @@ function theme_reservations_build_reservation_table_display($variables) {
 
       elseif (strstr($value, t('Item Condition'))) {
         $row[$index] =
-          drupal_render($values['reservations_checkin_item_condition']);
+	  drupal_render($values['reservations_checkin_item_condition']);
       }
       elseif (strstr($value, t('Condition Notes'))) {
         $row[$index] =
-          drupal_render($values['reservations_checkin_condition_notes']);
+	  drupal_render($values['reservations_checkin_condition_notes']);
       }
 
     }
@@ -326,15 +327,15 @@ function theme_reservations_build_reservation_table_display($variables) {
       $table_caption = t('Reserved Items');
     }
     else if ($node->reservations_reservation_status ==
-      RESERVATIONS_STATUS_CHECKED_OUT) {
+	RESERVATIONS_STATUS_CHECKED_OUT) {
       $table_caption = t('Checked out items');
     }
     else if($node->reservations_reservation_status ==
-      RESERVATIONS_STATUS_CHECKED_IN) {
+	    RESERVATIONS_STATUS_CHECKED_IN) {
       $table_caption = t('Checked in items');
     }
     else if ($node->reservations_reservation_status >
-      RESERVATIONS_STATUS_CHECKED_IN) {
+	     RESERVATIONS_STATUS_CHECKED_IN) {
       $table_caption = t('Reserved Items');
     }
     else {
@@ -353,3 +354,5 @@ function theme_reservations_build_reservation_table_display($variables) {
 
   return $output;
 }
+
+
