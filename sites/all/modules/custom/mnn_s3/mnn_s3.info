@@ -1,0 +1,4 @@
+name = MNN S3
+package = MNN Custom
+description = "MNN S3 custom functionality"
+core = 7.x

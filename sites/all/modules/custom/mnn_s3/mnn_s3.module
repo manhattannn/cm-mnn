@@ -1,0 +1,28 @@
+<?php
+/**
+ * @file
+ * Code for the MNN S3.
+ */
+
+
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function mnn_s3_element_info_alter(&$types) {
+  // Add our auto submit for the S3 Core file upload.
+  $file_path = drupal_get_path('module', 'mnn_s3');
+
+  // Replace the s3fs_cors.js with our custom one.
+  foreach ($types['s3fs_cors_upload']['#attached']['js'] as $idx => $file) {
+    if (strpos($file, 's3fs_cors.js') !== false) {
+      $types['s3fs_cors_upload']['#attached']['js'][$idx] =  $file_path . '/mnn_s3fs_cors.js';
+    }
+  }
+
+  // Add our auto submit file selected.
+  $types['s3fs_cors_upload']['#attached']['js'][]  =  $file_path . '/mnn_s3.js';
+}
+
+
+
