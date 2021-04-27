@@ -95,7 +95,7 @@
         contentType: false,
         processData: false,
         xhrFields: {
-          withCredentials: true
+          withCredentials: false
         },
         xhr: function() {
           // Alter the XMLHTTPRequest to make it use our progressbar code.
