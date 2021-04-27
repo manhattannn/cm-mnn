@@ -95,7 +95,7 @@
         contentType: false,
         processData: false,
         xhrFields: {
-          withCredentials: false
+          withCredentials: true
         },
         xhr: function() {
           // Alter the XMLHTTPRequest to make it use our progressbar code.
@@ -174,10 +174,7 @@
       // Submit the widget's subform to Drupal, to inform Drupal that the
       // file now exists.
       ajax.form.ajaxSubmit(ajaxOptions);
-//eric's hack to get node form to submit as soon as file is uploaded
-    	$('#test-for-upload-node-form').submit();
     }
-
   };
 
   /**
@@ -270,18 +267,14 @@
 
             event.preventDefault();
             event.stopPropagation();
-              return false;
-
+            return false;
           }
           else {
             // If there were no CORS uploads to perform, submit the form as normal.
-              return true;
+            return true;
           }
-	    //	    $('#test-for-upload-node-form').submit();
-	});
-//	  $('#test-for-upload-node-form').submit();
+        });
       });
     });
-	//      $('#test-for-upload-node-form').submit();
-    };
+  };
 })(jQuery);
