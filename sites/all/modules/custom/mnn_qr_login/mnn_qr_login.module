@@ -1,0 +1,110 @@
+<?php
+/**
+ * @file
+ */
+include_once 'Crypt/GPG.php';
+define("MNN_ANON_FAQ_PAGE_NID",  707409);
+/**
+ * Implements hook_menu().
+ */
+function mnn_qr_login_node_insert($node, $account = NULL) {
+
+  if ($node->type=="for_qr_teting"){
+    $signed_code_submitted = $node->field_qrlogin['und'][0]['value']; 
+
+//     $signed_code_submitted = <<<DATA
+// -----BEGIN PGP MESSAGE-----
+// 
+// owEB+AEH/pANAwAKARDlaXgNgtrrAcsxYgBgiwGsMTI6YjQwMDgyMzY3N2FkOGY2
+// N2JlZDg2MmYwOTUxODA4ZDEyZjI2ZjhkMIkBswQAAQoAHRYhBEAia9xjlwOuMcdD
+// 8BDlaXgNgtrrBQJgiwGsAAoJEBDlaXgNgtrri8UL/3BYxxPwR90iZQUvqZJYB+pu
+// Yj/EjCMwDLYsf5nPTnlGPmEkG0U+rkUoYoJ+tZLlxMN7oTP7WQs/kWtuYlpgJCRP
+// ui1wTjvjKXHy5B29QF7jN5vYN8cdu9Pd2y04K3IXAbyPAVrUEyfa74YEI+SXPFYE
+// dNpsUTYZ3OJx9G3tW8vYvfWgBXaj7Vygzvl+5UBJUqdLhmlVIVi500eNgrS0I8+5
+// Nlkcn4A4KG7xb5jQ6bM/68wQ7obkGEX3Ug8d3ncd+0PjYnIMMvo0vL0WOct/UAGH
+// fWqu6RPnocCUX7JCtiec0FihJmA6tfac74/iHFLpS+QBFpfaABHP4UNp1UVaSt29
+// Fe3KV4aU8LbT8ZeAG2dAoyWoLy3xhVvs2Y7P+oyQ5OvHx3VXQEmtCNfOUZHsCbIr
+// R0Y1B2FjgJOXQaTTsTDMSbuWmcmXbgHC0uMrWAuHj0v5SgWt9v2jPKmZm0+xnffO
+// xI15rzRsrwPfVORFObDAAcI9BcVBmXh7YtxAS8aBXA==
+// =6kqK
+// -----END PGP MESSAGE-----
+// DATA;
+
+    $gpg = new Crypt_GPG();
+//    $signatures = $gpg->verifyFile('/var/www/cm-stage.mnn.org/gpg-php-example-code/3', FALSE);
+    $signatures = $gpg->verify($signed_code_submitted);
+    // test to see if the code sent is ours/if it was signed by us
+    if ($signatures[0]->isValid()) {
+      // if it's valid, pull the values into an array 
+      dsm("succces");
+      $values_submitted = $gpg->decrypt($signed_code_submitted);
+      dsm($values_submitted);
+      
+      $values = array();
+      $values = explode(":",$values_submitted);
+      dsm($values);
+      
+      $user_from_code = user_load($values[0]);
+      dsm($user_from_code->field_access_center_access_hash['und'][0]['value']);
+      
+      // if the hash in the submitted code matches the hash in the user record 
+      // we log the user into the site. 
+      
+      if ($values[1] == $user_from_code->field_access_center_access_hash['und'][0]['value']){
+        dsm("values matched");
+         global $user;
+         $user = $user_from_code;
+         drupal_session_regenerate();
+         
+return;
+      } else {
+        dsm("invalid code"); 
+      }
+  
+      
+      
+      
+    } else {
+    
+      dsm("fail");
+
+    }
+
+
+
+//global $user;
+//$user = user_load(7);
+//drupal_session_regenerate();
+
+
+  }
+  
+}  
+
+// set the values of the hash and qr code fields when 
+// a user is inserted or updated and does not have 
+// these values set 
+
+function mnn_qr_login_user_presave(&$edit, $account, $category){
+  dsm($account);
+  if(!isset($account->field_access_center_access_hash['und'][0]['value'])){
+    $t=time();
+    $hash = sha1($t);
+    $edit['field_access_center_access_hash']['und'][0]['value'] = $hash;
+    //  $value_for_qr = $account->uid.":".$account->field_acccess_center_unique_hash['und'][0]['value'];
+    //  $account->field_access_center_access_code['und'][0]['value'] = $value_for_qr;
+    $code_to_sign = $account->uid.":".$hash; 
+    // sign code 
+    $gpg = new Crypt_GPG();
+    $gpg->addSignKey('accesscenter@mnn.org', 'accesscenter');
+    $signed_code = $gpg->sign($code_to_sign, Crypt_GPG::SIGN_MODE_NORMAL, TRUE);
+
+    $edit['field_ac_user_qr']['und'][0]['value'] = $signed_code;
+
+    dsm($edit);
+
+  }
+
+
+}  
+

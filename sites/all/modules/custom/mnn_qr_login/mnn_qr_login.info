@@ -1,0 +1,9 @@
+name = MNN QR Login
+package = MNN Custom
+description = "allows users to log in using QR code scanned at MNN in-house upload stations"
+
+core = 7.x
+files[] = mnn_qr.module
+
+
+
