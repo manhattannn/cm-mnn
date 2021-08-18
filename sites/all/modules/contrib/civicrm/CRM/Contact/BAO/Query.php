@@ -396,6 +396,7 @@ class CRM_Contact_BAO_Query {
     'im',
     'address_name',
     'master_id',
+    'location_type',
   ];
 
   /**
@@ -1075,7 +1076,7 @@ class CRM_Contact_BAO_Query {
           $elementCmpName = 'phone';
         }
 
-        if (in_array($elementCmpName, array_keys($addressCustomFields))) {
+        if (array_key_exists($elementCmpName, $addressCustomFields)) {
           if ($cfID = CRM_Core_BAO_CustomField::getKeyID($elementCmpName)) {
             $addressCustomFieldIds[$cfID][$name] = 1;
           }
@@ -1276,6 +1277,14 @@ class CRM_Contact_BAO_Query {
                   $this->_pseudoConstantsSelect["{$name}-{$elementFullName}"]['table'] = $tName;
                   $this->_pseudoConstantsSelect["{$name}-{$elementFullName}"]['join']
                     = "\nLEFT JOIN $tableName `$tName` ON `$tName`.id = $aName.state_province_id";
+                  if ($addWhere) {
+                    $this->_whereTables["{$name}-address"] = $addressJoin;
+                  }
+                  break;
+
+                case 'civicrm_location_type':
+                  $this->_tables[$tName] = "\nLEFT JOIN $tableName `$tName` ON `$tName`.id = $aName.location_type_id";
+
                   if ($addWhere) {
                     $this->_whereTables["{$name}-address"] = $addressJoin;
                   }
@@ -3121,7 +3130,7 @@ class CRM_Contact_BAO_Query {
    * @return string WHERE clause component for smart group criteria.
    * @throws \CRM_Core_Exception
    */
-  public function addGroupContactCache($groups, $tableAlias, $joinTable = "contact_a", $op, $joinColumn = 'id') {
+  public function addGroupContactCache($groups, $tableAlias, $joinTable, $op, $joinColumn = 'id') {
     $isNullOp = (strpos($op, 'NULL') !== FALSE);
     $groupsIds = $groups;
 
@@ -3284,7 +3293,8 @@ WHERE  $smartGroupClause
     $tagTree = CRM_Core_BAO_Tag::getChildTags();
     foreach ((array) $value as $tagID) {
       if (!empty($tagTree[$tagID])) {
-        $value = array_unique(array_merge($value, $tagTree[$tagID]));
+        // make sure value is an array here (see CORE-2502)
+        $value = array_unique(array_merge((array) $value, $tagTree[$tagID]));
       }
     }
 
@@ -4441,7 +4451,6 @@ civicrm_relationship.start_date > {$today}
 
       if (empty(self::$_defaultReturnProperties[$mode])) {
         self::$_defaultReturnProperties[$mode] = [
-          'home_URL' => 1,
           'image_URL' => 1,
           'legal_identifier' => 1,
           'external_identifier' => 1,
@@ -5896,7 +5905,7 @@ AND   displayRelType.is_active = 1
     $op,
     $value,
     $grouping,
-    $daoName = NULL,
+    $daoName,
     $field,
     $label,
     $dataType = 'String'
@@ -6317,7 +6326,7 @@ AND   displayRelType.is_active = 1
       $value = $formValues[$element] ?? NULL;
       if ($value) {
         if (is_array($value)) {
-          if (in_array($element, array_keys($changeNames))) {
+          if (array_key_exists($element, $changeNames)) {
             unset($formValues[$element]);
             $element = $changeNames[$element];
           }

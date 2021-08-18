@@ -13,31 +13,87 @@
       container: '^^afGuiContainer'
     },
     controller: function($scope, afGui) {
-      var ts = $scope.ts = CRM.ts(),
+      var ts = $scope.ts = CRM.ts('org.civicrm.afform_admin'),
         ctrl = this;
 
       $scope.editingOptions = false;
       var yesNo = [
         {id: '1', label: ts('Yes')},
         {id: '0', label: ts('No')}
-      ];
+      ],
+        entityRefOptions = [],
+        singleElement = [''],
+        // When search-by-range is enabled the second element gets a suffix for some properties like "placeholder2"
+        rangeElements = ['', '2'],
+        dateRangeElements = ['1', '2'],
+        relativeDatesWithPickRange = CRM.afGuiEditor.dateRanges,
+        relativeDatesWithoutPickRange = relativeDatesWithPickRange.slice(1);
 
       this.$onInit = function() {
-        $scope.meta = afGui.meta;
+        ctrl.inputTypes = _.transform(_.cloneDeep(afGui.meta.inputType), function(inputTypes, type) {
+          if (inputTypeCanBe(type.name)) {
+            // Change labels for EntityRef fields
+            if (ctrl.getDefn().input_type === 'EntityRef') {
+              var entity = ctrl.getFkEntity();
+              if (entity && type.name === 'EntityRef') {
+                type.label = ts('Autocomplete %1', {1: entity.label});
+              }
+              if (entity && type.name === 'Number') {
+                type.label = ts('%1 ID', {1: entity.label});
+              }
+              if (entity && type.name === 'Select') {
+                type.label = ts('Select Form %1', {1: entity.label});
+              }
+            }
+            inputTypes.push(type);
+          }
+        });
+      };
+
+      this.getFkEntity = function() {
+        var fkEntity = ctrl.getDefn().fk_entity;
+        return ctrl.editor.meta.entities[fkEntity];
       };
 
       this.isSearch = function() {
-        return !_.isEmpty($scope.meta.searchDisplays);
+        return ctrl.editor.getFormType() === 'search';
+      };
+
+      this.canBeRange = function() {
+        // Range search only makes sense for search display forms
+        return this.isSearch() &&
+          // Hack for postal code which is not stored as a number but can act like one
+          (ctrl.node.name.substr(-11) === 'postal_code' || (
+            // Multiselects cannot use range search
+            !ctrl.getDefn().input_attrs.multiple &&
+            // DataType & inputType must make sense for a range
+            _.includes(['Date', 'Timestamp', 'Integer', 'Float'], ctrl.getDefn().data_type) &&
+            _.includes(['Date', 'Number', 'Select'], $scope.getProp('input_type'))
+        ));
+      };
+
+      this.canBeMultiple = function() {
+        return this.isSearch() &&
+          !_.includes(['Date', 'Timestamp'], ctrl.getDefn().data_type) &&
+          _.includes(['Select', 'EntityRef'], $scope.getProp('input_type'));
+      };
+
+      this.getRangeElements = function(type) {
+        if (!$scope.getProp('search_range') || (type === 'Select' && ctrl.getDefn().input_type === 'Date')) {
+          return singleElement;
+        }
+        return type === 'Date' ? dateRangeElements : rangeElements;
       };
 
       // Returns the original field definition from metadata
       this.getDefn = function() {
         var defn = afGui.getField(ctrl.container.getFieldEntityType(ctrl.node.name), ctrl.node.name);
-        return defn ||  {
+        defn = defn || {
           label: ts('Untitled'),
-          requred: false,
-          input_attrs: []
+          required: false
         };
+        defn.input_attrs = _.isEmpty(defn.input_attrs) ? {} : defn.input_attrs;
+        return defn;
       };
 
       $scope.getOriginalLabel = function() {
@@ -52,12 +108,23 @@
         return _.contains(['CheckBox', 'Radio', 'Select'], inputType) && !(inputType === 'CheckBox' && !ctrl.getDefn().options);
       };
 
-      $scope.getOptions = this.getOptions = function() {
+      this.getOptions = function() {
         if (ctrl.node.defn && ctrl.node.defn.options) {
           return ctrl.node.defn.options;
         }
         if (_.includes(['Date', 'Timestamp'], $scope.getProp('data_type'))) {
-          return CRM.afGuiEditor.dateRanges;
+          return $scope.getProp('search_range') ? relativeDatesWithPickRange : relativeDatesWithoutPickRange;
+        }
+        if (ctrl.getDefn().input_type === 'EntityRef') {
+          // Build a list of all entities in this form that can be referenced by this field.
+          var newOptions = _.map(ctrl.editor.getEntities({type: ctrl.getDefn().fk_entity}), function(entity) {
+            return {id: entity.name, label: entity.label};
+          }, []);
+          // Store it in a stable variable for the sake of ng-repeat
+          if (!angular.equals(newOptions, entityRefOptions)) {
+            entityRefOptions = newOptions;
+          }
+          return entityRefOptions;
         }
         return ctrl.getDefn().options || ($scope.getProp('input_type') === 'CheckBox' ? null : yesNo);
       };
@@ -71,15 +138,18 @@
         $('#afGuiEditor').addClass('af-gui-editing-content');
       };
 
-      $scope.inputTypeCanBe = function(type) {
+      function inputTypeCanBe(type) {
         var defn = ctrl.getDefn();
+        if (defn.input_type === type) {
+          return true;
+        }
         switch (type) {
           case 'CheckBox':
           case 'Radio':
             return defn.options || defn.data_type === 'Boolean';
 
           case 'Select':
-            return defn.options || defn.data_type === 'Boolean' || (defn.input_type === 'Date' && ctrl.isSearch());
+            return defn.options || defn.data_type === 'Boolean' || defn.input_type === 'EntityRef' || (defn.input_type === 'Date' && ctrl.isSearch());
 
           case 'Date':
             return defn.input_type === 'Date';
@@ -88,13 +158,16 @@
           case 'RichTextEditor':
             return (defn.data_type === 'Text' || defn.data_type === 'String');
 
-          case 'ChainSelect':
-            return defn.input_type === 'ChainSelect';
+          case 'Text':
+            return !(defn.options || defn.input_type === 'Date' || defn.input_type === 'EntityRef' || defn.data_type === 'Boolean');
+
+          case 'Number':
+            return !(defn.options || defn.data_type === 'Boolean');
 
           default:
-            return true;
+            return false;
         }
-      };
+      }
 
       // Returns a value from either the local field defn or the base defn
       $scope.getProp = function(propName) {
@@ -119,6 +192,20 @@
           delete ctrl.node.defn.label;
         } else {
           ctrl.node.defn.label = false;
+        }
+      };
+
+      $scope.toggleMultiple = function() {
+        var newVal = getSet('input_attrs.multiple', !getSet('input_attrs.multiple'));
+        if (newVal && getSet('search_range')) {
+          getSet('search_range', false);
+        }
+      };
+
+      $scope.toggleSearchRange = function() {
+        var newVal = getSet('search_range', !getSet('search_range'));
+        if (newVal && getSet('input_attrs.multiple')) {
+          getSet('input_attrs.multiple', false);
         }
       };
 
@@ -151,6 +238,10 @@
             delete localDefn[item];
             clearOut(ctrl.node, ['defn'].concat(path));
           }
+          // When changing input_type
+          if (propName === 'input_type' && ctrl.node.defn && ctrl.node.defn.search_range && !ctrl.canBeRange()) {
+            delete ctrl.node.defn.search_range;
+          }
           return val;
         }
         return $scope.getProp(propName);
@@ -171,10 +262,15 @@
         return container;
       }
 
+      // Returns true only if value is [], {}, '', null, or undefined.
+      function isEmpty(val) {
+        return typeof val !== 'boolean' && typeof val !== 'number' && _.isEmpty(val);
+      }
+
       // Recursively clears out empty arrays and objects
       function clearOut(parent, path) {
         var item;
-        while (path.length && _.every(drillDown(parent, path), _.isEmpty)) {
+        while (path.length && _.every(drillDown(parent, path), isEmpty)) {
           item = path.pop();
           delete drillDown(parent, path)[item];
         }

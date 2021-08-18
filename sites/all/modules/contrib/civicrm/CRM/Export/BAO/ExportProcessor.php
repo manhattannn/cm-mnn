@@ -1120,6 +1120,11 @@ class CRM_Export_BAO_ExportProcessor {
           return $result['values'][$result['id']]['url'];
         }
 
+        // Do not export HTML markup for links
+        if ($html_type === 'Link' && $fieldValue) {
+          return $fieldValue;
+        }
+
         return CRM_Core_BAO_CustomField::displayValue($fieldValue, $cfID);
       }
       elseif (in_array($field, [
@@ -1453,11 +1458,22 @@ class CRM_Export_BAO_ExportProcessor {
           if (in_array(CRM_Utils_Array::value('data_type', $fieldSpec), ['Country', 'StateProvince', 'ContactReference'])) {
             return "`$fieldName` varchar(255)";
           }
-          return "`$fieldName` varchar(16)";
+          // some of those will be exported as a (localisable) string
+          // @see https://lab.civicrm.org/dev/core/-/issues/2164
+          return "`$fieldName` varchar(64)";
 
         case CRM_Utils_Type::T_STRING:
           if (isset($fieldSpec['maxlength'])) {
-            return "`$fieldName` varchar({$fieldSpec['maxlength']})";
+            // A localized string for the preferred_mail_format does not fit
+            // into the varchar(8) field.
+            // @see https://lab.civicrm.org/dev/core/-/issues/2645
+            switch ($fieldName) {
+              case 'preferred_mail_format':
+                return "`$fieldName` varchar(16)";
+
+              default:
+                return "`$fieldName` varchar({$fieldSpec['maxlength']})";
+            }
           }
           $dataType = $fieldSpec['data_type'] ?? '';
           // set the sql columns for custom data

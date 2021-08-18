@@ -910,14 +910,15 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
         $errors['trxn_id'] = ts('Transaction ID\'s must be unique. Transaction \'%1\' already exists in your database.', [1 => $fields['trxn_id']]);
       }
     }
-    if (!empty($fields['revenue_recognition_date'])
-      && count(array_filter($fields['revenue_recognition_date'])) == 1
-    ) {
-      $errors['revenue_recognition_date'] = ts('Month and Year are required field for Revenue Recognition.');
-    }
     // CRM-16189
+    $order = new CRM_Financial_BAO_Order();
+    $order->setPriceSelectionFromUnfilteredInput($fields);
+    if (isset($fields['total_amount'])) {
+      $order->setOverrideTotalAmount((float) CRM_Utils_Rule::cleanMoney($fields['total_amount']));
+    }
+    $lineItems = $order->getLineItems();
     try {
-      CRM_Financial_BAO_FinancialAccount::checkFinancialTypeHasDeferred($fields, $self->_id, $self->_priceSet['fields']);
+      CRM_Financial_BAO_FinancialAccount::checkFinancialTypeHasDeferred($fields, $self->_id, $lineItems);
     }
     catch (CRM_Core_Exception $e) {
       $errors['financial_type_id'] = ' ';
@@ -1445,7 +1446,7 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
         }
         else {
           $lineItems[$itemId]['tax_rate'] = $lineItems[$itemId]['tax_amount'] = "";
-          $submittedValues['tax_amount'] = 'null';
+          $submittedValues['tax_amount'] = 0;
         }
         if ($lineItems[$itemId]['tax_rate']) {
           $lineItems[$itemId]['tax_amount'] = ($lineItems[$itemId]['tax_rate'] / 100) * $lineItems[$itemId]['line_total'];
@@ -1583,9 +1584,6 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
         $params['contribution_mode'] = 'participant';
         $params['participant_id'] = $pId;
         $params['skipLineItem'] = 1;
-      }
-      elseif ($isRelatedId) {
-        $params['contribution_mode'] = 'membership';
       }
       $params['line_item'] = $lineItem;
       $params['payment_processor_id'] = $params['payment_processor'] = $this->_paymentProcessor['id'] ?? NULL;

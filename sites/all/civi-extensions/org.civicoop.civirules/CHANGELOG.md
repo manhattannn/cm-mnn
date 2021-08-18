@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Version 2.34 (not yet released)
+
+## Version 2.33
+* Added conditions for relationship has ended / is activated (issue https://lab.civicrm.org/extensions/civirules/-/issues/150)
+
 ## Version 2.32
 
 * Added Trigger which is fired when an activity is tagged and for all related participants of the related event (when the activity is connected to an event).

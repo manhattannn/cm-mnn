@@ -284,8 +284,8 @@ class CRM_Report_Form_Member_ContributionDetail extends CRM_Report_Form {
             'type' => CRM_Utils_Type::T_INT,
             'operatorType' => CRM_Report_Form::OP_MULTISELECT,
             'options' => [
-              0 => 'First by Contributor',
-              1 => 'Second or Later by Contributor',
+              0 => ts('First by Contributor'),
+              1 => ts('Second or Later by Contributor'),
             ],
           ],
         ],
@@ -518,7 +518,7 @@ class CRM_Report_Form_Member_ContributionDetail extends CRM_Report_Form {
           SELECT contribution.id, {$this->_aliases['civicrm_contact']}.id, m.id
           FROM civicrm_contribution contribution
           INNER JOIN civicrm_contact {$this->_aliases['civicrm_contact']}
-                ON {$this->_aliases['civicrm_contact']}.id = contribution.contact_id AND contribution.is_test = 0
+                ON {$this->_aliases['civicrm_contact']}.id = contribution.contact_id AND contribution.is_test = 0 AND contribution.is_template = 0
           LEFT JOIN civicrm_membership_payment mp
                 ON contribution.id = mp.contribution_id
           LEFT JOIN civicrm_membership m

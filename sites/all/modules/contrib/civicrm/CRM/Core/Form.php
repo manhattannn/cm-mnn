@@ -816,8 +816,8 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
   /**
    * @return int
    */
-  public function getPaymentProcessorID() {
-    return $this->_paymentProcessorID;
+  public function getPaymentProcessorID(): int {
+    return (int) $this->_paymentProcessorID;
   }
 
   /**
@@ -847,9 +847,6 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
       }
       // It's not clear why we set this on the form.
       $this->set('paymentProcessors', $this->_paymentProcessors);
-    }
-    else {
-      throw new CRM_Core_Exception(ts('A payment processor configured for this page might be disabled (contact the site administrator for assistance).'));
     }
   }
 
@@ -2243,7 +2240,7 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
       return (int) $tempID;
     }
 
-    $userID = $this->getLoggedInUserContactID();
+    $userID = CRM_Core_Session::getLoggedInContactID();
 
     if (!is_null($tempID) && $tempID === $userID) {
       CRM_Core_Resources::singleton()->addVars('coreForm', ['contact_id' => (int) $tempID]);
@@ -2283,10 +2280,12 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
 
   /**
    * Get the contact id of the logged in user.
+   * @deprecated
    *
    * @return int|false
    */
   public function getLoggedInUserContactID() {
+    CRM_Core_Error::deprecatedFunctionWarning('CRM_Core_Session::getLoggedInContactID()');
     // check if the user is logged in and has a contact ID
     $session = CRM_Core_Session::singleton();
     return $session->get('userID') ? (int) $session->get('userID') : FALSE;
@@ -2725,7 +2724,7 @@ class CRM_Core_Form extends HTML_QuickForm_Page {
     if (!$contactID) {
       return FALSE;
     }
-    if ($contactID === $this->getLoggedInUserContactID()) {
+    if ($contactID === CRM_Core_Session::getLoggedInContactID()) {
       return $contactID;
     }
     $userChecksum = CRM_Utils_Request::retrieve('cs', 'String', $this);

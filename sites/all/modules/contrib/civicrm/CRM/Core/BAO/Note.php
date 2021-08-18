@@ -19,6 +19,7 @@
  * BAO object for crm_note table.
  */
 class CRM_Core_BAO_Note extends CRM_Core_DAO_Note {
+  use CRM_Core_DynamicFKAccessTrait;
 
   /**
    * Const the max number of notes we display at any given time.
@@ -477,6 +478,7 @@ ORDER BY  modified_date desc";
         $contact->fetch();
         $tree[$note->id]['createdBy'] = $contact->display_name;
         $tree[$note->id]['createdById'] = $createdById;
+        $tree[$note->id]['note_date'] = CRM_Utils_Date::customFormat($tree[$note->id]['note_date']);
         $tree[$note->id]['modified_date'] = CRM_Utils_Date::customFormat($tree[$note->id]['modified_date']);
 
         // paper icon view for attachments part
@@ -561,19 +563,6 @@ WHERE participant.contact_id = %1 AND  note.entity_table = 'civicrm_participant'
     while ($contactNoteId->fetch()) {
       self::del($contactNoteId->id, FALSE);
     }
-  }
-
-  /**
-   * Whitelist of possible values for the entity_table field
-   * @return array
-   */
-  public static function entityTables() {
-    return array(
-      'civicrm_relationship' => 'Relationship',
-      'civicrm_contact' => 'Contact',
-      'civicrm_participant' => 'Participant',
-      'civicrm_contribution' => 'Contribution',
-    );
   }
 
 }

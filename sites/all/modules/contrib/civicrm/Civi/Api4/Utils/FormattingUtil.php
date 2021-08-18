@@ -10,13 +10,6 @@
  +--------------------------------------------------------------------+
  */
 
-/**
- *
- * @package CRM
- * @copyright CiviCRM LLC https://civicrm.org/licensing
- */
-
-
 namespace Civi\Api4\Utils;
 
 use Civi\Api4\Query\SqlExpression;
@@ -25,12 +18,18 @@ require_once 'api/v3/utils.php';
 
 class FormattingUtil {
 
+  /**
+   * @var string[]
+   */
   public static $pseudoConstantContexts = [
     'name' => 'validate',
     'abbr' => 'abbreviate',
     'label' => 'get',
   ];
 
+  /**
+   * @var string[]
+   */
   public static $pseudoConstantSuffixes = ['name', 'abbr', 'label', 'color', 'description', 'icon'];
 
   /**
@@ -201,13 +200,16 @@ class FormattingUtil {
         $fieldName = \CRM_Utils_Array::first($fieldExpr->getFields());
         $field = $fieldName && isset($fields[$fieldName]) ? $fields[$fieldName] : NULL;
         $dataType = $field['data_type'] ?? ($fieldName == 'id' ? 'Integer' : NULL);
-        // If Sql Function e.g. GROUP_CONCAT or COUNT wants to do its own formatting, apply and skip dataType conversion
+        // If Sql Function e.g. GROUP_CONCAT or COUNT wants to do its own formatting, apply
         if (method_exists($fieldExpr, 'formatOutputValue') && is_string($value)) {
-          $result[$key] = $value = $fieldExpr->formatOutputValue($value);
-          $dataType = NULL;
+          $result[$key] = $value = $fieldExpr->formatOutputValue($value, $dataType);
         }
         if (!$field) {
           continue;
+        }
+        if (!empty($field['output_formatters'])) {
+          self::applyFormatters($result, $fieldName, $field, $value);
+          $dataType = NULL;
         }
         // Evaluate pseudoconstant suffixes
         $suffix = strrpos($fieldName, ':');
@@ -296,6 +298,19 @@ class FormattingUtil {
       }
     }
     return is_array($value) ? $matches : $matches[0] ?? NULL;
+  }
+
+  private static function applyFormatters($result, $fieldName, $field, &$value) {
+    $row = [];
+    $prefix = substr($fieldName, 0, strpos($fieldName, $field['name']));
+    foreach ($result as $key => $val) {
+      if (!$prefix || strpos($key, $prefix) === 0) {
+        $row[substr($key, strlen($prefix))] = $val;
+      }
+    }
+    foreach ($field['output_formatters'] as $formatter) {
+      $formatter($value, $row, $field);
+    }
   }
 
   /**

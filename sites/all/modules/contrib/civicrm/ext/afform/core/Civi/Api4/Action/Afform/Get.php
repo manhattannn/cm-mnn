@@ -4,6 +4,7 @@ namespace Civi\Api4\Action\Afform;
 
 use Civi\Api4\CustomField;
 use Civi\Api4\CustomGroup;
+use CRM_Afform_ExtensionUtil as E;
 
 /**
  * @inheritDoc
@@ -102,16 +103,15 @@ class Get extends \Civi\Api4\Generic\BasicGetAction {
     }
     $customApi = CustomGroup::get()
       ->setCheckPermissions(FALSE)
-      ->setSelect(['name', 'title', 'help_pre', 'help_post', 'extends', 'max_multiple'])
+      ->addSelect('name', 'title', 'help_pre', 'help_post', 'extends', 'max_multiple')
       ->addWhere('is_multiple', '=', 1)
       ->addWhere('is_active', '=', 1);
     if ($groupNames) {
       $customApi->addWhere('name', 'IN', $groupNames);
     }
     if ($getLayout) {
-      $customApi->addSelect('help_pre')->addSelect('help_post');
-      $customApi->addChain('fields', CustomField::get()
-        ->setCheckPermissions(FALSE)
+      $customApi->addSelect('help_pre', 'help_post');
+      $customApi->addChain('fields', CustomField::get(FALSE)
         ->addSelect('name')
         ->addWhere('custom_group_id', '=', '$id')
         ->addWhere('is_active', '=', 1)
@@ -127,10 +127,11 @@ class Get extends \Civi\Api4\Generic\BasicGetAction {
         'name' => $name,
         'type' => 'block',
         'requires' => [],
-        'title' => ts('%1 block (default)', [1 => $custom['title']]),
+        'title' => E::ts('%1 block (default)', [1 => $custom['title']]),
         'description' => '',
         'is_dashlet' => FALSE,
         'is_public' => FALSE,
+        'is_token' => FALSE,
         'permission' => 'access CiviCRM',
         'join' => 'Custom_' . $custom['name'],
         'block' => $custom['extends'],
