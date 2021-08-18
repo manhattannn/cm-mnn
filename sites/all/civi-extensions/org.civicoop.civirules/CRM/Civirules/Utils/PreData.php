@@ -17,9 +17,7 @@ class CRM_Civirules_Utils_PreData {
    * @param string $objectName
    * @param int $objectId
    * @param array $params
-   * @access public
-   * @static
-   *
+   * @param string $eventID
    */
   public static function pre($op, $objectName, $objectId, $params, $eventID) {
     // Do not trigger when objectName is empty. See issue #19
@@ -79,6 +77,31 @@ class CRM_Civirules_Utils_PreData {
 
     }
     self::setPreData($entity, $id, $data, $eventID);
+  }
+
+  /**
+   * Retrieve the original data when the customPre hook is called.
+   *
+   * @param $op
+   * @param $groupID
+   * @param $entityID
+   * @param $params
+   * @param $eventID
+   */
+  public static function customPre($op, $groupID, $entityID, $params, $eventID=1) {
+    // We use api version 3 here as there is no api v4 for the CustomValue table.
+    $entity = civicrm_api3('CustomGroup', 'getvalue', ['id' => $groupID, 'return' => 'extends']);
+    $data = array();
+    try {
+      $data = civicrm_api3($entity, 'getsingle', array('id' => $entityID));
+    } catch (Exception $e) {
+      // Do nothing.
+    }
+    $customDataApiResult = civicrm_api3('CustomValue', 'get', ['entity_id' => $entityID, 'entity_table' => $entity]);
+    foreach($customDataApiResult['values'] as $customField) {
+      $data['custom_' . $customField['id']] = $customField['latest'];
+    }
+    self::setPreData($entity, $entityID, $data, $eventID);
   }
 
   /**
