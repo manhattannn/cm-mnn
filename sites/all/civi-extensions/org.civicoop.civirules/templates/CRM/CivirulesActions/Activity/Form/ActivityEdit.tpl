@@ -1,1 +1,0 @@
-{include file='CRM/CivirulesActions/Activity/Form/Activity.tpl'}
