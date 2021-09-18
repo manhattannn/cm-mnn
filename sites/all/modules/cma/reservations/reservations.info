@@ -2,18 +2,18 @@
 ; +---------------------------------------------------------------------------+
 ; | Copyright (C) 2009 Openflows, Inc. + Blue Bag. All rights reserved.       |
 ; | Additionally, Kevin Reynen + Dane Powell                                  |
-; |                                                                           |  
+; |                                                                           |
 ; | This work is published under the GNU AGPLv3 license without any           |
 ; | warranty. For full license and copyright information, see                 |
 ; | https://www.gnu.org/licenses/agpl-3.0.html                                |
-; +---------------------------------------------------------------------------+ 
+; +---------------------------------------------------------------------------+
 name = CMA Reservations
 package = CMA Reservations
 description = "Enable reservation options on any content type"
-project = "reservations"
+project = "reservations gen"
 
 core = 7.x
-version = "7.x-3.0"
+version = "7.x-3.2.0"
 
 configure = admin/config/reservations/reservations
 
@@ -49,10 +49,4 @@ files[] = theme/reservations_reservation_table.tpl.php
 files[] = theme/theme.inc
 
 
-
-; Information added by drupal.org packaging script on 2013-10-09
-version = "7.x-2.0-alpha2"
-core = "7.x"
-project = "reservations"
-datestamp = "1381332469"
 

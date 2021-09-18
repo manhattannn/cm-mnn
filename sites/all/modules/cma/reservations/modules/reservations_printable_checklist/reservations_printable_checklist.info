@@ -1,5 +1,5 @@
 name = Reservations Printable Checklist
-package = Reservations
+package = CMA reservation
 description = "Adds a printable checklist option to Reservation nodes."
 
 core = 7.x

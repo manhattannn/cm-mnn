@@ -85,21 +85,22 @@ function reservations_ui_menu() {
   $items['admin/reservations/manage/current_inventory'] = array(
     'title' => 'Current Inventory',
     'description' => 'List Reservable Content Types with the number On Hand, Checked Out, Temporarily Unavailable, ',
-    'page callback' => 'theme',
-    'page arguments' => array('reservations_ui_current_inventory'),
+
+    // Original code - did not properly work.
+    //    'page callback' => 'theme',
+    //    'page arguments' => array('reservations_ui_current_inventory'),
+
+    // Fixed code - but with confusing overhead.
+    //    'page callback' => 'theme',
+    //    'page arguments' => array('reservations_ui_current_inventory', array()),
+
+    // Best way - but we should:
+    // @todo - rename the file to includes/current_inventory.inc
+    'page callback' => 'theme_reservations_ui_current_inventory',
+    'file' => 'theme.inc',
+    'file path' => drupal_get_path('module', 'reservations_ui') . '/theme',
     'access arguments' => array('manage reservations'),
     'type' => MENU_NORMAL_ITEM,
-  );
-
-  $items['node/%node/reservations-list'] = array(
-    'title' => 'Reservations',
-    'description' => 'Takes node object and returns reservations',
-    'page callback' => 'reservations_ui_reservations',
-    'page arguments' => array(1),
-    'access callback' => 'reservations_ui_display_reservations_tab',
-    'access arguments' => array(1),
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 13,
   );
 
   return $items;
@@ -138,31 +139,7 @@ function reservations_ui_admin_settings($form, &$form_state) {
     '#description' => t(''),
   );
 
-
-
   return system_settings_form($form);
-}
-
-/**
- * Controls display of Reservations Tab on Reservable content types
- */
-function reservations_ui_display_reservations_tab($node) {
-  if (isset($node->reservations_type_setting) && $node->reservations_type_setting <> 'disabled') {
-    return TRUE;
-  }
-}
-
-/**
- * Adds Tab to Reservable content types with list of related Reservation nodes
- * if criteria from reservation_ui_display_reservations_tab returns TRUE
- */
-function reservations_ui_reservations($node) {
-
-  $args = array($node->nid);
-  $view = views_get_view('reservations_ui_node_res');
-  $output = $view->execute_display('default', $args);
-
-  return $output;
 }
 
 /**
@@ -232,7 +209,6 @@ function reservations_ui_management_page() {
   }
 }
 
-
 /**
  * Implements hook_form_alter().
  */
@@ -241,16 +217,60 @@ function reservations_ui_form_alter(&$form, $form_state, $form_id) {
 }
 
 /**
- * Implements hook_menu_alter().
+ * Implements hook_menu_local_tasks_alter()
  *
- * This might actually be the least gross way to override the node/add page.
+ * Only want the reservations view tab to appear on reservable nodes
  */
-function reservations_ui_menu_alter(&$items) {
+function reservations_ui_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  // make sure the reservations module is enabled
+  if (module_exists('reservations') == FALSE) return;
 
-  $items['node/add']['page callback'] = 'reservations_ui_node_add_page';
-  $items['node/add']['file'] = 'reservations_ui.pages.inc';
-  $items['node/add']['file path'] = drupal_get_path('module', 'reservations_ui');
+  //get an array of all the nonreservable content types and see if this one
+  $nonreservable_types = reservations_ui_nonreservable_content_types();
 
+  // determine if this is a nonreservable content type
+  $type = NULL;
+	foreach ($router_item["map"] as $map) {
+		if (!isset($map->type)) continue;
+		if (in_array($map->type, $nonreservable_types)) {
+			$type = $map->type;
+			break;
+		}
+	}
+  if ($type == NULL) return;
+
+  // nonreservable so unset the reservations tab
+	foreach ($data['tabs'][0]['output'] as $key => $value) {
+		if ($value['#link']['path'] == 'node/%/reservations-list') {
+			unset($data['tabs'][0]['output'][$key]);
+		}
+	}
 }
 
+/**
+ * Return a list of all nonreservable content types.
+ *
+ * @return
+ *    returns an associative array of nonreservable content types
+ */
+function reservations_ui_nonreservable_content_types() {
 
+  // query for all content types that are nonreservable
+  $sql = "
+    SELECT mt.type
+      FROM {reservations_node_type} mt
+        INNER JOIN {node_type} nt
+          ON mt.type = nt.type
+      WHERE reservations_type_setting = :reservations_type_setting
+  ";
+
+  $nonreservable_types = db_query($sql, array(
+    ':reservations_type_setting' => 'disabled'
+  ));
+
+  foreach ($nonreservable_types  as $type_name) {
+    $types[] = $type_name->type;
+  }
+
+  return $types;
+}

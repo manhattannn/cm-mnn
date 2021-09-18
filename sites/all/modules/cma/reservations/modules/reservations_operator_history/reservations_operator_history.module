@@ -87,149 +87,151 @@ function reservations_operator_history_views_data() {
   // is not very useful for this table, as it isn't really a distinct object of
   // its own, but it makes a good example.
   $data['reservations_operator_history']['table']['base'] =
-    array(
-	  'field' => 'slot_id', // This is the identifier field for the view.
-	  'title' => t('Reservations Operator History'),
-	  'help' => t('Reservations Operator History keeps the history of '.
-		      'status changes to reservations by operators.'),
-	  'weight' => -10,
-	  );
+    [
+      'field' => 'slot_id', // This is the identifier field for the view.
+      'title' => t('Reservations Operator History'),
+      'help' => t('Reservations Operator History keeps the history of ' .
+        'status changes to reservations by operators.'),
+      'weight' => -10,
+    ];
 
   // This table references the {node} table. The declaration below creates an
   // 'implicit' relationship to the node table, so that when 'node' is the base
   // table, the fields are automatically available.
   $data['reservations_operator_history']['table']['join'] =
-    array(
-	  // Index this array by the table name to which this table refers.
-	  // 'left_field' is the primary key in the referenced table.
-	  // 'field' is the foreign key in this table.
-	  'node' => array(
-			  'left_field' => 'nid',
-			  'field' => 'reservations_id',
-			  ),
-	  );
+    [
+      // Index this array by the table name to which this table refers.
+      // 'left_field' is the primary key in the referenced table.
+      // 'field' is the foreign key in this table.
+      'node' => [
+        'left_field' => 'nid',
+        'field' => 'reservations_id',
+      ],
+    ];
 
   // Next, describe each of the individual fields in this table to Views.
   // Node ID table field.
   $data['reservations_operator_history']['id'] =
-    array(
-	  'title' => t('ID'),
-	  'help' => t('The primary key of the table'),
-	  'field' => array(
-			   'handler' => 'views_handler_field_numeric',
-			   'click sortable' => TRUE,
-			   ),
-	  'filter' => array(
-			    'handler' => 'views_handler_filter_numeric',
-			    ),
-	  'sort' => array(
-			  'handler' => 'views_handler_sort',
-			  ),
+    [
+      'title' => t('ID'),
+      'help' => t('The primary key of the table'),
+      'field' => [
+        'handler' => 'views_handler_field_numeric',
+        'click sortable' => TRUE,
+      ],
+      'filter' => [
+        'handler' => 'views_handler_filter_numeric',
+      ],
+      'sort' => [
+        'handler' => 'views_handler_sort',
+      ],
 
-	  );
+    ];
   $data['reservations_operator_history']['uid'] =
-    array(
-	  'title' => t('UID'),
-	  'help' => t('The UID of the operator editing the reservation.'),
-	  'field' => array(
-			   'handler' => 'views_handler_field_numeric',
-			   'click sortable' => TRUE,
-			   ),
-	  'filter' => array(
-			    'handler' => 'views_handler_filter_numeric',
-			    ),
-	  'sort' => array(
-			  'handler' => 'views_handler_sort',
-			  ),
+    [
+      'title' => t('UID'),
+      'help' => t('The UID of the operator editing the reservation.'),
+      'field' => [
+        'handler' => 'views_handler_field_numeric',
+        'click sortable' => TRUE,
+      ],
+      'filter' => [
+        'handler' => 'views_handler_filter_numeric',
+      ],
+      'sort' => [
+        'handler' => 'views_handler_sort',
+      ],
 
-	  );
+    ];
   $data['reservations_operator_history']['reservation_id'] =
-    array(
-	  'title' => t('Reservation nid'),
-	  'help' => t('The Reservation NID.'),
-	  'field' => array(
-			   'handler' => 'views_handler_field_node',
-			   'click sortable' => TRUE,
-			   ),
-	  'filter' => array(
-			    'handler' => 'views_handler_filter_numeric',
-			    ),
-	  'sort' => array(
-			  'handler' => 'views_handler_sort',
-			  ),
-	  'relationship' =>
-	  array(
-		'base' => 'node', // The name of the table to join with.
-		'base field' => 'nid', //name of the field on the joined table.
-		'handler' => 'views_handler_relationship',
-		'label' => t('Operatory History Reservation Relationship'),
-		'title' => t('Operatory History Reservation Relationship'),
-		'description' => t('The reservation operator history.'),
-		),
+    [
+      'title' => t('Reservation nid'),
+      'help' => t('The Reservation NID.'),
+      'field' => [
+        'handler' => 'views_handler_field_node',
+        'click sortable' => TRUE,
+      ],
+      'filter' => [
+        'handler' => 'views_handler_filter_numeric',
+      ],
+      'sort' => [
+        'handler' => 'views_handler_sort',
+      ],
+      'relationship' =>
+        [
+          'base' => 'node', // The name of the table to join with.
+          'base field' => 'nid', //name of the field on the joined table.
+          'handler' => 'views_handler_relationship',
+          'label' => t('Operatory History Reservation Relationship'),
+          'title' => t('Operatory History Reservation Relationship'),
+          'description' => t('The reservation operator history.'),
+        ],
 
-	  );
+    ];
   $data['reservations_operator_history']['beginning_status'] =
-    array(
-	  'title' => t('Beginning Reservation Status'),
-	  'help' => t('Beginning Reservation Status'),
-	  'field' => array(
-			   'handler' => 'views_handler_field_numeric',
-			   'click sortable' => TRUE,
-			   ),
-	  'filter' => array(
-			    'handler' => 'views_handler_filter_numeric',
-			    ),
-	  'sort' => array(
-			  'handler' => 'views_handler_sort',
-			  ),
-	  );
+    [
+      'title' => t('Beginning Reservation Status'),
+      'help' => t('Beginning Reservation Status'),
+      'field' => [
+        'handler' => 'views_handler_field_numeric',
+        'click sortable' => TRUE,
+      ],
+      'filter' => [
+        'handler' => 'views_handler_filter_numeric',
+      ],
+      'sort' => [
+        'handler' => 'views_handler_sort',
+      ],
+    ];
   $data['reservations_operator_history']['end_status'] =
-    array(
-	  'title' => t('End Reservation Status'),
-	  'help' => t('End Reservation Status'),
-	  'field' => array(
-			   'handler' => 'views_handler_field_numeric',
-			   'click sortable' => TRUE,
-			   ),
-	  'filter' => array(
-			    'handler' => 'views_handler_filter_numeric',
-			    ),
-	  'sort' => array(
-			  'handler' => 'views_handler_sort',
-			  ),
-	  );
+    [
+      'title' => t('End Reservation Status'),
+      'help' => t('End Reservation Status'),
+      'field' => [
+        'handler' => 'views_handler_field_numeric',
+        'click sortable' => TRUE,
+      ],
+      'filter' => [
+        'handler' => 'views_handler_filter_numeric',
+      ],
+      'sort' => [
+        'handler' => 'views_handler_sort',
+      ],
+    ];
   // Example timestamp field.
   $data['reservations_operator_history']['timestamp'] =
-    array(
-	  'title' => t('Timestamp'),
-	  'help' => t('Timestamp'),
-	  'field' => array(
-			   'handler' => 'views_handler_field_date',
-			   'click sortable' => TRUE,
-			   ),
-	  'sort' => array(
-			  'handler' => 'views_handler_sort_date',
-			  ),
-	  'filter' => array(
-			    'handler' => 'views_handler_filter_date',
-			    ),
-	  );
+    [
+      'title' => t('Timestamp'),
+      'help' => t('Timestamp'),
+      'field' => [
+        'handler' => 'views_handler_field_date',
+        'click sortable' => TRUE,
+      ],
+      'sort' => [
+        'handler' => 'views_handler_sort_date',
+      ],
+      'filter' => [
+        'handler' => 'views_handler_filter_date',
+      ],
+    ];
 
   $data['reservations_operator_history']['notes'] =
-    array(
-	  'title' => t('Notes'),
-	  'help' => t('Reservations Operator History Notes'),
-	  'field' => array(
-			   'handler' => 'views_handler_field_markup',
-			   'click sortable' => TRUE,
-			   ),
-	  'sort' => array(
-			  'handler' => 'views_handler_sort',
-			  ),
-	  'filter' => array(
-			    'handler' => 'views_handler_filter_string',
-			    ),
-	  );
+    [
+      'title' => t('Notes'),
+      'help' => t('Reservations Operator History Notes'),
+      'field' => [
+        'handler' => 'views_handler_field_markup',
+        'click sortable' => TRUE,
+        'format' => 'filtered_html',
+
+      ],
+      'sort' => [
+        'handler' => 'views_handler_sort',
+      ],
+      'filter' => [
+        'handler' => 'views_handler_filter_string',
+      ],
+    ];
 
   return $data;
 }

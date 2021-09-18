@@ -239,10 +239,8 @@ function theme_reservations_permissions_form($variables) {
  * be displayed in the permissions table. The variables are set in by the "Permissions Configuration" page.
  */
 function reservations_permissions_form($form, &$form_state) {
-  // Is the logged-in user an administrator.
-  global $user;
-  $admin_role = in_array('administrator', $user->roles);
-
+  // Is the logged-in user an administrator (Role ID 3).
+  $admin_role = user_has_role(3);
 
   //admin/reservations/manage/permissions/inventory/$tid
   $inventory = (arg(4) == 'inventory') ? arg(5) : FALSE;
@@ -413,6 +411,7 @@ function reservations_permissions_settings_form_submit($form, &$form_state) {
           if ($admin_role) {
             $perms[] = "edit any $type content";
             $perms[] = "delete any $type content";
+            $perms[] = "create $type content";
           }
           // If the value is set (user has permission for the type).
           if ($value) {
@@ -444,9 +443,21 @@ function reservations_permissions_settings_form_submit($form, &$form_state) {
               $perm_exists_to_revoke = db_query('SELECT COUNT(rid) FROM {role_permission} WHERE rid = :rid and permission = :permission', array(':rid' => $role->rid, ':permission' => 'edit own ' . $type . ' content'))->fetchField();
               if ($perm_exists_to_revoke) {
                 $revoke_perms = array_merge($perms, $revoke_perms);
-                // Also add the $admin_role permission in case it was removed from the role.
+                // Also, add any missing permissions to allow for user editing of the role.
+                if (!in_array("edit own $type content", $revoke_perms)) {
+                  $revoke_perms[] = "edit own $type content";
+                }
+                if (!in_array("delete own $type content", $revoke_perms)) {
+                  $revoke_perms[] = "delete own $type content";
+                }
                 if (!in_array("delete any $type content", $revoke_perms)) {
                   $revoke_perms[] = "delete any $type content";
+                }
+                if (!in_array("edit any $type content", $revoke_perms)) {
+                  $revoke_perms[] = "edit any $type content";
+                }
+                if (!in_array("create $type content", $revoke_perms)) {
+                  $revoke_perms[] = "create $type content";
                 }
               }
             }

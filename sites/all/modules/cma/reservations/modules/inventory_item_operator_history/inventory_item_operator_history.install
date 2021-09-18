@@ -19,55 +19,62 @@ function inventory_item_operator_history_install() {
  */
 function inventory_item_operator_history_schema() {
   $schema['inventory_item_operator_history'] =
-    array(
-	  'description' => t('Stores operator actions on inventory items'),
-	  'fields' =>
-	  array(
-		'id' =>
-		array(
-		      'description' => 'Primary Key.',
-		      'type' => 'serial',
-		      'unsigned' => TRUE,
-		      'not null' => TRUE),
-		'uid' =>
-		array(
-		      'description' =>
-		      'Operator UID.',
-		      'type' => 'int',
-		      'not null' => TRUE),
-		'inventory_item_id'    =>
-		array(
-		      'description' => 'The Inventory Item ID.',
-		      'type' => 'int',
-		      ),
-		'beginning_status' =>
-		array(
-		      'description' =>  'Beginning Status',
-		      'type' => 'int',
-		      'not null' => TRUE),
-		'end_status' =>
-		array(
-		      'description' =>  'Ending Status',
-		      'type' => 'int',
-		      'not null' => TRUE),
-		'timestamp'    =>
-		array(
-		      'description'=>'The time the operator took the action.',
-		      'type' => 'int',
-		      'not null' => TRUE),
-		'notes'    =>
-		array(
-		      'description'=>'Inventory Item Operator History Notes',
-		      'type' => 'blob',
-		      'not null' => FALSE),
-		),
+    [
+      'description' => t('Stores operator actions on inventory items'),
+      'fields' =>
+        [
+          'id' =>
+            [
+              'description' => 'Primary Key.',
+              'type' => 'serial',
+              'unsigned' => TRUE,
+              'not null' => TRUE
+            ],
+          'uid' =>
+            [
+              'description' =>
+                'Operator UID.',
+              'type' => 'int',
+              'not null' => TRUE
+            ],
+          'inventory_item_id' =>
+            [
+              'description' => 'The Inventory Item ID.',
+              'type' => 'int',
+            ],
+          'beginning_status' =>
+            [
+              'description' => 'Beginning Status',
+              'type' => 'int',
+              'not null' => TRUE
+            ],
+          'end_status' =>
+            [
+              'description' => 'Ending Status',
+              'type' => 'int',
+              'not null' => TRUE
+            ],
+          'timestamp' =>
+            [
+              'description' => 'The time the operator took the action.',
+              'type' => 'int',
+              'not null' => TRUE
+            ],
+          'notes' =>
+            [
+              'description' => 'Inventory Item Operator History Notes',
+              'type' => 'blob',
+              'not null' => FALSE
+            ],
+        ],
 
-	  'indexes' => array(
-			     'inventory_item_id' =>
-			     array('inventory_item_id'),
-			     'uid' => array('uid')),
-	  'primary key' => array('id'),
-	  );
+      'indexes' => [
+        'inventory_item_id' =>
+          ['inventory_item_id'],
+        'uid' => ['uid']
+      ],
+      'primary key' => ['id'],
+    ];
 
   return $schema;
 }

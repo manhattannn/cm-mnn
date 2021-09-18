@@ -1,0 +1,64 @@
+7.x-3.dev 
+---------
+
+7.x-3.2.1 2021 AUG 10
+---------------------
+Commits:
+  dde1884 - 3908: fix so user can filter on inventory items reservations tab view
+  
+Includes:
+  - Fixes related reservations_ui:reservations_ui_node_res filter
+    - Launch List
+      - Revert Reservations UI: Node Reservation to use code instead of DB
+    - Issue: the user was unable to submit the Start Date filter on the 
+      Reservations tab of inventory items 
+      - two start date filters were set and were conflicting
+    - Issue: Each time the filter is submitted, the page returns to the View tab.
+      - Menu item was being added for the view which was using a master 
+        display. Added a page with a tab menu and removed code for menu and 
+        callback
+      - add a hook to alter the tabs for nonreservable content types so that
+        the view is only shown on reservable content types
+
+
+7.x-3.2.0 2021 MAR 24
+---------------------
+commits:
+  bccc32b #2894 - remove patches and empty folder: civicrm_custom
+  6cbb461 #2894 all changes needed to make Reservation work independently form other custom modules, excluding project.
+  45b451b #2894 update all core reservation modules to be under the CMA Reservation package
+
+Includes:
+  - Decouple the reservation module from other custom modules.
+  - The Project module is the only custom project required.
+  - It also needs OG for the proper operation of projects.
+
+
+7.x-3.1.2, 2021 MAR 17
+----------------------
+commits:
+  7fdf3af fix small issue in reservations_resource_chart.module
+  2db0a9a replace formatCurrency with NumberFormatter
+  c95b963 #2895 Fix PHP 7.3 related issues for pcm_reservation
+  940a9b0 #2895 Fix PHP 7.3 related issues for cma/reservations
+
+Includes:
+- PHP 7.3 compatibility and fix related errors and warnings.
+
+
+7.x-3.1, 2021 FEB 25
+--------------------
+commits:
+  #2865 - don't allow changing reservation dates and assigning items in a single operation.
+  https://bitbucket.org/openflows/generic.res.openflows.com/commits/2c259c4a8626d73f0bd3cd8dbf87f5817742711f
+Includes:
+- New Validation Rule:
+  The user is not allowed to check out items or assign them if they also changed the start or end date.
+  This is because the validation of assigned items only checks if the reservation conflicts with other assigned items.
+  This validation ignores unassigned reservation and if allowed a user can make an item unavailable to another existing
+  order by assigning and changing the date at the same time.
+
+
+7.x-3.0, 2021 FEB 25
+--------------------
+- This is the latest version of the code before the creation of the CHANGELOG.txt.

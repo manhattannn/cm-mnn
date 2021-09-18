@@ -124,9 +124,15 @@ function reservations_admin_settings($form, &$form_state) {
   }
 
   $form['reservations_hours']['reservations_hours_admin'] = array(
-    '#title' => t('Admin hours'),
+    '#title' => t('Expanded Hours'),
     '#default_value' => variable_get('reservations_hours_admin', '07:00-22:00'),
-    '#description' => t('This setting controls the hours shown on the conflict grid for users with create Reservations outside the normal hours of operation. The conflict grid is normally limited to the days and hours the set above. Because users with this permission can create Reservations outside the normal hours of operation, they need to see conflicts during those times as well.'),
+    '#description' => t(
+      "This setting controls the hours shown on the conflict grid for " .
+      "users with 'Create new content (Outside Normal Hours of " .
+      "Operation)' permission.  Normally, the conflict grid is limited " .
+      "to the hours of operation set above for the days of the week. " .
+      "But user allowed to create reservations outside normal hours of " .
+      "operation, need to see conflicts during the expanded hours as well."),
     '#type' => 'textfield',
     '#size' => 11,
     '#maxlength' => 11,
@@ -186,6 +192,16 @@ function reservations_admin_settings($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
+
+  $field_list = _get_posible_status_fields();
+  $form['reservations_advanced']['reservable_item_status_field_name'] = array(
+    '#type' => 'select',
+    '#title' => t('Reservable item status field'),
+    '#options' => $field_list,
+    '#default_value' => variable_get('reservable_item_status_field_name', 'field_reservable_item_status'),
+    '#description' => t('This field to hold the status for the reservable item status.'),
+  );
+
 
   $form['reservations_advanced']['reservations_verbose_logging'] = array(
     '#type' => 'checkbox',
@@ -357,3 +373,22 @@ function reservations_admin_staff_settings($form, &$form_state) {
   return (system_settings_form($form));
 }
 
+/**
+ * @return array
+ *   A list of option select fields as one of those will be the reservable tem status field.
+ */
+function _get_posible_status_fields() {
+  $instances = field_info_instances();
+
+  $field_list = array();
+  foreach ($instances as $entity_type => $type_bundles) {
+    foreach ($type_bundles as $bundle => $bundle_instances) {
+      foreach ($bundle_instances as $field_name => $instance) {
+        if ($instance['widget']['type'] == 'options_select') {
+          $field_list[$field_name] = $field_name;
+        }
+      }
+    }
+  }
+  return $field_list;
+}

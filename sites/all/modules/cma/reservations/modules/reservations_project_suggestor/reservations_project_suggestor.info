@@ -15,8 +15,7 @@ project = "reservations"
 core = 7.x
 version = "7.x-3.x
 
-configure = admin/config/reservations/project_suggestor
-
 dependencies[] = reservations
+dependencies[] = cm_project
 scripts[] = reservations_project_suggestor.js
 

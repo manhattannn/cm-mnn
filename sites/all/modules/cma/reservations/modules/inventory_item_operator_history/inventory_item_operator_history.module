@@ -48,20 +48,20 @@ function inventory_item_operator_history_node_delete($node) {
 
 function inventory_item_operator_history_node_post_save($inventory_item,
 							$deleting = FALSE) {
+  $item_status_field_name = variable_get('reservable_item_status_field_name', 'field_reservable_item_status');
 
-  if (!isset($inventory_item->field_reservable_item_status)) {
+  if (!isset($inventory_item->{$item_status_field_name})) {
     return;
   }
 
+  $notes = ''; // Intit notes.
   //fetch new status
   if ($deleting) {
     $new_status = 0;
   }
   else {
     $new_status =
-      inventory_item_operator_get_single_field_value($inventory_item,
-					       'field_reservable_item_status',
-						     'tid');
+      inventory_item_operator_get_single_field_value($inventory_item, $item_status_field_name,'tid');
     $new_status = $new_status ? $new_status : 0;
     $notes =
       inventory_item_operator_get_single_field_value($inventory_item,
@@ -74,13 +74,15 @@ function inventory_item_operator_history_node_post_save($inventory_item,
 
 
   //fetch old status
-
-  $old_inventory_item = $inventory_item->original;
-  $old_status =
-    inventory_item_operator_get_single_field_value($old_inventory_item,
-						'field_reservable_item_status',
-						   'tid');
-  $old_status = $old_status ? $old_status : 0;
+  if (isset($inventory_item->original)) {
+    $old_inventory_item = $inventory_item->original;
+    $old_status =
+      inventory_item_operator_get_single_field_value($old_inventory_item, $item_status_field_name, 'tid');
+    $old_status = $old_status ? $old_status : 0;
+  }
+  else {
+    $old_status = 0;
+  }
 
 
 
@@ -251,32 +253,45 @@ function inventory_item_operator_history_views_data() {
 
   $data['inventory_item_operator_history']['notes'] =
     array(
-	  'title' => t('Notes'),
-	  'help' => t('Inventory Items Operator History Notes'),
-	  'field' => array(
-			   'handler' => 'views_handler_field_markup',
-			   'click sortable' => FALSE,
-			   ),
-	  'sort' => array(
-			  'handler' => 'views_handler_sort',
-			  ),
-	  'filter' => array(
-			    'handler' => 'views_handler_filter_string',
-			    ),
-	  );
+      'title' => t('Notes'),
+      'help' => t('Inventory Items Operator History Notes'),
+      'field' => array(
+        'handler' => 'views_handler_field_markup',
+        'click sortable' => FALSE,
+        'format' => 'filtered_html',
+      ),
+      'sort' => array(
+        'handler' => 'views_handler_sort',
+      ),
+      'filter' => array(
+        'handler' => 'views_handler_filter_string',
+      ),
+    );
 
   return $data;
 }
 
 function inventory_item_operator_history_inventory_item_field($row) {
   $node = node_load($row->inventory_item_id);
-  $link = l($node->title, "node/" . $row->inventory_item_id);
+  $link = ' Inventory Item not found';
+  if ($node) {
+    $link = l($node->title, "node/" . $row->inventory_item_id);
+  }
   return $link;
 }
 
 function inventory_item_operator_history_operator_field($row) {
   $user = user_load($row->uid);
-  $link = l($user->realname, 'user/'.$row->uid);
+  $link = ''; // Default.
+  if ($user) {
+    if (isset($user->realname)) {
+      $link = l($user->realname, 'user/' . $row->uid);
+    }
+    else {
+      $link = l($user->name, 'user/' . $row->uid);
+    }
+
+  }
   return $link;
 }
 
@@ -289,9 +304,12 @@ function inventory_item_operator_history_status_field($row, $type) {
     $status = $row->end_status;
   }
   $term = taxonomy_term_load($status);
-  $status = $term->name;
-  if ($type == 'ending' && $row->notes) {
-    $status .= ' ('. $row->notes . ')';
+  $status = 'Unknown'; // Default.
+  if ($term) {
+    $status = $term->name;
+    if ($type == 'ending' && $row->notes) {
+      $status .= ' (' . $row->notes . ')';
+    }
   }
   return $status;
 }

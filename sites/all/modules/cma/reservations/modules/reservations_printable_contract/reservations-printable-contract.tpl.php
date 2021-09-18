@@ -132,7 +132,8 @@
                 <div>
                 <?php
     if(!$replace_cost_cols) {
-      print $ttitle . ' (' . money_format('%(#10n', $day_rate) . ' per day)';
+      $fmt = new \NumberFormatter("en-US", \NumberFormatter::CURRENCY);
+      print $ttitle . ' (' . $fmt->formatCurrency($day_rate, "USD") . ' per day)';
     }
     else {
       print $ttitle;
@@ -170,8 +171,9 @@
         print '<td>' . $contract_text . '</td>';
       }
       else {
-        print '<td>' . money_format('%(#10n', $comreservationsal_cost) . '</td>';
-        print '<td>' . money_format('%(#10n', $member_cost) . '</td>';
+        $fmt = new \NumberFormatter("en-US", \NumberFormatter::CURRENCY);
+        print '<td>' . $fmt->formatCurrency($comreservationsal_cost, "USD") . '</td>';
+        print '<td>' . $fmt->formatCurrency($member_cost, "USD") . '</td>';
       }
     ?>
             </tr>
@@ -188,8 +190,9 @@
           <tfoot>
             <tr class="<?php echo $even_odd; ?>">
               <th>Total</th>
-              <td><?php echo money_format('%(#10n', $comreservationsal_cost_total) ?></td>
-              <td><?php echo money_format('%(#10n', $member_cost_total) ?></td>
+              <?php $fmt = new \NumberFormatter("en-US", \NumberFormatter::CURRENCY); ?>
+              <td><?php echo $fmt->formatCurrency($comreservationsal_cost_total, "USD") ?></td>
+              <td><?php echo $fmt->formatCurrency($member_cost_total, "USD") ?></td>
             </tr>
           <tfoot>
     <?php endif; ?>

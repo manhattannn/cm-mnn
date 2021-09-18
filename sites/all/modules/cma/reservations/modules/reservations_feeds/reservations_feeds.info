@@ -1,11 +1,11 @@
-name = Reservations Feeds 
-package = Reservations
+name = Reservations Feeds
+package = CMA reservation
 description = "Provides a feeds processor plugin to import Content Type and Nodes with Reservations API settings."
 
 core = 7.x
 
 dependencies[] = reservations
-dependencies[] = feeds 
+dependencies[] = feeds
 
 
 files[] = reservations_feeds.module

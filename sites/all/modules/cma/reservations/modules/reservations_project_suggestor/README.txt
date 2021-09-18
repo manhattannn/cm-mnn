@@ -20,8 +20,6 @@ INSTALLATION
     - Field Type: the field type of the field you added to the Reservation form
     -  Validate Producer Project Membership?
        - Check this box if you want to validate that the producer is a member of the project
-  3 - grant permission on the Node -  Reservation: Create new content for those
-      who need to click the project suggestor button
 
 
 How to Apply GNU AFFERO GENERAL PUBLIC LICENSE Terms to Your New Programs - see LICENSE.txt

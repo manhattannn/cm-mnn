@@ -279,7 +279,12 @@ function reservations_pin_get_staff_users() {
   $ret = array();
   foreach($results['user'] as $uid=>$result) {
     $user = user_load($uid);
-    $ret[$uid] = $user->realname . " (".$user->name.")";
+    if (isset($user->realname)) {
+      $ret[$uid] = $user->realname . " (".$user->name.")";
+    }
+    else {
+      $ret[$uid] = $user->name;
+    }
   }
   asort($ret);
   return $ret;
@@ -299,8 +304,12 @@ function reservations_pin_query_role_filter_alter(QueryAlterableInterface $query
 
 function reservations_pin_reservations_operator_history_user_alter(&$user,
 							       &$reservation) {
-  $pin = $reservation->reservations_pin;
+  // Exit, if no pin.
+  if (!isset($reservation->reservations_pin)) {
+    return;
+  }
 
+  $pin = $reservation->reservations_pin;
   $uid = reservations_pin_get_uid_for_pin($pin);
   if ($uid) {
     $new_user = $uid ? user_load($uid) : NULL;

@@ -20,6 +20,7 @@ define('RESERVATIONS_AVA_T', 3); // Template Only.
 define('RESERVATIONS_UNA_S', 4); // No Longer in Inventory (edited).
 
 // Reservation status options.
+define('RESERVATIONS_STATUS_EMPTY', 0);
 define('RESERVATIONS_STATUS_UNCONFIRMED', 1);
 define('RESERVATIONS_STATUS_PENDING', 2);
 define('RESERVATIONS_STATUS_CHECKED_OUT', 3);
@@ -86,8 +87,8 @@ function reservations_permission() {
       'description' => t('This permission allows users to create/edit reservations with a status of unconfirmed or confirmed. It does not allow the user to change the status.  Users without this permission can NOT adjust the dates, times, or items in a Reservation after it has been confirmed.'),
     ),
     'create reservations outside hours of operation' => array(
-      'title' => '<em class="placeholder">Reservations</em>: Create new content (Outside Normal Hours of Operation)',
-      'description' => t('Does what it says. Allows users to create reservations with start and end times outside of the hours of operation without needing to have the Manage Reservations permission.'),
+      'title' => '<em class="placeholder">Reservations</em>: Show expanded conflict chart. (Outside Normal Hours of Operation)',
+      'description' => t('Will show the conflict chart for the hours defined by "Admin hours" of the Reservations API settings page.'),
     ),
     'push forward over closed days' => array(
       'title' => t('Push Forward Over Closed Days'),
@@ -309,7 +310,7 @@ function reservations_prepare(&$node) {
  * the validation hook was not being called for every reservation node
  */
 function reservations_validate($node, $form, &$form_state) {
-  // Admin override allows bypathing all validation.
+  // Admin override allows bypassing all validation.
   if (isset($form_state['values']['admin_override']) && $form_state['values']['admin_override']) {
     return;
   }
@@ -341,7 +342,7 @@ function reservations_validate($node, $form, &$form_state) {
       foreach ($form_state['values']['reservations_reservation_items'] as $did => $item) {
           if (isset($item['reservations_placeholder_nid'])) {
               $item_count++;
-              if ($item['reservations_remove_item_checkbox']) {
+              if (isset($item['reservations_remove_item_checkbox']) && $item['reservations_remove_item_checkbox']) {
                   $delete_count++;
               }
           }
@@ -375,7 +376,8 @@ function reservations_validate($node, $form, &$form_state) {
       $deleted_items = FALSE;
       if (isset($form_state['values']['reservations_reservation_items'])) {
           foreach ($form_state['values']['reservations_reservation_items'] as $did => $item) {
-              if ($item['reservations_remove_item_checkbox']) {
+              if (isset($item['reservations_remove_item_checkbox'])  &&
+                $item['reservations_remove_item_checkbox']) {
                   if ($item['reservations_placeholder_nid']) {
                       // If dialog set to delete items.
                       if ($dialog_delete_items_confirmation_value) {
@@ -430,6 +432,41 @@ function reservations_validate($node, $form, &$form_state) {
 
       // The state the reservation is in / (original state).
       $reservation_state = $node->reservations_original_reservation_status;
+
+
+    // Make sure user does not checkout or assign an item and change dates at the
+    // same time, as this will bypath validation.
+    $node = (object)$form_state['values'];
+    // Status.
+    $orig_state = $node->reservations_original_reservation_status;
+    $new_state = $node->reservations_reservation_status;
+    // Dates
+    $orig_start_date = $form['original_reservations_start_date']['#value'];
+    $orig_end_date = $form['original_reservations_end_date']['#value'];
+    $new_start_date = $node->field_reservations_date[$langcode][0]['value'];
+    $new_end_date = $node->field_reservations_date[$langcode][0]['value2'];
+    // Initialise the "Order contains invalid assigned items" variable.
+    $invalid_assigned_item = FALSE;
+    // If the order is in pending or unconfirmed state
+    if ( in_array($orig_state, [RESERVATIONS_STATUS_PENDING, RESERVATIONS_STATUS_UNCONFIRMED])  ) {
+      // and the start or end date have changed.
+      if (($orig_start_date != $new_start_date) || ($orig_end_date != $new_end_date)) {
+        // Check all items.
+        foreach ($node->reservations_reservation_items as $item) {
+          // if an assigned item is found .
+          if (isset($item['reservations_item_nid']) && ($item['reservations_item_nid'] > 0 ) ) {
+            // Set the "Order contains invalid assigned items" to Yes.
+            $invalid_assigned_item = TRUE;
+            break;
+          }
+        }
+      }
+    }
+    // if "Order contains invalid assigned items"
+    if ($invalid_assigned_item) {
+      // Set an error and give useful advice to the user.
+      form_set_error('checkout_options', t('If you need to change the date you must make sure no items are selected and that you save the reservation without checking out.'));
+    }
 
     // Clear / init the extended date variable.
     global $reservation_ext_date;
@@ -598,6 +635,12 @@ function reservations_validate($node, $form, &$form_state) {
           reservations_load_user();
           drupal_goto('node/' . $form_state['values']['nid'] . '/edit', $options);
       }
+
+    // If no variances selected.
+    if (empty($form_state['values']['field_reservable_variances']['und'][0]['tid'])) {
+      // Clear the variance reason field
+      $form_state['values']['field_variance_reason']['und'][0]["value"] = '';
+    }
   } finally {
       reservations_load_user();
   }
@@ -693,10 +736,6 @@ function reservations_form($node, &$form_state) {
     '#suffix' => '</div>',
   );
 
-  // Update the date labels.
-  // $form_state['values']['field_reservations_date'][$langcode][0]['value']['date']
-  $datef = $form_state['values']['field_reservations_date'];
-
   $form['initial_state'] = array(
     '#type' => 'hidden',
     '#value' => $node->reservations_reservation_status,
@@ -719,8 +758,9 @@ function reservations_form($node, &$form_state) {
 
     $checkout_options = array(
       NULL => '-- select item ---',
-      1 => 'Check-in all items on the reservation',
-      2 => 'Extend all or part of the reservation'
+      1 => t('Check-in all items on the reservation'),
+      2 => t('Extend all or part of the reservation'),
+      3 => t('Add an item - change status to reserved/confirmed'),
     );
     $form['choice_wrapper']['checkout_options'] = array(
       '#title' => t('Check in options'),
@@ -1047,6 +1087,36 @@ function reservations_form_alter(&$form, $form_state, $form_id) {
 
     // putting this here instead of reservations_form allows it to be run after the date fields are added
     case 'reservations_reservation_node_form':
+
+      // Hise the items string
+      $form['field_reservations_items_string']["#access"] = FALSE;
+
+      //put the fields into the admin section
+      $form['#group_children']['reservations_reservation_status'] =
+        'group_reservations_admin';
+      $form['#group_children']['reservations_pin'] ='group_reservations_admin';
+
+      //move reservations items block down page
+      $form['choice_wrapper']['#weight'] = 10;
+
+
+      //set temporary title, real title will be set in presave
+      $form['title'] = array(
+        '#type' => 'hidden',
+        '#value' => 'temp title',
+      );
+
+
+      // Get the node.
+      if (isset($form_state['values'])) {
+        $node = (array) $form_state['values'] + (array) $form['#node'];
+      }
+      else {
+        $node = $form['#node'];
+      }
+      $node = (object) $node;
+      $langcode = $node->language;
+
       if (user_access('suspend reservations access') && !user_access('manage reservations')) {
         drupal_set_message(t('Your permission to make Reservations has been suspended.  Please contact a staff member.'), 'error');
         $form = NULL;
@@ -1054,14 +1124,6 @@ function reservations_form_alter(&$form, $form_state, $form_id) {
       // Staff reservations - set reserve for.
       // @todo - code needs review.
       if (user_access('manage reservations')) {
-        // Get the node.
-        if (isset($form_state['values'])) {
-          $node = (array) $form_state['values'] + (array) $form['#node'];
-        }
-        else {
-          $node = $form['#node'];
-        }
-        $node = (object) $node;
         // Move the author field and set autocomplete and ahah handlers.
         // We do this here and not in after_build because the ahah hash is handled before after_build is called.
         $form['name'] = $form['author']['name'];
@@ -1104,7 +1166,7 @@ function reservations_form_alter(&$form, $form_state, $form_id) {
           $form['admin_override'] = array(
             '#type' => 'checkbox',
             '#title' => 'Admin Override Validation',
-            '#description' => 'This will bypath all validation (available to site admins only).',
+            '#description' => 'This will bypass all validation (available to site admins only).',
             '#default_value' => FALSE,
             '#weight' => -97,
             '#columns' => 0,
@@ -1136,6 +1198,25 @@ function reservations_form_alter(&$form, $form_state, $form_id) {
 //        $form['#prefix'] = '<div id="reservations-staff-edit-form-wrapper">';
 //        $form['#suffix'] = '</div>';
       }
+
+      // Store original values for later validation.
+    if (isset($node->field_reservations_date)) {
+      $date1 = $node->field_reservations_date[$langcode][0]['value'];
+      $date2 = $node->field_reservations_date[$langcode][0]['value2'];
+    }
+    else {
+      $date1 = NULL;
+      $date2 = NULL;
+    }
+      $form['original_reservations_start_date'] = array(
+        '#type' => 'value',
+        '#value' => $date1,
+      );
+      $form['original_reservations_end_date'] = array(
+        '#type' => 'value',
+        '#value' => $date2,
+      );
+
       // @todo - Is this needed?
       reservations_load_user();
       // End of: Staff reservations - set reserve for.
@@ -1197,6 +1278,66 @@ function reservations_form_alter(&$form, $form_state, $form_id) {
 
   }
 }
+
+
+/**
+ * Implements hook_node_presave().
+ */
+function reservations_node_presave($node) {
+  if($node->type == "reservations_reservation") {
+    $ptitle = $dtitle = $title = '';
+
+    //get project name
+    $field_name = 'field_reservation_project';
+    $project_id = reservations_get_single_field_value($node, $field_name,
+      'target_id');
+    $ptitle = $project_id ? node_load($project_id)->title : '';
+
+    //get department name
+    $field_name = 'field_reservations_department';
+    $tid = reservations_get_single_field_value($node, $field_name, 'tid');
+    $dtitle =  ($tid && $term = taxonomy_term_load($tid)) ? $term->name : '';
+
+    //get is template
+    $field_name = 'field_is_reservable_template';
+    $is_template =
+      reservations_get_single_field_value($node, $field_name, 'value');
+
+    if ($is_template) {
+      //get template name
+      $field_name = 'field_reservable_template_title';
+      $ttitle =
+        reservations_get_single_field_value($node, $field_name, 'value');
+    }
+
+    // to avoid clobbering the global $user, use a different variable for user
+    $producer = isset($node->uid) ? user_load($node->uid) : NULL;
+
+    if (isset($producer->display_name)) {
+      $display_name = $producer->display_name;
+    }
+    else {
+      $display_name = $producer->name;
+    }
+
+
+    //BASED ON WHAT TEMPLATE, PROJECT, AND DEPARTMENT VALUES WE HAVE, SET TITLE
+    if (isset($ttitle)) {
+      $title = t("Template: !ttitle", array("!ttitle" => $ttitle));
+    }
+    else if ($ptitle) {
+      $title = $ptitle . ": " . $display_name;
+    }
+    else if ($dtitle) {
+      $title = $dtitle . ": " . $display_name;
+    }
+    else {
+      $title = t("Reservation");
+    }
+    $node->title = $title;
+  }
+}
+
 
 /**
  * Menu callback that reprocesses the form with the new author
@@ -2266,10 +2407,9 @@ function reservations_build_reservation_table_form($form, &$form_state, $node, $
 
         $default = '';
         $inventory_item = node_load($item['reservations_item_nid']);
+        $item_status_field_name = variable_get('reservable_item_status_field_name', 'field_reservable_item_status');
         $default =
-          reservations_get_single_field_value($inventory_item,
-            'field_equipment_item_status',
-            'tid');
+          reservations_get_single_field_value($inventory_item, $item_status_field_name,'tid');
       }
       if (!in_array($header_label, $table['#header'])) {
         $header_label = t('Check In') . '<br/>' .

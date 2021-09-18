@@ -76,8 +76,13 @@ function reservations_validate_reservations_selected_items($form, &$form_state) 
         $item['inventory_tid'] = $inventory_tid;
       }
       else {
-        $content_settings = reservations_load_item_settings($item['type']);
-        $item['item_title'] = $content_settings->type_name;
+        if (!empty($item['type'])) {
+          $content_settings = reservations_load_item_settings($item['type']);
+          $item['item_title'] = $content_settings->type_name;
+        }
+        else {
+          $item['item_title'] = NULL;
+        }
       }
     }
 
@@ -179,7 +184,7 @@ function reservations_validate_reservations_selected_items($form, &$form_state) 
                     $messages[$did] .= '<div> ' . l($overdue->title, 'node/' . $overdue->nid) . '</div>';
                 }
             }
-            if (!in_array($msg, $messages)) {
+            if (!isset($msg) || !in_array($msg, $messages)) {
                 form_set_error("reservations_reservation_items][$did][reservations_item_nid", $messages[$did]);
             }
             else {
@@ -315,6 +320,8 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
   $reservation_checked_out = ($reservation_state == RESERVATIONS_STATUS_CHECKED_OUT);
   $new_status = $node->reservations_reservation_status;
 
+  $reservations_manager = user_access('manage reservations');
+
   $langcode = $form_state['node']->language;
   $backtoback = variable_get('reservations_back_to_back_allowed', 0);
   // Build date objects we'll need for our different validations.
@@ -370,7 +377,7 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
   }
 
   // Get the next end day as it may be needed later.
-  $nextday_end_number = ($end_day_of_week + 1 == 8) ? 0 : ($end_day_of_week + 1);
+  $nextday_end_number = ($end_day_of_week + 1 == 7) ? 0 : ($end_day_of_week + 1);
 
 
   // if no inventory hours, use global hours
@@ -447,23 +454,6 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
     $max_booking_time = 0;
   }
 
-  // Users in role with Administer Reservations permssion or outside hours of
-  $skip_hours_of_op = user_access('create reservations outside hours of operation');
-  if ($skip_hours_of_op) {
-    //
-    // Operation skip these some checks.
-    reservations_verbose_logging('SKIP Hours of Operation Check because user has create reservations outside hours of operation permission');
-
-    // Check to see if warning should be displayed
-    if (!empty($start) && !empty($end)) {
-      if (
-        strtotime(date('G:i', strtotime($start . ' UTC'))) < strtotime($start_hours['open'])
-        || strtotime($start_hours['close']) < strtotime(date('G:i', strtotime($end . ' UTC')))
-      ) {
-        drupal_set_message(t('You are making a Reservation outside the normal hours of operation. This may impact access to the items you are reserving.'), 'warning');
-      }
-    }
-  }
   if (!$reservation_checked_out) {
     // Reservation start date cannot exceed the max advance
     reservations_verbose_logging('CHECKING Max Days');
@@ -479,7 +469,7 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
     }
   }
   // Check for advance min hours restriction if set.
-  if ($min_hours && (in_array($new_status, [RESERVATIONS_STATUS_UNCONFIRMED, RESERVATIONS_STATUS_PENDING]))) {
+  if ($min_hours && !$reservations_manager && (in_array($new_status, [RESERVATIONS_STATUS_UNCONFIRMED, RESERVATIONS_STATUS_PENDING]))) {
     reservations_verbose_logging('CHECKING Min Hours');
     $min_date = new DateTime("+$min_hours hour");
     if ($start_object < $min_date) {
@@ -552,10 +542,8 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
       $start_time = date_format($start_object, 'H:i');
       // Is checkout/start time before opening hours.
       if ($start_time < $start_hours['open']) {
-        if (!$skip_hours_of_op) {
-          form_set_error('field_reservations_date][und][0][value][time', t('Reservations cannot start at a time before %start.',
-            array('%start' => reservations_format_time($start_hours['open']))));
-        }
+        form_set_error('field_reservations_date][und][0][value][time', t('Reservations cannot start at a time before %start.',
+          array('%start' => reservations_format_time($start_hours['open']))));
       } // Is checkout/start time, is restricted to specific hours?
       elseif (isset($force_hours)) {
         reservations_verbose_logging('CHECKING restricted start time');
@@ -565,11 +553,9 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
         }
       } // Is checkout/start time after close time for that day.
       elseif ($start_time > $start_hours['close']) {
-        if (!$skip_hours_of_op) {
-          reservations_verbose_logging('CHECKING start time is not after close time');
-          form_set_error('field_reservations_date][und][0][value][time', t('Reservations cannot start at a time after %end.',
-            array('%end' => reservations_format_time($start_hours['close']))));
-        }
+        reservations_verbose_logging('CHECKING start time is not after close time');
+        form_set_error('field_reservations_date][und][0][value][time', t('Reservations cannot start at a time after %end.',
+          array('%end' => reservations_format_time($start_hours['close']))));
       }
     }
   }
@@ -611,22 +597,24 @@ function reservations_validate_reservations_reservation_date($form, &$form_state
     }
   }
   else {
+
+    // Get the end time - to be used for comparing against closing time.
     $end_time = date_format($end_object, 'H:i');
-    if ($end_time < $end_hours['open']) {
-      if (!$skip_hours_of_op) {
-        form_set_error($end_fld_time, t('Reservations cannot end at a time before %start.',
-          array('%start' => reservations_format_time($end_hours['open']))));
-      }
+
+    // Get the end time - to be used for comparing against opening time.
+    $end_object_for_open_time = clone $end_object;
+    // Add 2 Sec.
+    $end_object_for_open_time->add(new DateInterval('PT2S'));
+    $end_time_for_open_time = date_format($end_object_for_open_time, 'H:i');
+    if ($end_time_for_open_time < $end_hours['open']) {
+      form_set_error($end_fld_time, t('Reservations cannot end at a time before %start.',
+        array('%start' => reservations_format_time($end_hours['open']))));
     }
     elseif ($end_time > $end_hours['close']) {
-      if (!$skip_hours_of_op) {
-        form_set_error($end_fld_time, t('Reservations cannot end at a time after %end.',
-          array('%end' => reservations_format_time($end_hours['close']))));
-      }
+      form_set_error($end_fld_time, t('Reservations cannot end at a time after %end.',
+        array('%end' => reservations_format_time($end_hours['close']))));
     }
   }
-
-
 }
 
 function reservations_get_user_account($username) {
@@ -649,27 +637,27 @@ function  reservations_validate_checked_in_reservation_items($form, $form_state)
   $node = (object) $form_state['values'];
   $orig_status = $node->reservations_original_reservation_status;
   $new_status = $node->reservations_reservation_status;
+  $error = FALSE;
 
   $checked_items = $changed_status_items = $condition_notes_items = array();
 
+  $item_status_field_name = variable_get('reservable_item_status_field_name', 'field_reservable_item_status');
+
   foreach ($node->reservations_reservation_items as $did => $item) {
 
-
-    if ($item['reservations_checkin_checkbox']) {
+    if (isset($item['reservations_checkin_checkbox']) && $item['reservations_checkin_checkbox']) {
       $checked_items[] = $item['reservations_checkin_checkbox'];
     }
     else {
       if ($item['reservations_item_nid']) {
         $item_node = node_load($item['reservations_item_nid']);
-        $tid = reservations_get_single_field_value($item_node,
-          'field_equipment_item_status',
-          'tid');
-
-        if ($tid && $tid != $item['reservations_checkin_item_condition']) {
+        $tid = reservations_get_single_field_value($item_node, $item_status_field_name, 'tid');
+        if ($tid && (!isset($item['reservations_checkin_item_condition']) || ($tid != $item['reservations_checkin_item_condition']))) {
           $changed_status_items[] = $item;
         }
         else {
-          if ($item['reservations_checkin_condition_notes']) {
+          if (isset($item['reservations_checkin_condition_notes']) &&
+            $item['reservations_checkin_condition_notes']) {
             $condition_notes_items[] = $item;
           }
         }
@@ -1145,10 +1133,16 @@ function reservations_item_reservation_status($code = NULL) {
  *  if int, will return translated name of the code.
  *  if NULL, returns array of codes as keys, and translated strings as value
  *
+ *  @param boolean $include_STATUS_EMPTY
+ *   If this is TRUE and the $code is not set then the Empty (0) status will be returned.
+ *   The Empty status is only needed for display purposes and should not present
+ *   it self as an option for the user.
+ *
  * @return string|int
  */
-function reservations_record_status($code = NULL) {
+function reservations_record_status($code = NULL, $include_STATUS_EMPTY = FALSE) {
   $types = array(
+    RESERVATIONS_STATUS_EMPTY  => t('Empty'),
     RESERVATIONS_STATUS_UNCONFIRMED => t('Unconfirmed'),
     RESERVATIONS_STATUS_PENDING => t('Confirmed'),
     RESERVATIONS_STATUS_CHECKED_OUT => t('Checked out'),
@@ -1157,6 +1151,9 @@ function reservations_record_status($code = NULL) {
     RESERVATIONS_STATUS_DENIED => t('Denied'),
     RESERVATIONS_STATUS_CANCELLED => t('Cancelled'),
   );
+  if (!$include_STATUS_EMPTY &&  !isset($code)) {
+    unset($types[RESERVATIONS_STATUS_EMPTY]);
+  }
 
   // allow UI reservation status to be altered with hook
   drupal_alter('reservation_record_status', $types);
@@ -1624,6 +1621,8 @@ function reservations_add_reservation_items($node) {
       $new_reservation = clone $node;
       $checked_items = $unchecked_items = $items_to_save = array();
 
+      $item_status_field_name = variable_get('reservable_item_status_field_name', 'field_reservable_item_status');
+
       foreach ($node->reservations_reservation_items as $did => $item) {
 
         if ($item['reservations_checkin_checkbox']) {
@@ -1637,9 +1636,7 @@ function reservations_add_reservation_items($node) {
         if ($item['reservations_item_nid']) {
           $item_node = node_load($item['reservations_item_nid']);
           $tid =
-            reservations_get_single_field_value($item_node,
-              'field_equipment_item_status',
-              'tid');
+            reservations_get_single_field_value($item_node, $item_status_field_name,'tid');
           $reservation_link =
             l(t("Updated via Reservation"), "node/" . $node->nid);
 
@@ -1667,7 +1664,7 @@ function reservations_add_reservation_items($node) {
       if ($items_to_save) {
         foreach ($items_to_save as $item) {
           $item_node = $item['node'];
-          $item_node->field_equipment_item_status[LANGUAGE_NONE][0]['tid'] =
+          $item_node->{$item_status_field_name}[LANGUAGE_NONE][0]['tid'] =
             $item['reservations_checkin_item_condition'];
           $item_node->field_reservable_condition_notes[LANGUAGE_NONE]
           [0]['value'] = $item['reservations_checkin_condition_notes'];

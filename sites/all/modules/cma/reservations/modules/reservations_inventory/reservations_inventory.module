@@ -355,7 +355,7 @@ function reservations_inventory_node_type_save_validate($form, &$form_state) {
   }
 
   // get the buckets
-  $nids = db_query("SELECT node.nid FROM {node} LEFT JOIN {reservations_bucket_node } ON node.nid = reservations_bucket_node .nid WHERE reservations_sub_type = 1 AND type = :type", array(':type' => $values['type']));
+  $nids = db_query("SELECT node.nid FROM {node} LEFT JOIN {reservations_bucket_node} ON node.nid = reservations_bucket_node .nid WHERE reservations_sub_type = 1 AND type = :type", array(':type' => $values['type']));
 
   foreach ($nids as $nid) {
     $node = node_load($nid->nid);
