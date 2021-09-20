@@ -15,8 +15,9 @@ http://cm-testing.mnn.openflows.com/node/779616/edit?destination=user/207293/cm_
   if ($form_id == 'crew_connect_request_node_form') {
 //dpm($form_state, 'form_state');
     
-      drupal_set_message(t("Please make sure you have a Confirmed Reservation for the relevant facility and time prior to asking for a Crew."), 'warning');
-
+      // uncomment this on Oct 12 2021      drupal_set_message(t("Please make sure you have a Confirmed Reservation for the relevant facility and time prior to asking for a Crew."), 'warning');
+      // comment out the line below after oct 12 2012
+      drupal_set_message(t("NOTE: Crew Connect will be in use for Reservations on or after October 12th, please read <a href='https://www.mnn.org/node/7270'>https://www.mnn.org/node/7270</a>."), 'warning');
 
       $nid = (isset($form['nid']['#value'])) ? $form['nid']['#value'] :
                 NULL;    
@@ -57,7 +58,7 @@ http://cm-testing.mnn.openflows.com/node/779616/edit?destination=user/207293/cm_
       //THEM AND THEN IN PRESAVE WE WILL SET THESE FIELDS BASED ON THE TMP 
       //FIELDS. 
       $form['field_crew_location'] = array();
-      $form['field_crew_positions'] = array();
+            $form['field_crew_positions'] = array();
       $form['field_which_studio_is_this_in_'] = array();
       
       // THESE VALUES ARE ONLY SET THE FIRST TIME THROUGH
@@ -69,8 +70,15 @@ http://cm-testing.mnn.openflows.com/node/779616/edit?destination=user/207293/cm_
           global $user;
           $author_id = $user->uid;
           $name = cm_crew_connect_get_display_name($author_id); 
-          
-          
+          // unsetting some options https://mantis.mnn.org/view.php?id=4667
+          //          dsm($form['field_tmp1_crew_position']['und']['#options']);
+          unset($form['field_tmp1_crew_position']['und']['#options']['editor_premiere']);
+          unset($form['field_tmp1_crew_position']['und']['#options']['editor_xpression_cg']);
+          //dsm($form['field_tmp1_crew_position']['und']['#options']);
+          //dsm($form['field_tmp2_crew_position']['und']['#options']);
+          unset($form['field_tmp2_crew_position']['und']['#options']['editor_premiere']);
+          unset($form['field_tmp2_crew_position']['und']['#options']['editor_xpression_cg']);
+          //dsm($form['field_tmp2_crew_position']['und']['#options']);                
           // SHOULD THIS EMAIL BE UPDATED WHEN THE CIVI ONE IS UPDATED? no, 
           // if the email has already been sent to people, it should not be 
           // updated
