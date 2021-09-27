@@ -17,7 +17,7 @@ http://cm-testing.mnn.openflows.com/node/779616/edit?destination=user/207293/cm_
     
       // uncomment this on Oct 12 2021      drupal_set_message(t("Please make sure you have a Confirmed Reservation for the relevant facility and time prior to asking for a Crew."), 'warning');
       // comment out the line below after oct 12 2012
-      drupal_set_message(t("NOTE: Crew Connect will be in use for Reservations on or after October 12th, please read <a href='https://www.mnn.org/node/7270'>https://www.mnn.org/node/7270</a>."), 'warning');
+      drupal_set_message(t("NOTE: Crew Connect will be in use for Reservations on or after October 12th, <i>please read <a href='https://www.mnn.org/node/7270'>our reopening procedures</a></i>.<br><b> **PLEASE NOTE: AS OF OCTOBER 12, 2021, PROOF OF COVID-19 VACCINATION WILL BE REQUIRED TO ENTER ALL MNN FACILITIES** </b>"), 'warning');
 
       $nid = (isset($form['nid']['#value'])) ? $form['nid']['#value'] :
                 NULL;    
