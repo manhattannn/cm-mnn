@@ -1,8 +1,23 @@
 # CHANGELOG
 
-## Version 2.34 (not yet released)
+## Version 2.36
+
+* Fixed issue with CiviRules and deleting entities.
+* Added function to retrieve the operation (create, edit, delete) from the post trigger.
+
+## Version 2.35
+
+* Fixed #152 - Action "End Relationship" added
+* CiviRules, field value comparison will fail when checking a value of '0' in custom field by !149
+
+## Version 2.34
+
+* Fixed #151: Activity is Deleted trigger does not work
+* Added condition 'Recurring Contribution is (not) financial type'.
+* Handle contact subtypes when retrieving preData/originalData for Contacts (affects customdata) by !148
 
 ## Version 2.33
+
 * Added conditions for relationship has ended / is activated (issue https://lab.civicrm.org/extensions/civirules/-/issues/150)
 
 ## Version 2.32

@@ -175,6 +175,12 @@
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
   <item>
+    <path>civicrm/civirule/form/condition/contribution_recur_financialtype</path>
+    <page_callback>CRM_CivirulesConditions_Form_ContributionRecur_FinancialType</page_callback>
+    <title>financial type</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
+  <item>
     <path>civicrm/civirule/form/condition/contribution_recur_campaign</path>
     <page_callback>CRM_CivirulesConditions_Form_ContributionRecur_Campaign</page_callback>
     <title>recurring contribution campaign</title>
@@ -557,6 +563,12 @@
     <path>civicrm/civirule/form/action/activityfromevent</path>
     <page_callback>CRM_CivirulesActions_Activity_Form_CreateActivityFromEvent</page_callback>
     <title>Activity</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/civirule/form/action/relationship/end</path>
+    <page_callback>CRM_CivirulesActions_Relationship_Form_End</page_callback>
+    <title>Relationship End</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
   <item>

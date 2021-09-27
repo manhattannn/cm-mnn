@@ -68,6 +68,15 @@ class CRM_Civirules_Trigger_Post extends CRM_Civirules_Trigger {
   }
 
   /**
+   * Getter for op(eration)
+   *
+   * @return String
+   */
+  public function getOp() {
+    return $this->op;
+  }
+
+  /**
    * Method post
    *
    * @param string $op
@@ -126,7 +135,7 @@ class CRM_Civirules_Trigger_Post extends CRM_Civirules_Trigger {
     $entity = CRM_Civirules_Utils_ObjectName::convertToEntity($objectName);
 
     $data = $this->convertObjectRefToDataArray($entity, $objectRef, $objectId);
-    if ($op == 'edit') {
+    if ($op == 'edit' || 'delete') {
       //set also original data with an edit event
       $oldData = CRM_Civirules_Utils_PreData::getPreData($entity, $objectId, $eventID);
       $triggerData = new CRM_Civirules_TriggerData_Edit($entity, $objectId, $data, $oldData);
@@ -155,6 +164,24 @@ class CRM_Civirules_Trigger_Post extends CRM_Civirules_Trigger {
       $data = $objectRef;
     }
 
+    return $data;
+  }
+
+  /**
+   * Alter the pre data
+   *
+   * Could be overriden by child classes.
+   *
+   * @param $data
+   * @param $op
+   * @param $objectName
+   * @param $objectId
+   * @param $params
+   * @param $eventID
+   *
+   * @return mixed
+   */
+  public function alterPreData($data, $op, $objectName, $objectId, $params, $eventID) {
     return $data;
   }
 
