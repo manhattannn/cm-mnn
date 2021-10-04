@@ -47,7 +47,7 @@
         <p>{ts}You can upload an image from your computer OR enter a URL for an image already on the Web. If you chose to upload an image file, a 'thumbnail' version will be automatically created for you. If you don't have an image available at this time, you may also choose to display a 'No Image Available' icon by selecting the 'default image'.{/ts}</p>
                   </div>
   <table class="form-layout-compressed">
-    {if $thumbnailUrl}<tr class="odd-row"><td class="describe-image" colspan="2"><strong>Current Image Thumbnail</strong><br /><img src="{$thumbnailUrl}" /></td></tr>{/if}
+    {if !empty($thumbnailUrl)}<tr class="odd-row"><td class="describe-image" colspan="2"><strong>Current Image Thumbnail</strong><br /><img src="{$thumbnailUrl}" /></td></tr>{/if}
     <tr class="crm-contribution-form-block-imageOption"><td>{$form.imageOption.image.html}</td><td>{$form.uploadFile.html}</td></tr>
   <tr class="crm-contribution-form-block-imageOption-thumbnail"><td colspan="2">{$form.imageOption.thumbnail.html}</td></tr>
     <tr id="imageURL"{if $action neq 2} class="hiddenElement"{/if}>
@@ -64,26 +64,26 @@
     </tr>
     <tr class="crm-contribution-form-block-min_contribution">
        <td class="label">{$form.min_contribution.label}</td>
-       <td class="html-adjust">{$form.min_contribution.html|crmMoney}<br />
+       <td class="html-adjust">{$form.min_contribution.html}<br />
           <span class="description">{ts}The minimum contribution amount required to be eligible to select this premium. If you want to offer it to all contributors regardless of contribution amount, enter '0'. If display of minimum contribution amounts is enabled then this text is displayed:{/ts} <em>{ts}(Contribute at least X to be eligible for this gift.){/ts}</em></span>
        </td>
     </tr>
     <tr class="crm-contribution-form-block-price">
        <td class="label">{$form.price.label}</td>
-       <td class="html-adjust">{$form.price.html|crmMoney}<br />
+       <td class="html-adjust">{$form.price.html}<br />
      <span class="description">{ts}The market value of this premium (e.g. retail price). For tax-deductible contributions, this amount will be used to set the non-deductible amount in the contribution record and receipt.{/ts}</span>
        </td>
     </tr>
     <tr class="crm-contribution-form-block-cost">
        <td class="label">{$form.cost.label}</td>
-       <td class="html-adjust">{$form.cost.html|crmMoney}<br />
+       <td class="html-adjust">{$form.cost.html}<br />
         <span class="description">{ts}You may optionally record the actual cost of this premium to your organization. This may be useful when evaluating net return for this incentive.{/ts}</span>
        </td>
     </tr>
      <tr class="crm-contribution-form-block-financial_type">
        <td class="label">{$form.financial_type_id.label}</td>
        <td class="html-adjust">
-       {if !$financialType}
+       {if empty($financialType)}
          {capture assign=ftUrl}{crmURL p='civicrm/admin/financial/financialType' q="reset=1"}{/capture}
          {ts 1=$ftUrl}There are no financial types configured with linked 'Cost of Sales Premiums' and 'Premiums Inventory Account' accounts. If you want to generate accounting transactions which track the cost of premiums used <a href='%1'>click here</a> to configure financial types and accounts.{/ts}
        {else}

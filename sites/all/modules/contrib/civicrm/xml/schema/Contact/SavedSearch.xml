@@ -144,6 +144,7 @@
     <html>
       <label>Created By</label>
     </html>
+    <readonly>true</readonly>
     <add>5.36</add>
   </field>
   <foreignKey>
@@ -161,6 +162,7 @@
     <html>
       <label>Modified By</label>
     </html>
+    <readonly>true</readonly>
     <add>5.36</add>
   </field>
   <foreignKey>
@@ -184,6 +186,7 @@
     <comment>When the search was created.</comment>
     <required>true</required>
     <default>CURRENT_TIMESTAMP</default>
+    <readonly>true</readonly>
     <add>5.36</add>
   </field>
   <field>
@@ -193,6 +196,7 @@
     <required>true</required>
     <default>CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</default>
     <add>5.36</add>
+    <readonly>true</readonly>
   </field>
   <field>
     <name>description</name>

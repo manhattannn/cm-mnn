@@ -185,7 +185,7 @@ if (!CRM.vars) CRM.vars = {};
 
   // Workaround for https://github.com/ivaynberg/select2/issues/1246
   $.ui.dialog.prototype._allowInteraction = function(e) {
-    return !!$(e.target).closest('.ui-dialog, .ui-datepicker, .select2-drop, .cke_dialog, #civicrm-menu').length;
+    return !!$(e.target).closest('.ui-dialog, .ui-datepicker, .select2-drop, .cke_dialog, .ck-balloon-panel, #civicrm-menu').length;
   };
 
   // Implements jQuery hook.prop
@@ -436,11 +436,26 @@ if (!CRM.vars) CRM.vars = {};
           formatResult: formatCrmSelect2,
           formatSelection: formatCrmSelect2
         };
+
       // quickform doesn't support optgroups so here's a hack :(
+      // Instead of using wrapAll or similar that repeatedly appends options to the group and redraw the page (=> very slow on large lists),
+      // build bulk HTML and insert in single shot
+      var optGroups = {};
       $('option[value^=crm_optgroup]', this).each(function () {
-        $(this).nextUntil('option[value^=crm_optgroup]').wrapAll('<optgroup label="' + $(this).text() + '" />');
+        var groupHtml = '';
+          $(this).nextUntil('option[value^=crm_optgroup]').each(function () {
+          groupHtml += this.outerHTML;
+        });
+        optGroups[$(this).text()] = groupHtml;
         $(this).remove();
       });
+      var replacedHtml = '';
+      for (var groupLabel in optGroups) {
+        replacedHtml += '<optgroup label="' + groupLabel + '">' + optGroups[groupLabel] + '</optgroup>';
+      }
+      if (replacedHtml) {
+        $el.html(replacedHtml);
+      }
 
       // quickform does not support disabled option, so yet another hack to
       // add disabled property for option values
@@ -459,12 +474,36 @@ if (!CRM.vars) CRM.vars = {};
         };
       }
 
-      // Use description as title for each option
-      $el.on('select2-loaded.crmSelect2', function() {
-        $('.crm-select2-row-description', '#select2-drop').each(function() {
-          $(this).closest('.select2-result-label').attr('title', $(this).text());
+      $el
+        .on('select2-loaded.crmSelect2', function() {
+          // Use description as title for each option
+          $('.crm-select2-row-description', '#select2-drop').each(function() {
+            $(this).closest('.select2-result-label').attr('title', $(this).text());
+          });
+          // Collapsible optgroups should be expanded when searching
+          if ($('#select2-drop.collapsible-optgroups-enabled .select2-search input.select2-input').val()) {
+            $('#select2-drop.collapsible-optgroups-enabled li.select2-result-with-children')
+              .addClass('optgroup-expanded');
+          }
+        })
+        // Handle collapsible optgroups
+        .on('select2-open', function(e) {
+          var isCollapsible = $(e.target).hasClass('collapsible-optgroups');
+          $('#select2-drop')
+            .off('.collapseOptionGroup')
+            .toggleClass('collapsible-optgroups-enabled', isCollapsible);
+          if (isCollapsible) {
+            $('#select2-drop')
+              .on('click.collapseOptionGroup', '.select2-result-with-children > .select2-result-label', function() {
+                $(this).parent().toggleClass('optgroup-expanded');
+              })
+              // If the first item in the list is an optgroup, expand it
+              .find('li.select2-result-with-children:first-child').addClass('optgroup-expanded');
+          }
+        })
+        .on('select2-close', function() {
+          $('#select2-drop').off('.collapseOptionGroup').removeClass('collapsible-optgroups-enabled');
         });
-      });
 
       // Defaults for single-selects
       if ($el.is('select:not([multiple])')) {
@@ -741,6 +780,7 @@ if (!CRM.vars) CRM.vars = {};
     }
     markup += '<div><div class="crm-select2-row-label '+(row.label_class || '')+'">' +
       (row.color ? '<span class="crm-select-item-color" style="background-color: ' + row.color + '"></span> ' : '') +
+      (row.icon ? '<i class="crm-i ' + row.icon + '" aria-hidden="true"></i> ' : '') +
       _.escape((row.prefix !== undefined ? row.prefix + ' ' : '') + row.label + (row.suffix !== undefined ? ' ' + row.suffix : '')) +
       '</div>' +
       '<div class="crm-select2-row-description">';

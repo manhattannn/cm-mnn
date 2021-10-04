@@ -230,6 +230,14 @@ WHERE civicrm_case.id = %1";
   }
 
   /**
+   * @param $id
+   * @return bool
+   */
+  public static function del($id) {
+    return self::deleteCase($id);
+  }
+
+  /**
    * Enable disable case related relationships.
    *
    * @param int $caseId
@@ -392,7 +400,7 @@ WHERE cc.contact_id = %1 AND civicrm_case_type.name = '{$caseType}'";
    *
    * @return string
    */
-  public static function getCaseActivityCountQuery($type = 'upcoming', $userID, $condition = NULL) {
+  public static function getCaseActivityCountQuery($type, $userID, $condition = NULL) {
     return sprintf(" SELECT COUNT(*) FROM (%s) temp ", self::getCaseActivityQuery($type, $userID, $condition));
   }
 
@@ -405,7 +413,7 @@ WHERE cc.contact_id = %1 AND civicrm_case_type.name = '{$caseType}'";
    *
    * @return string
    */
-  public static function getCaseActivityQuery($type = 'upcoming', $userID, $condition = NULL, $limit = NULL, $order = NULL) {
+  public static function getCaseActivityQuery($type, $userID, $condition = NULL, $limit = NULL, $order = NULL) {
     $selectClauses = [
       'civicrm_case.id as case_id',
       'civicrm_case.subject as case_subject',
@@ -432,16 +440,37 @@ WHERE cc.contact_id = %1 AND civicrm_case_type.name = '{$caseType}'";
         INNER JOIN civicrm_contact ON civicrm_case_contact.contact_id = civicrm_contact.id
 HERESQL;
 
+    // 'upcoming' and 'recent' show the next scheduled and most recent
+    // not-scheduled activity on each case, respectively.
+    $scheduled_id = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_status_id', 'Scheduled');
     switch ($type) {
       case 'upcoming':
-      case 'recent':
-        // civicrm_view_case_activity_upcoming and
-        // civicrm_view_case_activity_recent are views that show the next
-        // scheduled and most recent not-scheduled activity on each case,
-        // respectively.
         $query .= <<<HERESQL
-        INNER JOIN civicrm_view_case_activity_$type t_act
-          ON t_act.case_id = civicrm_case.id
+        INNER JOIN (SELECT ca.case_id, a.id, a.activity_date_time, a.status_id, a.activity_type_id
+         FROM civicrm_case_activity ca
+         INNER JOIN civicrm_activity a ON ca.activity_id=a.id
+         WHERE a.id =
+        (SELECT b.id FROM civicrm_case_activity bca
+         INNER JOIN civicrm_activity b ON bca.activity_id=b.id
+         WHERE b.activity_date_time <= DATE_ADD( NOW(), INTERVAL 14 DAY )
+         AND b.is_current_revision = 1 AND b.is_deleted=0 AND b.status_id = $scheduled_id
+         AND bca.case_id = ca.case_id ORDER BY b.activity_date_time ASC LIMIT 1)) t_act
+        ON t_act.case_id = civicrm_case.id
+HERESQL;
+        break;
+
+      case 'recent':
+        $query .= <<<HERESQL
+        INNER JOIN (SELECT ca.case_id, a.id, a.activity_date_time, a.status_id, a.activity_type_id
+         FROM civicrm_case_activity ca
+         INNER JOIN civicrm_activity a ON ca.activity_id=a.id
+         WHERE a.id =
+        (SELECT b.id FROM civicrm_case_activity bca
+         INNER JOIN civicrm_activity b ON bca.activity_id=b.id
+         WHERE b.activity_date_time >= DATE_SUB( NOW(), INTERVAL 14 DAY )
+         AND b.is_current_revision = 1 AND b.is_deleted=0 AND b.status_id <> $scheduled_id
+         AND bca.case_id = ca.case_id ORDER BY b.activity_date_time DESC LIMIT 1)) t_act
+        ON t_act.case_id = civicrm_case.id
 HERESQL;
         break;
 
@@ -776,6 +805,8 @@ SELECT civicrm_case.id, case_status.label AS case_status, status_id, civicrm_cas
             civicrm_email.email as email,
             civicrm_phone.phone as phone,
             con.id as civicrm_contact_id,
+            rel.is_active as is_active,
+            rel.end_date as end_date,
             IF(rel.contact_id_a = %1, civicrm_relationship_type.label_a_b, civicrm_relationship_type.label_b_a) as relation,
             civicrm_relationship_type.id as relation_type,
             IF(rel.contact_id_a = %1, "a_b", "b_a") as relationship_direction
@@ -800,6 +831,7 @@ SELECT civicrm_case.id, case_status.label AS case_status, status_id, civicrm_cas
       $query .= ' AND rel.id = %3 ';
       $params[3] = [$relationshipID, 'Integer'];
     }
+
     $dao = CRM_Core_DAO::executeQuery($query, $params);
 
     $values = [];
@@ -807,9 +839,11 @@ SELECT civicrm_case.id, case_status.label AS case_status, status_id, civicrm_cas
       $rid = $dao->civicrm_relationship_id;
       $values[$rid]['cid'] = $dao->civicrm_contact_id;
       $values[$rid]['relation'] = $dao->relation;
-      $values[$rid]['name'] = $dao->sort_name;
+      $values[$rid]['sort_name'] = $dao->sort_name;
       $values[$rid]['email'] = $dao->email;
       $values[$rid]['phone'] = $dao->phone;
+      $values[$rid]['is_active'] = $dao->is_active;
+      $values[$rid]['end_date'] = $dao->end_date;
       $values[$rid]['relation_type'] = $dao->relation_type;
       $values[$rid]['rel_id'] = $dao->civicrm_relationship_id;
       $values[$rid]['client_id'] = $contactID;
@@ -1229,7 +1263,7 @@ HERESQL;
    *
    * @return bool |array
    */
-  public static function sendActivityCopy($clientId, $activityId, $contacts, $attachments = NULL, $caseId) {
+  public static function sendActivityCopy($clientId, $activityId, $contacts, $attachments, $caseId) {
     if (!$activityId) {
       return FALSE;
     }
@@ -1723,20 +1757,24 @@ HERESQL;
       if (substr($managerRoleId, -4) == '_a_b') {
         $managerRoleQuery = "
           SELECT civicrm_contact.id as casemanager_id,
-                 civicrm_contact.sort_name as casemanager
+                 civicrm_contact.sort_name as casemanager,
+                 civicrm_relationship.is_active,
+                 civicrm_relationship.end_date
            FROM civicrm_contact
            LEFT JOIN civicrm_relationship ON (civicrm_relationship.contact_id_b = civicrm_contact.id AND civicrm_relationship.relationship_type_id = %1) AND civicrm_relationship.is_active
            LEFT JOIN civicrm_case ON civicrm_case.id = civicrm_relationship.case_id
-           WHERE civicrm_case.id = %2 AND is_active = 1";
+           WHERE civicrm_case.id = %2";
       }
       if (substr($managerRoleId, -4) == '_b_a') {
         $managerRoleQuery = "
           SELECT civicrm_contact.id as casemanager_id,
-                 civicrm_contact.sort_name as casemanager
+                 civicrm_contact.sort_name as casemanager,
+                 civicrm_relationship.is_active,
+                 civicrm_relationship.end_date
            FROM civicrm_contact
            LEFT JOIN civicrm_relationship ON (civicrm_relationship.contact_id_a = civicrm_contact.id AND civicrm_relationship.relationship_type_id = %1) AND civicrm_relationship.is_active
            LEFT JOIN civicrm_case ON civicrm_case.id = civicrm_relationship.case_id
-           WHERE civicrm_case.id = %2 AND is_active = 1";
+           WHERE civicrm_case.id = %2";
       }
 
       $managerRoleParams = [
@@ -1745,10 +1783,28 @@ HERESQL;
       ];
 
       $dao = CRM_Core_DAO::executeQuery($managerRoleQuery, $managerRoleParams);
-      if ($dao->fetch()) {
+      // Pull an array of ALL case managers related to the case.
+      $caseManagerNameArray = [];
+      while ($dao->fetch()) {
+        $caseManagerNameArray[$dao->casemanager_id]['casemanager_id'] = $dao->casemanager_id;
+        $caseManagerNameArray[$dao->casemanager_id]['is_active'] = $dao->is_active;
+        $caseManagerNameArray[$dao->casemanager_id]['end_date'] = $dao->end_date;
+        $caseManagerNameArray[$dao->casemanager_id]['casemanager'] = $dao->casemanager;
+      }
+
+      // Look for an active case manager, when no active case manager (like a closed case) show the most recently expired case manager.
+      // Get the index of the manager if set to active
+      $activekey = array_search(1, array_combine(array_keys($caseManagerNameArray), array_column($caseManagerNameArray, 'is_active')));
+      if (!empty($activekey)) {
         $caseManagerName = sprintf('<a href="%s">%s</a>',
-          CRM_Utils_System::url('civicrm/contact/view', ['cid' => $dao->casemanager_id]),
-          $dao->casemanager
+          CRM_Utils_System::url('civicrm/contact/view', ['cid' => $activekey]), $caseManagerNameArray[$activekey]['casemanager']
+        );
+      }
+      elseif (!empty($caseManagerNameArray)) {
+        // if there is no active case manager, get the index of the most recent end_date
+        $max = array_search(max(array_combine(array_keys($caseManagerNameArray), array_column($caseManagerNameArray, 'end_date'))), array_combine(array_keys($caseManagerNameArray), array_column($caseManagerNameArray, 'end_date')));
+        $caseManagerName = sprintf('<a href="%s">%s</a>',
+          CRM_Utils_System::url('civicrm/contact/view', ['cid' => $max]), $caseManagerNameArray[$max]['casemanager']
         );
       }
     }
@@ -2781,67 +2837,6 @@ WHERE id IN (' . implode(',', $copiedActivityIds) . ')';
     }
 
     return $configured;
-  }
-
-  /**
-   * Used during case component enablement and during upgrade.
-   *
-   * @return bool
-   */
-  public static function createCaseViews() {
-    $dao = new CRM_Core_DAO();
-    try {
-      $sql = self::createCaseViewsQuery('upcoming');
-      $dao->query($sql);
-
-      $sql = self::createCaseViewsQuery('recent');
-      $dao->query($sql);
-    }
-    catch (Exception $e) {
-      return FALSE;
-    }
-
-    return TRUE;
-  }
-
-  /**
-   * Helper function, also used by the upgrade in case of error
-   *
-   * @param string $section
-   *
-   * @return string
-   */
-  public static function createCaseViewsQuery($section = 'upcoming') {
-    $sql = "";
-    $scheduled_id = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_status_id', 'Scheduled');
-    switch ($section) {
-      case 'upcoming':
-        $sql = "CREATE OR REPLACE VIEW `civicrm_view_case_activity_upcoming`
- AS SELECT ca.case_id, a.id, a.activity_date_time, a.status_id, a.activity_type_id
- FROM civicrm_case_activity ca
- INNER JOIN civicrm_activity a ON ca.activity_id=a.id
- WHERE a.id =
-(SELECT b.id FROM civicrm_case_activity bca
- INNER JOIN civicrm_activity b ON bca.activity_id=b.id
- WHERE b.activity_date_time <= DATE_ADD( NOW(), INTERVAL 14 DAY )
- AND b.is_current_revision = 1 AND b.is_deleted=0 AND b.status_id = $scheduled_id
- AND bca.case_id = ca.case_id ORDER BY b.activity_date_time ASC LIMIT 1)";
-        break;
-
-      case 'recent':
-        $sql = "CREATE OR REPLACE VIEW `civicrm_view_case_activity_recent`
- AS SELECT ca.case_id, a.id, a.activity_date_time, a.status_id, a.activity_type_id
- FROM civicrm_case_activity ca
- INNER JOIN civicrm_activity a ON ca.activity_id=a.id
- WHERE a.id =
-(SELECT b.id FROM civicrm_case_activity bca
- INNER JOIN civicrm_activity b ON bca.activity_id=b.id
- WHERE b.activity_date_time >= DATE_SUB( NOW(), INTERVAL 14 DAY )
- AND b.is_current_revision = 1 AND b.is_deleted=0 AND b.status_id <> $scheduled_id
- AND bca.case_id = ca.case_id ORDER BY b.activity_date_time DESC LIMIT 1)";
-        break;
-    }
-    return $sql;
   }
 
   /**

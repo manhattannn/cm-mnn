@@ -1,5 +1,4 @@
 <?php
-
 /*
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC. All rights reserved.                        |
@@ -9,18 +8,13 @@
  | and copyright information, see https://civicrm.org/licensing       |
  +--------------------------------------------------------------------+
  */
-
-/**
- *
- * @package CRM
- * @copyright CiviCRM LLC https://civicrm.org/licensing
- */
-
 namespace Civi\Api4;
 
 /**
  * A collection of system maintenance/diagnostic utilities.
  *
+ * @searchable none
+ * @since 5.19
  * @package Civi\Api4
  */
 class System extends Generic\AbstractEntity {
@@ -61,6 +55,15 @@ class System extends Generic\AbstractEntity {
     return (new Generic\BasicGetFieldsAction(__CLASS__, __FUNCTION__, function() {
       return [];
     }))->setCheckPermissions($checkPermissions);
+  }
+
+  /**
+   * @param bool $checkPermissions
+   * @return Action\System\ResetPaths
+   */
+  public static function resetPaths($checkPermissions = TRUE) {
+    return (new Action\System\ResetPaths(__CLASS__, __FUNCTION__))
+      ->setCheckPermissions($checkPermissions);
   }
 
 }

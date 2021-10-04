@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d
+class ComposerStaticInitd3b425df3f98c8fcc68875089e748d8c
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -15,6 +15,7 @@ class ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
+        '7e9bd612cc444b3eed788ebbe46263a0' => __DIR__ . '/..' . '/laminas/laminas-zendframework-bridge/src/autoload.php',
         'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
         '9e4824c5afbdc1482b6025ce3d4dfde8' => __DIR__ . '/..' . '/league/csv/src/functions_include.php',
         'def43f6c87e4f8dfd0c9e1b1bab14fe8' => __DIR__ . '/..' . '/symfony/polyfill-iconv/bootstrap.php',
@@ -38,10 +39,6 @@ class ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d
         'c' => 
         array (
             'cweagans\\Composer\\' => 18,
-        ),
-        'Z' => 
-        array (
-            'Zend\\Escaper\\' => 13,
         ),
         'W' => 
         array (
@@ -76,7 +73,6 @@ class ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d
             'Psr\\Container\\' => 14,
             'Psr\\Cache\\' => 10,
             'PhpOffice\\PhpWord\\' => 18,
-            'PhpOffice\\Common\\' => 17,
             'Padaliyajay\\PHPAutoprefixer\\' => 28,
         ),
         'M' => 
@@ -90,6 +86,8 @@ class ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d
             'League\\OAuth2\\Client\\' => 21,
             'League\\Csv\\' => 11,
             'LastCall\\DownloadsPlugin\\' => 25,
+            'Laminas\\ZendFrameworkBridge\\' => 28,
+            'Laminas\\Escaper\\' => 16,
         ),
         'G' => 
         array (
@@ -138,10 +136,6 @@ class ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d
         'cweagans\\Composer\\' => 
         array (
             0 => __DIR__ . '/..' . '/cweagans/composer-patches/src',
-        ),
-        'Zend\\Escaper\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/zendframework/zend-escaper/src',
         ),
         'When\\' => 
         array (
@@ -231,10 +225,6 @@ class ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d
         array (
             0 => __DIR__ . '/..' . '/phpoffice/phpword/src/PhpWord',
         ),
-        'PhpOffice\\Common\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/phpoffice/common/src/Common',
-        ),
         'Padaliyajay\\PHPAutoprefixer\\' => 
         array (
             0 => __DIR__ . '/..' . '/padaliyajay/php-autoprefixer/src',
@@ -263,6 +253,14 @@ class ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d
         'LastCall\\DownloadsPlugin\\' => 
         array (
             0 => __DIR__ . '/..' . '/civicrm/composer-downloads-plugin/src',
+        ),
+        'Laminas\\ZendFrameworkBridge\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/laminas/laminas-zendframework-bridge/src',
+        ),
+        'Laminas\\Escaper\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/laminas/laminas-escaper/src',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (
@@ -446,7 +444,6 @@ class ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d
         'ICallbackNamed' => __DIR__ . '/..' . '/electrolinux/phpquery/phpQuery/phpQuery/Callback.php',
         'PDF417' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/barcodes/pdf417.php',
         'PEAR_Exception' => __DIR__ . '/..' . '/pear/pear_exception/PEAR/Exception.php',
-        'PclZip' => __DIR__ . '/..' . '/pclzip/pclzip/pclzip.lib.php',
         'QRcode' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/barcodes/qrcode.php',
         'TCPDF' => __DIR__ . '/..' . '/tecnickcom/tcpdf/tcpdf.php',
         'TCPDF2DBarcode' => __DIR__ . '/..' . '/tecnickcom/tcpdf/tcpdf_barcodes_2d.php',
@@ -575,11 +572,11 @@ class ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit0dbc77f5b64a42583beba4f4cba7283d::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitd3b425df3f98c8fcc68875089e748d8c::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitd3b425df3f98c8fcc68875089e748d8c::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitd3b425df3f98c8fcc68875089e748d8c::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitd3b425df3f98c8fcc68875089e748d8c::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitd3b425df3f98c8fcc68875089e748d8c::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -10,13 +10,6 @@
  +--------------------------------------------------------------------+
  */
 
-/**
- *
- * @package CRM
- * @copyright CiviCRM LLC https://civicrm.org/licensing
- */
-
-
 namespace Civi\Api4\Generic;
 
 use Civi\Api4\Query\Api4SelectQuery;
@@ -85,9 +78,17 @@ class DAOGetAction extends AbstractGetAction {
    */
   protected $having = [];
 
+  /**
+   * @throws \API_Exception
+   * @throws \CRM_Core_Exception
+   */
   public function _run(Result $result) {
     // Early return if table doesn't exist yet due to pending upgrade
     $baoName = $this->getBaoName();
+    if (!$baoName) {
+      // In some cases (eg. site spin-up) the code may attempt to call the api before the entity name is registered.
+      throw new \API_Exception("BAO for {$this->getEntityName()} is not available. This could be a load-order issue");
+    }
     if (!$baoName::tableHasBeenAdded()) {
       \Civi::log()->warning("Could not read from {$this->getEntityName()} before table has been added. Upgrade required.", ['civi.tag' => 'upgrade_needed']);
       return;
@@ -164,16 +165,16 @@ class DAOGetAction extends AbstractGetAction {
 
   /**
    * @param string $entity
-   * @param bool $required
+   * @param string|bool $type
    * @param string $bridge
    * @param array ...$conditions
    * @return DAOGetAction
    */
-  public function addJoin(string $entity, bool $required = FALSE, $bridge = NULL, ...$conditions): DAOGetAction {
+  public function addJoin(string $entity, $type = 'LEFT', $bridge = NULL, ...$conditions): DAOGetAction {
     if ($bridge) {
       array_unshift($conditions, $bridge);
     }
-    array_unshift($conditions, $entity, $required);
+    array_unshift($conditions, $entity, $type);
     $this->join[] = $conditions;
     return $this;
   }

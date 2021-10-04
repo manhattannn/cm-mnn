@@ -2,8 +2,10 @@
   "use strict";
 
   angular.module('afAdmin').controller('afAdminList', function($scope, afforms, crmApi4, crmStatus) {
-    var ts = $scope.ts = CRM.ts(),
+    var ts = $scope.ts = CRM.ts('org.civicrm.afform_admin'),
       ctrl = $scope.$ctrl = this;
+    this.sortField = 'title';
+    this.sortDir = false;
 
     $scope.crmUrl = CRM.url;
 
@@ -13,18 +15,32 @@
     $scope.types = _.indexBy(ctrl.tabs, 'name');
     _.each(['form', 'block', 'search'], function(type) {
       if ($scope.types[type]) {
-        $scope.types[type].options = [];
         if (type === 'form') {
           $scope.types.form.default = '#create/form/Individual';
         }
       }
     });
+    $scope.types.system.options = false;
 
     this.afforms = _.transform(afforms, function(afforms, afform) {
       afform.type = afform.type || 'system';
+      // Aggregate a couple fields for the "Placement" column
+      afform.placement = [];
+      if (afform.is_dashlet) {
+        afform.placement.push(ts('Dashboard'));
+      }
+      if (afform['contact_summary:label']) {
+        afform.placement.push(afform['contact_summary:label']);
+      }
       afforms[afform.type] = afforms[afform.type] || [];
       afforms[afform.type].push(afform);
     }, {});
+
+    // Change sort field/direction when clicking a column header
+    this.sortBy = function(col) {
+      ctrl.sortDir = ctrl.sortField === col ? !ctrl.sortDir : false;
+      ctrl.sortField = col;
+    };
 
     $scope.$bindToRoute({
       expr: '$ctrl.tab',
@@ -35,7 +51,7 @@
 
     this.createLinks = function() {
       ctrl.searchCreateLinks = '';
-      if ($scope.types[ctrl.tab].options.length) {
+      if ($scope.types[ctrl.tab].options) {
         return;
       }
       var links = [];
@@ -66,6 +82,7 @@
         $scope.types.block.options = _.sortBy(links, function(item) {
           return item.url === '#create/block/*' ? '0' : item.label;
         });
+        // Add divider after the * entity (content block)
         $scope.types.block.options.splice(1, 0, {'class': 'divider', label: ''});
       }
 

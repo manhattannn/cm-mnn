@@ -5,6 +5,7 @@
   <class>Contact</class>
   <name>civicrm_contact</name>
   <comment>Contact objects are defined by a civicrm_contact record plus a related civicrm_contact_type record.</comment>
+  <description>Individuals, organizations, households, etc.</description>
   <add>1.1</add>
   <log>true</log>
   <icon>fa-address-book-o</icon>
@@ -361,6 +362,7 @@
       <label>API KEY</label>
     </html>
     <add>2.2</add>
+    <readonly>true</readonly>
     <permission>
       <or>administer CiviCRM, edit api keys</or>
     </permission>
@@ -559,6 +561,7 @@
     <type>varchar</type>
     <length>255</length>
     <comment>Cache Email Greeting.</comment>
+    <readonly>true</readonly>
     <add>3.0</add>
   </field>
   <field>
@@ -594,6 +597,7 @@
     <type>varchar</type>
     <length>255</length>
     <comment>Cache Postal greeting.</comment>
+    <readonly>true</readonly>
     <add>3.0</add>
   </field>
   <field>
@@ -629,6 +633,7 @@
     <type>varchar</type>
     <length>255</length>
     <comment>Cache Addressee.</comment>
+    <readonly>true</readonly>
     <add>3.0</add>
   </field>
   <field>
@@ -752,6 +757,7 @@
     </html>
     <add>1.1</add>
     <contactType>Household</contactType>
+    <readonly>true</readonly>
   </field>
   <foreignKey>
     <name>primary_contact_id</name>

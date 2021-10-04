@@ -31,7 +31,7 @@
     <required>true</required>
     <comment>Name of table where item being referenced is stored.</comment>
     <pseudoconstant>
-      <callback>CRM_Core_BAO_Note::entityTables</callback>
+      <optionGroupName>note_used_for</optionGroupName>
     </pseudoconstant>
     <add>1.1</add>
   </field>
@@ -87,12 +87,33 @@
     <onDelete>SET NULL</onDelete>
   </foreignKey>
   <field>
+    <name>note_date</name>
+    <title>Note Date</title>
+    <type>timestamp</type>
+    <add>5.36</add>
+    <default>CURRENT_TIMESTAMP</default>
+    <comment>Date attached to the note</comment>
+    <html>
+     <type>Select Date</type>
+     <formatType>activityDateTime</formatType>
+   </html>
+  </field>
+  <field>
+    <name>created_date</name>
+    <type>timestamp</type>
+    <comment>When the note was created.</comment>
+    <required>true</required>
+    <default>CURRENT_TIMESTAMP</default>
+    <add>5.36</add>
+  </field>
+  <field>
     <name>modified_date</name>
     <title>Note Modified By</title>
     <type>timestamp</type>
     <comment>When was this note last modified/edited</comment>
     <default>CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP</default>
     <add>1.1</add>
+    <readonly>true</readonly>
   </field>
   <field>
     <name>subject</name>

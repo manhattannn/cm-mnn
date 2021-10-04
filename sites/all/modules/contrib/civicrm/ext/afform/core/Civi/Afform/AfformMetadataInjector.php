@@ -11,6 +11,8 @@
 
 namespace Civi\Afform;
 
+use CRM_Afform_ExtensionUtil as E;
+
 /**
  * Class AfformMetadataInjector
  * @package Civi\Afform
@@ -26,7 +28,7 @@ class AfformMetadataInjector {
       ->alterHtml(';\\.aff\\.html$;', function($doc, $path) {
         try {
           $module = \Civi::service('angular')->getModule(basename($path, '.aff.html'));
-          $meta = \Civi\Api4\Afform::get()->addWhere('name', '=', $module['_afform'])->setSelect(['join', 'block'])->setCheckPermissions(FALSE)->execute()->first();
+          $meta = \Civi\Api4\Afform::get(FALSE)->addWhere('name', '=', $module['_afform'])->setSelect(['join', 'block'])->execute()->first();
         }
         catch (\Exception $e) {
         }
@@ -81,42 +83,51 @@ class AfformMetadataInjector {
    */
   private static function fillFieldMetadata($entityName, $action, \DOMElement $afField) {
     $fieldName = $afField->getAttribute('name');
-    // For explicit joins, strip the alias off the field name
-    if (strpos($entityName, ' AS ')) {
-      [$entityName, $alias] = explode(' AS ', $entityName);
-      $fieldName = preg_replace('/^' . preg_quote($alias . '.', '/') . '/', '', $fieldName);
-    }
-    $params = [
-      'action' => $action,
-      'where' => [['name', '=', $fieldName]],
-      'select' => ['label', 'input_type', 'input_attrs', 'options'],
-      'loadOptions' => ['id', 'label'],
-      // If the admin included this field on the form, then it's OK to get metadata about the field regardless of user permissions.
-      'checkPermissions' => FALSE,
-    ];
-    if (in_array($entityName, \CRM_Contact_BAO_ContactType::basicTypes(TRUE))) {
-      $params['values'] = ['contact_type' => $entityName];
-      $entityName = 'Contact';
-    }
-    $fieldInfo = civicrm_api4($entityName, 'getFields', $params)->first();
+    $fieldInfo = self::getField($entityName, $fieldName, $action);
     // Merge field definition data with whatever's already in the markup.
     $deep = ['input_attrs'];
     if ($fieldInfo) {
+      // Defaults for attributes not in spec
+      $fieldInfo['search_range'] = FALSE;
+
       $existingFieldDefn = trim(pq($afField)->attr('defn') ?: '');
       if ($existingFieldDefn && $existingFieldDefn[0] != '{') {
         // If it's not an object, don't mess with it.
         return;
       }
+
+      // Get field defn from afform markup
+      $fieldDefn = $existingFieldDefn ? \CRM_Utils_JS::getRawProps($existingFieldDefn) : [];
+      // This is the input type set on the form (may be different from the default input type in the field spec)
+      $inputType = !empty($fieldDefn['input_type']) ? \CRM_Utils_JS::decode($fieldDefn['input_type']) : $fieldInfo['input_type'];
+      // On a search form, search_range will present a pair of fields (or possibly 3 fields for date select + range)
+      $isSearchRange = !empty($fieldDefn['search_range']) && \CRM_Utils_JS::decode($fieldDefn['search_range']);
+
       // Default placeholder for select inputs
-      if ($fieldInfo['input_type'] === 'Select') {
-        $fieldInfo['input_attrs'] = ($fieldInfo['input_attrs'] ?? []) + ['placeholder' => ts('Select')];
+      if ($inputType === 'Select') {
+        $fieldInfo['input_attrs']['placeholder'] = E::ts('Select');
+      }
+      elseif ($inputType === 'EntityRef') {
+        $info = civicrm_api4('Entity', 'get', [
+          'where' => [['name', '=', $fieldInfo['fk_entity']]],
+          'checkPermissions' => FALSE,
+          'select' => ['title', 'title_plural'],
+        ], 0);
+        $label = empty($fieldInfo['input_attrs']['multiple']) ? $info['title'] : $info['title_plural'];
+        $fieldInfo['input_attrs']['placeholder'] = E::ts('Select %1', [1 => $label]);
       }
 
-      $fieldDefn = $existingFieldDefn ? \CRM_Utils_JS::getRawProps($existingFieldDefn) : [];
-
-      if ('Date' === $fieldInfo['input_type'] && !empty($fieldDefn['input_type']) && \CRM_Utils_JS::decode($fieldDefn['input_type']) === 'Select') {
-        $fieldInfo['input_attrs']['placeholder'] = ts('Select');
-        $fieldInfo['options'] = \CRM_Utils_Array::makeNonAssociative(\CRM_Core_OptionGroup::values('relative_date_filters'), 'id', 'label');
+      if ($fieldInfo['input_type'] === 'Date') {
+        // This flag gets used by the afField controller
+        $fieldDefn['is_date'] = TRUE;
+        // For date fields that have been converted to Select
+        if ($inputType === 'Select') {
+          $dateOptions = \CRM_Utils_Array::makeNonAssociative(\CRM_Core_OptionGroup::values('relative_date_filters'), 'id', 'label');
+          if ($isSearchRange) {
+            $dateOptions = array_merge([['id' => '{}', 'label' => E::ts('Choose Date Range')]], $dateOptions);
+          }
+          $fieldInfo['options'] = $dateOptions;
+        }
       }
 
       foreach ($fieldInfo as $name => $prop) {
@@ -130,6 +141,48 @@ class AfformMetadataInjector {
       }
       pq($afField)->attr('defn', htmlspecialchars(\CRM_Utils_JS::writeObject($fieldDefn)));
     }
+  }
+
+  /**
+   * @param string $entityName
+   * @param string $fieldName
+   * @param string $action
+   * @return array|NULL
+   */
+  private static function getField(string $entityName, string $fieldName, string $action):? array {
+    // For explicit joins, strip the alias off the field name
+    if (strpos($entityName, ' AS ')) {
+      [$entityName, $alias] = explode(' AS ', $entityName);
+      $fieldName = preg_replace('/^' . preg_quote($alias . '.', '/') . '/', '', $fieldName);
+    }
+    $namesToMatch = [$fieldName];
+    // Also match base field if this is an implicit join
+    if ($action === 'get' && strpos($fieldName, '.')) {
+      $namesToMatch[] = substr($fieldName, 0, strrpos($fieldName, '.'));
+    }
+    $params = [
+      'action' => $action,
+      'where' => [['name', 'IN', $namesToMatch]],
+      'select' => ['name', 'label', 'input_type', 'input_attrs', 'help_pre', 'help_post', 'options', 'fk_entity'],
+      'loadOptions' => ['id', 'label'],
+      // If the admin included this field on the form, then it's OK to get metadata about the field regardless of user permissions.
+      'checkPermissions' => FALSE,
+    ];
+    if (in_array($entityName, \CRM_Contact_BAO_ContactType::basicTypes(TRUE))) {
+      $params['values'] = ['contact_type' => $entityName];
+      $entityName = 'Contact';
+    }
+    $fields = civicrm_api4($entityName, 'getFields', $params);
+    $field = $originalField = $fields->first();
+    // If this is an implicit join, get new field from fk entity
+    if ($field['name'] !== $fieldName && $field['fk_entity']) {
+      $params['where'] = [['name', '=', substr($fieldName, 1 + strrpos($fieldName, '.'))]];
+      $field = civicrm_api4($field['fk_entity'], 'getFields', $params)->first();
+      if ($field) {
+        $field['label'] = $originalField['label'] . ' ' . $field['label'];
+      }
+    }
+    return $field;
   }
 
   /**
