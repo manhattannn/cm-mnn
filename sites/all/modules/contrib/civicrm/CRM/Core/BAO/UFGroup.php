@@ -340,7 +340,7 @@ class CRM_Core_BAO_UFGroup extends CRM_Core_DAO_UFGroup {
       $field = CRM_Core_DAO::executeQuery($query);
 
       $importableFields = self::getProfileFieldMetadata($showAll);
-      list($customFields, $addressCustomFields) = self::getCustomFields($ctype);
+      list($customFields, $addressCustomFields) = self::getCustomFields($ctype, $skipPermission ? FALSE : $permissionType);
 
       while ($field->fetch()) {
         list($name, $formattedField) = self::formatUFField($group, $field, $customFields, $addressCustomFields, $importableFields, $permissionType);
@@ -400,7 +400,7 @@ class CRM_Core_BAO_UFGroup extends CRM_Core_DAO_UFGroup {
     $profileType = CRM_Core_BAO_UFField::calculateProfileType(implode(',', $ufGroupType));
     $contactActivityProfile = CRM_Core_BAO_UFField::checkContactActivityProfileTypeByGroupType(implode(',', $ufGroupType));
     $importableFields = self::getImportableFields($showAll, $profileType, $contactActivityProfile);
-    list($customFields, $addressCustomFields) = self::getCustomFields($ctype);
+    list($customFields, $addressCustomFields) = self::getCustomFields($ctype, $permissionType);
 
     $formattedFields = [];
     foreach ($fieldArrs as $fieldArr) {
@@ -722,13 +722,17 @@ class CRM_Core_BAO_UFGroup extends CRM_Core_DAO_UFGroup {
 
   /**
    * @param $ctype
-   *
+   * @param int|bool $checkPermission
    * @return mixed
    */
-  protected static function getCustomFields($ctype) {
-    $cacheKey = 'uf_group_custom_fields_' . $ctype;
+  protected static function getCustomFields($ctype, $checkPermission = CRM_Core_Permission::VIEW) {
+    // Only Edit and View is supported in ACL for custom field.
+    if ($checkPermission == CRM_Core_Permission::CREATE) {
+      $checkPermission = CRM_Core_Permission::EDIT;
+    }
+    $cacheKey = 'uf_group_custom_fields_' . $ctype . '_' . (int) $checkPermission;
     if (!Civi::cache('metadata')->has($cacheKey)) {
-      $customFields = CRM_Core_BAO_CustomField::getFieldsForImport($ctype, FALSE, FALSE, FALSE, TRUE, TRUE);
+      $customFields = CRM_Core_BAO_CustomField::getFieldsForImport($ctype, FALSE, FALSE, FALSE, $checkPermission, TRUE);
 
       // hack to add custom data for components
       $components = ['Contribution', 'Participant', 'Membership', 'Activity', 'Case'];
@@ -2089,7 +2093,7 @@ AND    ( entity_id IS NULL OR entity_id <= 0 )
       );
     }
     elseif ($fieldName === 'contribution_status_id') {
-      $contributionStatuses = CRM_Contribute_BAO_Contribution_Utils::getContributionStatuses();
+      $contributionStatuses = CRM_Contribute_BAO_Contribution_Utils::getPendingCompleteFailedAndCancelledStatuses();
 
       $form->add('select', $name, $title,
         $contributionStatuses, $required, ['placeholder' => TRUE]
@@ -3336,8 +3340,7 @@ SELECT  group_id
   public static function checkForMixProfiles($profileIds) {
     $mixProfile = FALSE;
 
-    $contactTypes = ['Individual', 'Household', 'Organization'];
-    $subTypes = CRM_Contact_BAO_ContactType::subTypes();
+    $contactTypes = CRM_Contact_BAO_ContactType::basicTypes(TRUE);
 
     $components = ['Contribution', 'Participant', 'Membership', 'Activity'];
 
@@ -3348,7 +3351,7 @@ SELECT  group_id
       if ($profileType == 'Contact') {
         continue;
       }
-      if (in_array($profileType, $contactTypes)) {
+      if (in_array($profileType, $contactTypes, TRUE)) {
         if (!isset($typeCount['ctype'][$profileType])) {
           $typeCount['ctype'][$profileType] = 1;
         }
@@ -3359,7 +3362,7 @@ SELECT  group_id
           break;
         }
       }
-      elseif (in_array($profileType, $components)) {
+      elseif (in_array($profileType, $components, TRUE)) {
         $mixProfile = TRUE;
         break;
       }

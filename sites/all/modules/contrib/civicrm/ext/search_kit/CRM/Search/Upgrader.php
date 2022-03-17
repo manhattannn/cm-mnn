@@ -18,7 +18,7 @@ class CRM_Search_Upgrader extends CRM_Search_Upgrader_Base {
       ->addValue('icon', 'crm-i fa-search-plus')
       ->addValue('has_separator', 2)
       ->addValue('weight', 99)
-      ->addValue('permission', 'administer CiviCRM data')
+      ->addValue('permission', ['administer CiviCRM data'])
       ->execute();
   }
 
@@ -36,7 +36,7 @@ class CRM_Search_Upgrader extends CRM_Search_Upgrader_Base {
    * Upgrade 1000 - install schema
    * @return bool
    */
-  public function upgrade_1000() {
+  public function upgrade_1000(): bool {
     $this->ctx->log->info('Applying update 1000 - install schema.');
     // For early, early adopters who installed the extension pre-beta
     if (!CRM_Core_DAO::singleValueQuery("SHOW TABLES LIKE 'civicrm_search_display'")) {
@@ -50,7 +50,15 @@ class CRM_Search_Upgrader extends CRM_Search_Upgrader_Base {
    * Upgrade 1001 - normalize search display column keys
    * @return bool
    */
-  public function upgrade_1001() {
+  public function upgrade_1001(): bool {
+    // If you upgrade direct from 5.35 to 5.40+ then upgrade_1001 which is
+    // from 5.36 triggers api4 to use the field that gets added in 5.40.
+    // So rather than rewrite all these upgrades in straight SQL, let's just
+    // add the field now, and then upgrade_1005 will be a no-op if upgrading
+    // from 5.36 or earlier.
+    $this->ctx->log->info('Applying update 1005 before 1001 to avoid chicken and egg problem.');
+    $this->addColumn('civicrm_search_display', 'acl_bypass', "tinyint DEFAULT 0 COMMENT 'Skip permission checks and ACLs when running this display.'");
+
     $this->ctx->log->info('Applying update 1001 - normalize search display columns.');
     $savedSearches = \Civi\Api4\SavedSearch::get(FALSE)
       ->addWhere('api_params', 'IS NOT NULL')
@@ -89,7 +97,7 @@ class CRM_Search_Upgrader extends CRM_Search_Upgrader_Base {
    * Upgrade 1002 - embellish search display link data
    * @return bool
    */
-  public function upgrade_1002() {
+  public function upgrade_1002(): bool {
     $this->ctx->log->info('Applying update 1002 - embellish search display link data.');
     $displays = \Civi\Api4\SearchDisplay::get(FALSE)
       ->setSelect(['id', 'settings'])
@@ -115,7 +123,7 @@ class CRM_Search_Upgrader extends CRM_Search_Upgrader_Base {
    * Upgrade 1003 - update APIv4 join syntax in saved searches
    * @return bool
    */
-  public function upgrade_1003() {
+  public function upgrade_1003(): bool {
     $this->ctx->log->info('Applying 1003 - update APIv4 join syntax in saved searches.');
     $savedSearches = \Civi\Api4\SavedSearch::get(FALSE)
       ->addSelect('id', 'api_params')
@@ -138,7 +146,7 @@ class CRM_Search_Upgrader extends CRM_Search_Upgrader_Base {
    * Upgrade 1004 - fix menu permission.
    * @return bool
    */
-  public function upgrade_1004() {
+  public function upgrade_1004(): bool {
     $this->ctx->log->info('Applying update 1004 - fix menu permission.');
     CRM_Core_DAO::executeQuery("UPDATE civicrm_navigation SET permission = 'administer CiviCRM data' WHERE url = 'civicrm/admin/search'");
     return TRUE;
@@ -148,10 +156,36 @@ class CRM_Search_Upgrader extends CRM_Search_Upgrader_Base {
    * Upgrade 1005 - add acl_bypass column.
    * @return bool
    */
-  public function upgrade_1005() {
+  public function upgrade_1005(): bool {
     $this->ctx->log->info('Applying update 1005 - add acl_bypass column.');
     $this->addTask('Add Cancel Button Setting to the Profile', 'addColumn',
       'civicrm_search_display', 'acl_bypass', "tinyint DEFAULT 0 COMMENT 'Skip permission checks and ACLs when running this display.'");
+    return TRUE;
+  }
+
+  /**
+   * Upgrade 1006 - add image column type
+   * @return bool
+   */
+  public function upgrade_1006(): bool {
+    $this->ctx->log->info('Applying update 1006 - add image column type.');
+    $displays = \Civi\Api4\SearchDisplay::get(FALSE)
+      ->setSelect(['id', 'settings'])
+      ->execute();
+    foreach ($displays as $display) {
+      $update = FALSE;
+      foreach ($display['settings']['columns'] ?? [] as $c => $column) {
+        if (!empty($column['image'])) {
+          $display['settings']['columns'][$c]['type'] = 'image';
+          $update = TRUE;
+        }
+      }
+      if ($update) {
+        \Civi\Api4\SearchDisplay::update(FALSE)
+          ->setValues($display)
+          ->execute();
+      }
+    }
     return TRUE;
   }
 

@@ -162,7 +162,7 @@ class CRM_Member_Form_MembershipRenewal extends CRM_Member_Form {
       CRM_Custom_Form_CustomData::setDefaultValues($this);
     }
 
-    CRM_Utils_System::setTitle(ts('Renew Membership'));
+    $this->setTitle(ts('Renew Membership'));
 
     parent::preProcess();
   }
@@ -359,7 +359,7 @@ class CRM_Member_Form_MembershipRenewal extends CRM_Member_Form {
       );
 
       $this->add('select', 'contribution_status_id', ts('Payment Status'),
-        CRM_Contribute_BAO_Contribution_Utils::getContributionStatuses('membership')
+        CRM_Contribute_BAO_Contribution_Utils::getPendingAndCompleteStatuses()
       );
 
       $this->add('text', 'check_number', ts('Check Number'),
@@ -638,7 +638,7 @@ class CRM_Member_Form_MembershipRenewal extends CRM_Member_Form {
   /**
    * Send a receipt.
    *
-   * @param array $membership
+   * @param CRM_Member_BAO_Membership $membership
    *
    * @throws \CRM_Core_Exception
    */

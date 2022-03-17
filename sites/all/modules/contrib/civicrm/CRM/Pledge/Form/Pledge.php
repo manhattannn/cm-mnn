@@ -210,7 +210,7 @@ class CRM_Pledge_Form_Pledge extends CRM_Core_Form {
     $defaults = [];
 
     $paneNames = [
-      'Payment Reminders' => 'PaymentReminders',
+      ts('Payment Reminders') => 'PaymentReminders',
     ];
     foreach ($paneNames as $name => $type) {
       $urlParams = "snippet=4&formType={$type}";
@@ -488,7 +488,6 @@ class CRM_Pledge_Form_Pledge extends CRM_Core_Form {
     if (!empty($formValues['hidden_custom'])) {
       $params['hidden_custom'] = 1;
 
-      $customFields = CRM_Core_BAO_CustomField::getFields('Pledge');
       $params['custom'] = CRM_Core_BAO_CustomField::postProcess($formValues,
         $this->_id,
         'Pledge'

@@ -119,7 +119,7 @@ class CRM_Extension_Browser {
   /**
    * Get a list of all available extensions.
    *
-   * @return array
+   * @return CRM_Extension_Info[]
    *   ($key => CRM_Extension_Info)
    */
   public function getExtensions() {
@@ -159,7 +159,7 @@ class CRM_Extension_Browser {
   }
 
   /**
-   * @return array
+   * @return CRM_Extension_Info[]
    * @throws CRM_Extension_Exception_ParseException
    */
   private function _discoverRemote() {
@@ -243,7 +243,7 @@ class CRM_Extension_Browser {
     restore_error_handler();
 
     if ($status !== CRM_Utils_HttpClient::STATUS_OK) {
-      throw new CRM_Extension_Exception(ts('The CiviCRM public extensions directory at %1 could not be contacted - please check your webserver can make external HTTP requests or contact CiviCRM team on <a href="http://forum.civicrm.org/">CiviCRM forum</a>.', array(1 => $this->getRepositoryUrl())), 'connection_error');
+      throw new CRM_Extension_Exception(ts('The CiviCRM public extensions directory at %1 could not be contacted - please check your webserver can make external HTTP requests. Contact your site administrator for assistance.', [1 => $this->getRepositoryUrl()]), 'connection_error');
     }
 
     // Don't call grabCachedJson here, that would risk infinite recursion

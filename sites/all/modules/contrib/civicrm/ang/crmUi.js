@@ -636,14 +636,16 @@
     // Use a select2 widget as a pick-list. Instead of updating ngModel, the select2 widget will fire an event.
     // This similar to ngModel+ngChange, except that value is never stored in a model. It is only fired in the event.
     // usage: <select crm-ui-select='{...}' on-crm-ui-select="alert("User picked this item: " + selection)"></select>
-    .directive('onCrmUiSelect', function ($parse) {
+    .directive('onCrmUiSelect', function () {
       return {
         priority: 10,
         link: function (scope, element, attrs) {
           element.on('select2-selecting', function(e) {
             e.preventDefault();
             element.select2('close').select2('val', '');
-            scope.$parent.$eval(attrs.onCrmUiSelect, {selection: e.val});
+            scope.$apply(function() {
+              scope.$eval(attrs.onCrmUiSelect, {selection: e.val});
+            });
           });
         }
       };
@@ -943,7 +945,8 @@
           else {
             $(element).prepend('<span class="icon ui-icon-' + attrs.crmIcon + '"></span> ');
           }
-          if ($(element).is('button')) {
+          // Add crm-* class to non-bootstrap buttons
+          if ($(element).is('button:not(.btn)')) {
             $(element).addClass('crm-button');
           }
         }
@@ -1080,15 +1083,20 @@
           function update() {
             $timeout(function() {
               var newPageTitle = _.trim($el.html()),
-                newDocumentTitle = scope.crmDocumentTitle || $el.text();
+                newDocumentTitle = scope.crmDocumentTitle || $el.text(),
+                h1Count = 0;
               document.title = $('title').text().replace(documentTitle, newDocumentTitle);
               // If the CMS has already added title markup to the page, use it
               $('h1').not('.crm-container h1').each(function() {
-                if (_.trim($(this).html()) === pageTitle) {
+                if ($(this).hasClass('crm-page-title') || _.trim($(this).html()) === pageTitle) {
                   $(this).addClass('crm-page-title').html(newPageTitle);
                   $el.hide();
+                  ++h1Count;
                 }
               });
+              if (!h1Count) {
+                $el.show();
+              }
               pageTitle = newPageTitle;
               documentTitle = newDocumentTitle;
             });

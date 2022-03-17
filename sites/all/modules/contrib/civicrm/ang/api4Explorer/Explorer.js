@@ -33,7 +33,7 @@
     $scope.availableParams = {};
     params = $scope.params = {};
     $scope.index = '';
-    $scope.selectedTab = {result: 'result', code: 'php'};
+    $scope.selectedTab = {result: 'result'};
     $scope.perm = {
       accessDebugOutput: CRM.checkPerm('access debug output'),
       editGroups: CRM.checkPerm('edit groups')
@@ -42,6 +42,7 @@
     var getMetaParams = {},
       objectParams = {orderBy: 'ASC', values: '', defaults: '', chain: ['Entity', '', '{}']},
       docs = CRM.vars.api4.docs,
+      response,
       helpTitle = '',
       helpContent = {};
     $scope.helpTitle = '';
@@ -74,15 +75,38 @@
         {name: 'pipe', label: ts('CV (pipe)'), code: ''}
       ]
     };
+    this.resultFormats = [
+      {
+        name: 'json',
+        label: ts('View as JSON')
+      },
+      {
+        name: 'php',
+        label: ts('View as PHP')
+      },
+    ];
 
     if (!entities.length) {
       formatForSelect2(schema, entities, 'name', ['description', 'icon']);
     }
 
+    // Prefix other url args with an underscore to avoid conflicts with param names
     $scope.$bindToRoute({
       expr: 'index',
-      param: 'index',
+      param: '_index',
       default: ''
+    });
+    $scope.$bindToRoute({
+      expr: 'selectedTab.code',
+      param: '_lang',
+      format: 'raw',
+      default: 'php'
+    });
+    $scope.$bindToRoute({
+      expr: '$ctrl.resultFormat',
+      param: '_format',
+      format: 'raw',
+      default: 'json'
     });
 
     function ucfirst(str) {
@@ -142,11 +166,14 @@
           if (join.bridge) {
             var bridgeFields = _.cloneDeep(entityFields(join.bridge)),
               bridgeEntity = getEntity(join.bridge),
-              joinFieldNames = _.pluck(joinFields, 'name');
+              joinFieldNames = _.pluck(joinFields, 'name'),
+              // Check if this is a symmetric bridge e.g. RelationshipCache joins Contact to Contact
+              bridgePair = _.keys(bridgeEntity.bridge),
+              symmetric = getField(bridgePair[0], join.bridge).entity === getField(bridgePair[1], join.bridge).entity;
             _.each(bridgeFields, function(field) {
               if (
                 // Only include bridge fields that link back to the original entity
-                (!bridgeEntity.bridge[field.name] || field.fk_entity !== join.entity) &&
+                (!bridgeEntity.bridge[field.name] || field.fk_entity !== join.entity || symmetric) &&
                 // Exclude fields with the same name as those in the original entity
                 !_.includes(joinFieldNames, field.name)
               ) {
@@ -258,9 +285,9 @@
         return;
       }
       var info = {
-          description: field.description,
-          type: field.data_type
-        };
+        description: field.description,
+        type: field.data_type
+      };
       if (field.default_value) {
         info.default = field.default_value;
       }
@@ -453,8 +480,8 @@
             children: _.transform(CRM.vars.api4.functions, function(result, fn) {
               result.push({
                 id: fn.name + '() AS ' + fn.name.toLowerCase(),
-                text: fn.name + '()',
-                description: fn.name + '(' + describeSqlFn(fn.params) + ')'
+                description: fn.description,
+                text: fn.name + '(' + describeSqlFn(fn.params) + ')'
               });
             })
           };
@@ -604,16 +631,19 @@
       var desc = ' ';
       _.each(params, function(param) {
         desc += ' ';
-        if (param.prefix) {
-          desc += _.filter(param.prefix).join('|') + ' ';
+        if (param.name) {
+          desc += param.name + ' ';
         }
-        if (param.expr === 1) {
+        if (!_.isEmpty(param.flag_before)) {
+          desc += '[' + _.filter(param.name ? [param.name] : _.keys(param.flag_before)).join('|') + '] ';
+        }
+        if (param.max_expr === 1) {
           desc += 'expr ';
-        } else if (param.expr > 1) {
+        } else if (param.max_expr > 1) {
           desc += 'expr, ... ';
         }
-        if (param.suffix) {
-          desc += ' ' + _.filter(param.suffix).join('|') + ' ';
+        if (!_.isEmpty(param.flag_after)) {
+          desc += ' [' + _.filter(param.flag_after).join('|') + '] ';
         }
       });
       return desc.replace(/[ ]+/g, ' ');
@@ -759,6 +789,7 @@
     // Format oop params
     function formatOOP(entity, action, params, indent) {
       var info = getEntity(entity),
+        arrayParams = ['groupBy', 'records'],
         newLine = "\n" + _.repeat(' ', indent),
         code = '\\' + info.class + '::' + action + '(',
         perm = params.checkPermissions === false ? 'FALSE' : '';
@@ -773,6 +804,10 @@
           _.each(param, function(item, index) {
             val = phpFormat(index) + ', ' + phpFormat(item, 2 + indent);
             code += newLine + "->add" + ucfirst(key).replace(/s$/, '') + '(' + val + ')';
+          });
+        } else if (_.includes(arrayParams, key)) {
+          _.each(param, function(item) {
+            code += newLine + "->add" + ucfirst(key).replace(/s$/, '') + '(' + phpFormat(item, 2 + indent) + ')';
           });
         } else if (key === 'where') {
           _.each(param, function (clause) {
@@ -840,22 +875,40 @@
           'X-Requested-With': 'XMLHttpRequest'
         }
       }).then(function(resp) {
-          $scope.loading = false;
-          $scope.status = resp.data && resp.data.debug && resp.data.debug.log ? 'warning' : 'success';
-          $scope.debug = debugFormat(resp.data);
-          $scope.result = [
-            formatMeta(resp.data),
-            prettyPrintOne((_.isArray(resp.data.values) ? '(' + resp.data.values.length + ') ' : '') + _.escape(JSON.stringify(resp.data.values, null, 2)), 'js', 1)
-          ];
-        }, function(resp) {
-          $scope.loading = false;
-          $scope.status = 'danger';
-          $scope.debug = debugFormat(resp.data);
-          $scope.result = [
-            formatMeta(resp),
-            prettyPrintOne(_.escape(JSON.stringify(resp.data, null, 2)))
-          ];
-        });
+        $scope.loading = false;
+        $scope.status = resp.data && resp.data.debug && resp.data.debug.log ? 'warning' : 'success';
+        $scope.debug = debugFormat(resp.data);
+        response = {
+          meta: resp.data,
+          values: resp.data.values
+        };
+        ctrl.formatResult();
+      }, function(resp) {
+        $scope.loading = false;
+        $scope.status = 'danger';
+        $scope.debug = debugFormat(resp.data);
+        response = {
+          meta: resp,
+          values: resp.data
+        };
+        ctrl.formatResult();
+      });
+    };
+
+    ctrl.formatResult = function() {
+      if (!response) {
+        return;
+      }
+      $scope.result = [formatMeta(response.meta)];
+      switch (ctrl.resultFormat) {
+        case 'json':
+          $scope.result.push(prettyPrintOne((_.isArray(response.values) ? '(' + response.values.length + ') ' : '') + _.escape(JSON.stringify(response.values, null, 2)), 'js', 1));
+          break;
+
+        case 'php':
+          $scope.result.push(prettyPrintOne((_.isArray(response.values) ? '(' + response.values.length + ') ' : '') + _.escape(phpFormat(response.values, 2, 2)), 'php', 1));
+          break;
+      }
     };
 
     function debugFormat(data) {
@@ -867,27 +920,34 @@
     /**
      * Format value to look like php code
      */
-    function phpFormat(val, indent) {
+    function phpFormat(val, indent, indentChildren) {
       if (typeof val === 'undefined') {
         return '';
       }
       if (val === null || val === true || val === false) {
         return JSON.stringify(val).toUpperCase();
       }
+      var indentChild = indentChildren ? indent + indentChildren : null;
       indent = (typeof indent === 'number') ? _.repeat(' ', indent) : (indent || '');
       var ret = '',
         baseLine = indent ? indent.slice(0, -2) : '',
         newLine = indent ? '\n' : '',
         trailingComma = indent ? ',' : '';
       if ($.isPlainObject(val)) {
+        if ($.isEmptyObject(val)) {
+          return '[]';
+        }
         $.each(val, function(k, v) {
-          ret += (ret ? ', ' : '') + newLine + indent + "'" + k + "' => " + phpFormat(v);
+          ret += (ret ? ', ' : '') + newLine + indent + "'" + k + "' => " + phpFormat(v, indentChild, indentChildren);
         });
         return '[' + ret + trailingComma + newLine + baseLine + ']';
       }
       if ($.isArray(val)) {
+        if (!val.length) {
+          return '[]';
+        }
         $.each(val, function(k, v) {
-          ret += (ret ? ', ' : '') + newLine + indent + phpFormat(v);
+          ret += (ret ? ', ' : '') + newLine + indent + phpFormat(v, indentChild, indentChildren);
         });
         return '[' + ret + trailingComma + newLine + baseLine + ']';
       }

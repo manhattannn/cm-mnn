@@ -89,7 +89,7 @@ class CRM_Contribute_Form_CancelSubscription extends CRM_Contribute_Form_Contrib
       (!$this->_crid && !$this->_coid && !$this->_mid) ||
       (!$this->getSubscriptionDetails())
     ) {
-      CRM_Core_Error::statusBounce('Required information missing.');
+      CRM_Core_Error::statusBounce(ts('Required information missing.'));
     }
 
     $this->assign('cancelRecurDetailText', $this->_paymentProcessorObj->getText('cancelRecurDetailText', $cancelRecurTextParams));
@@ -97,7 +97,7 @@ class CRM_Contribute_Form_CancelSubscription extends CRM_Contribute_Form_Contrib
     // handle context redirection
     CRM_Contribute_BAO_ContributionRecur::setSubscriptionContext();
 
-    CRM_Utils_System::setTitle($this->_mid ? ts('Cancel Auto-renewal') : ts('Cancel Recurring Contribution'));
+    $this->setTitle($this->_mid ? ts('Cancel Auto-renewal') : ts('Cancel Recurring Contribution'));
     $this->assign('mode', $this->_mode);
 
     if ($this->isSelfService()) {
@@ -222,7 +222,7 @@ class CRM_Contribute_Form_CancelSubscription extends CRM_Contribute_Form_Contrib
         'id' => $this->getSubscriptionDetails()->recur_id,
         'membership_id' => $this->_mid,
         'processor_message' => $message,
-        'cancel_reason' => $params['cancel_reason'],
+        'cancel_reason' => $this->getSubmittedValue('cancel_reason'),
       ]);
 
       $tplParams = [];
@@ -239,15 +239,11 @@ class CRM_Contribute_Form_CancelSubscription extends CRM_Contribute_Form_Contrib
         $msgType = 'info';
       }
       else {
-        $tplParams['recur_frequency_interval'] = $this->getSubscriptionDetails()->frequency_interval;
-        $tplParams['recur_frequency_unit'] = $this->getSubscriptionDetails()->frequency_unit;
-        $tplParams['amount'] = CRM_Utils_Money::format($this->getSubscriptionDetails()->amount, $this->getSubscriptionDetails()->currency);
-        $tplParams['contact'] = ['display_name' => $this->_donorDisplayName];
         $status = ts('The recurring contribution of %1, every %2 %3 has been cancelled.',
           [
-            1 => $tplParams['amount'],
-            2 => $tplParams['recur_frequency_interval'],
-            3 => $tplParams['recur_frequency_unit'],
+            1 => CRM_Utils_Money::format($this->getSubscriptionDetails()->amount, $this->getSubscriptionDetails()->currency),
+            2 => $this->getSubscriptionDetails()->frequency_interval,
+            3 => $this->getSubscriptionDetails()->frequency_unit,
           ]
         );
         $msgTitle = 'Contribution Cancelled';
@@ -255,25 +251,6 @@ class CRM_Contribute_Form_CancelSubscription extends CRM_Contribute_Form_Contrib
       }
 
       if (CRM_Utils_Array::value('is_notify', $params) == 1) {
-        if ($this->getSubscriptionDetails()->contribution_page_id) {
-          CRM_Core_DAO::commonRetrieveAll(
-            'CRM_Contribute_DAO_ContributionPage',
-            'id',
-            $this->getSubscriptionDetails()->contribution_page_id,
-            $value,
-            ['title', 'receipt_from_name', 'receipt_from_email']
-          );
-          $receiptFrom
-            = '"' . CRM_Utils_Array::value('receipt_from_name', $value[$this->getSubscriptionDetails()->contribution_page_id]) .
-            '" <' .
-            $value[$this->getSubscriptionDetails()->contribution_page_id]['receipt_from_email'] .
-            '>';
-        }
-        else {
-          $domainValues = CRM_Core_BAO_Domain::getNameAndEmail();
-          $receiptFrom = "$domainValues[0] <$domainValues[1]>";
-        }
-
         // send notification
         $sendTemplateParams
           = [
@@ -281,9 +258,10 @@ class CRM_Contribute_Form_CancelSubscription extends CRM_Contribute_Form_Contrib
             'valueName' => $this->_mode == 'auto_renew' ? 'membership_autorenew_cancelled' : 'contribution_recurring_cancelled',
             'contactId' => $this->getSubscriptionDetails()->contact_id,
             'tplParams' => $tplParams,
+            'tokenContext' => ['contribution_recurId' => $this->getContributionRecurID()],
             //'isTest'    => $isTest, set this from _objects
             'PDFFilename' => 'receipt.pdf',
-            'from' => $receiptFrom,
+            'from' => CRM_Contribute_BAO_ContributionRecur::getRecurFromAddress($this->getContributionRecurID()),
             'toName' => $this->_donorDisplayName,
             'toEmail' => $this->_donorEmail,
           ];

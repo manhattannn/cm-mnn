@@ -464,10 +464,6 @@ class CRM_Core_Block {
       );
     }
 
-    if (empty($dashboardLinks)) {
-      return NULL;
-    }
-
     $values = [];
     foreach ($dashboardLinks as $dash) {
       $value = [];
@@ -552,6 +548,7 @@ class CRM_Core_Block {
     if ($config->isUpgradeMode()) {
       return NULL;
     }
+    CRM_Core_Smarty::singleton()->ensureVariablesAreAssigned(['langSwitch', 'breadcrumb', 'pageTitle']);
 
     if (!self::getProperty($id, 'active')) {
       return NULL;

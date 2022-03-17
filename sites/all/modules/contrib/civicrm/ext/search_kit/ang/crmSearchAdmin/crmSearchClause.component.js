@@ -7,6 +7,7 @@
       clauses: '<',
       format: '@',
       op: '@',
+      allowFunctions: '<',
       skip: '<',
       label: '@',
       hideLabel: '@',
@@ -61,18 +62,32 @@
         }
       }
 
-      this.getField = function(expr) {
-        if (!meta[expr]) {
-          meta[expr] = searchMeta.parseExpr(expr);
+      // Gets the first arg of type "field"
+      function getFirstArgFromExpr(expr) {
+        if (!(expr in meta)) {
+          meta[expr] = _.findWhere(searchMeta.parseExpr(expr).args, {type: 'field'});
         }
-        return meta[expr].field;
+        return meta[expr] || {};
+      }
+
+      this.getField = function(expr) {
+        return getFirstArgFromExpr(expr).field;
+      };
+
+      this.getFieldOrFunction = function(expr) {
+        if (ctrl.hasFunction(expr)) {
+          return searchMeta.parseExpr(expr).fn;
+        }
+        return ctrl.getField(expr);
       };
 
       this.getOptionKey = function(expr) {
-        if (!meta[expr]) {
-          meta[expr] = searchMeta.parseExpr(expr);
-        }
-        return meta[expr].suffix ? meta[expr].suffix.slice(1) : 'id';
+        var arg = getFirstArgFromExpr(expr);
+        return arg.suffix ? arg.suffix.slice(1) : 'id';
+      };
+
+      this.hasFunction = function(expr) {
+        return expr.indexOf('(') > -1;
       };
 
       this.addGroup = function(op) {
@@ -93,15 +108,12 @@
         $('.api4-input.form-inline.ui-sortable-helper').css('margin-left', '' + offset + 'px');
       }
 
-      this.addClause = function() {
-        $timeout(function() {
-          if (ctrl.newClause) {
-            var newIndex = ctrl.clauses.length;
-            ctrl.clauses.push([ctrl.newClause, '=', '']);
-            ctrl.newClause = null;
-            updateOperators(ctrl.clauses[newIndex]);
-          }
-        });
+      this.addClause = function(value) {
+        if (value) {
+          var newIndex = ctrl.clauses.length;
+          ctrl.clauses.push([value, '=', '']);
+          updateOperators(ctrl.clauses[newIndex]);
+        }
       };
 
       this.deleteRow = function(index) {

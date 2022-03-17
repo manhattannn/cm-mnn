@@ -58,8 +58,9 @@ class Entity extends Generic\AbstractEntity {
             'DAOEntity' => 'DAOEntity',
             'CustomValue' => 'CustomValue',
             'BasicEntity' => 'BasicEntity',
+            'SortableEntity' => 'SortableEntity',
+            'ManagedEntity' => 'ManagedEntity',
             'EntityBridge' => 'EntityBridge',
-            'OptionList' => 'OptionList',
           ],
         ],
         [
@@ -88,6 +89,10 @@ class Entity extends Generic\AbstractEntity {
           'description' => 'Field to show when displaying a record',
         ],
         [
+          'name' => 'order_by',
+          'description' => 'Default column to sort results',
+        ],
+        [
           'name' => 'searchable',
           'description' => 'How should this entity be presented in search UIs',
           'options' => [
@@ -111,6 +116,11 @@ class Entity extends Generic\AbstractEntity {
           'name' => 'since',
           'data_type' => 'String',
           'description' => 'Version this API entity was added',
+        ],
+        [
+          'name' => 'class',
+          'data_type' => 'String',
+          'description' => 'PHP class name',
         ],
         [
           'name' => 'bridge',

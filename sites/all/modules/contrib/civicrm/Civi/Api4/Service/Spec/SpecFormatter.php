@@ -32,6 +32,8 @@ class SpecFormatter {
         $field->setName($data['custom_group_id.name'] . '.' . $data['name']);
       }
       else {
+        // Fields belonging to custom entities are treated as normal; type = Field instead of Custom
+        $field->setType('Field');
         $field->setTableName($data['custom_group_id.table_name']);
       }
       $field->setColumnName($data['column_name']);
@@ -43,6 +45,11 @@ class SpecFormatter {
       $field->setHelpPost($data['help_post'] ?? NULL);
       if (self::customFieldHasOptions($data)) {
         $field->setOptionsCallback([__CLASS__, 'getOptions']);
+        if (!empty($data['option_group_id'])) {
+          // Option groups support other stuff like description, icon & color,
+          // but at time of this writing, custom fields do not.
+          $field->setSuffixes(['id', 'name', 'label']);
+        }
       }
       $field->setReadonly($data['is_view']);
     }
@@ -55,7 +62,19 @@ class SpecFormatter {
       $field->setTitle($data['title'] ?? NULL);
       $field->setLabel($data['html']['label'] ?? NULL);
       if (!empty($data['pseudoconstant'])) {
-        $field->setOptionsCallback([__CLASS__, 'getOptions']);
+        // Do not load options if 'prefetch' is explicitly FALSE
+        if (!isset($data['pseudoconstant']['prefetch']) || $data['pseudoconstant']['prefetch'] === FALSE) {
+          $field->setOptionsCallback([__CLASS__, 'getOptions']);
+        }
+        // These suffixes are always supported if a field has options
+        $suffixes = ['name', 'label'];
+        // Add other columns specified in schema (e.g. 'abbrColumn')
+        foreach (['description', 'abbr', 'icon', 'color'] as $suffix) {
+          if (isset($data['pseudoconstant'][$suffix . 'Column'])) {
+            $suffixes[] = $suffix;
+          }
+        }
+        $field->setSuffixes($suffixes);
       }
       $field->setReadonly(!empty($data['readonly']));
     }
@@ -256,8 +275,8 @@ class SpecFormatter {
     if ($inputType == 'Date' && !empty($data['custom_group_id'])) {
       $inputAttrs['time'] = empty($data['time_format']) ? FALSE : ($data['time_format'] == 1 ? 12 : 24);
       $inputAttrs['date'] = $data['date_format'];
-      $inputAttrs['start_date_years'] = (int) $data['start_date_years'];
-      $inputAttrs['end_date_years'] = (int) $data['end_date_years'];
+      $inputAttrs['start_date_years'] = isset($data['start_date_years']) ? (int) $data['start_date_years'] : NULL;
+      $inputAttrs['end_date_years'] = isset($data['end_date_years']) ? (int) $data['end_date_years'] : NULL;
     }
     if ($inputType == 'Text' && !empty($data['maxlength'])) {
       $inputAttrs['maxlength'] = (int) $data['maxlength'];

@@ -337,8 +337,8 @@ class CRM_Core_BAO_CustomGroup extends CRM_Core_DAO_CustomGroup {
    * @param bool $returnAll
    *   Do not restrict by subtype at all. (The parameter feels a bit cludgey but is only used from the
    *   api - through which it is properly tested - so can be refactored with some comfort.)
-   *
-   * @param bool $checkPermission
+   * @param bool|int $checkPermission
+   *   Either a CRM_Core_Permission constant or FALSE to disable checks
    * @param string|int $singleRecord
    *   holds 'new' or id if view/edit/copy form for a single record is being loaded.
    * @param bool $showPublicOnly
@@ -367,10 +367,14 @@ class CRM_Core_BAO_CustomGroup extends CRM_Core_DAO_CustomGroup {
     $fromCache = TRUE,
     $onlySubType = NULL,
     $returnAll = FALSE,
-    $checkPermission = TRUE,
+    $checkPermission = CRM_Core_Permission::EDIT,
     $singleRecord = NULL,
     $showPublicOnly = FALSE
   ) {
+    if ($checkPermission === TRUE) {
+      CRM_Core_Error::deprecatedWarning('Unexpected TRUE passed to CustomGroup::getTree $checkPermission param.');
+      $checkPermission = CRM_Core_Permission::EDIT;
+    }
     if ($entityID) {
       $entityID = CRM_Utils_Type::escape($entityID, 'Integer');
     }
@@ -529,7 +533,7 @@ WHERE civicrm_custom_group.is_active = 1
     if ($checkPermission) {
       // ensure that the user has access to these custom groups
       $strWhere .= " AND " .
-        CRM_Core_Permission::customGroupClause(CRM_Core_Permission::VIEW,
+        CRM_Core_Permission::customGroupClause($checkPermission,
           'civicrm_custom_group.'
         );
     }
@@ -1784,7 +1788,7 @@ SELECT IF( EXISTS(SELECT name FROM civicrm_contact_type WHERE name like %1), 1, 
    * @return array
    * @throws \CRM_Core_Exception
    */
-  public static function formatGroupTree(&$groupTree, $groupCount = 1, &$form = NULL) {
+  public static function formatGroupTree($groupTree, $groupCount = 1, &$form = NULL) {
     $formattedGroupTree = [];
     $uploadNames = $formValues = [];
 
@@ -1810,7 +1814,7 @@ SELECT IF( EXISTS(SELECT name FROM civicrm_contact_type WHERE name like %1), 1, 
       $formattedGroupTree[$key]['collapse_adv_display'] = $value['collapse_adv_display'] ?? NULL;
       $formattedGroupTree[$key]['style'] = $value['style'] ?? NULL;
 
-      // this params needed of bulding multiple values
+      // this params needed of building multiple values
       $formattedGroupTree[$key]['is_multiple'] = $value['is_multiple'] ?? NULL;
       $formattedGroupTree[$key]['extends'] = $value['extends'] ?? NULL;
       $formattedGroupTree[$key]['extends_entity_column_id'] = $value['extends_entity_column_id'] ?? NULL;
@@ -1818,8 +1822,12 @@ SELECT IF( EXISTS(SELECT name FROM civicrm_contact_type WHERE name like %1), 1, 
       $formattedGroupTree[$key]['subtype'] = $value['subtype'] ?? NULL;
       $formattedGroupTree[$key]['max_multiple'] = $value['max_multiple'] ?? NULL;
 
+      // Properties that might have been filtered out but which
+      // should be present to avoid smarty e-notices.
+      $expectedProperties = ['options_per_line', 'help_pre', 'help_post'];
       // add field information
       foreach ($value['fields'] as $k => $properties) {
+        $properties = array_merge(array_fill_keys($expectedProperties, NULL), $properties);
         $properties['element_name'] = "custom_{$k}_-{$groupCount}";
         if (isset($properties['customValue']) &&
           !CRM_Utils_System::isNull($properties['customValue']) &&
@@ -1879,16 +1887,23 @@ SELECT IF( EXISTS(SELECT name FROM civicrm_contact_type WHERE name like %1), 1, 
    * @param null $prefix
    * @param int $customValueId
    * @param int $entityId
+   * @param bool $checkEditPermission
    *
    * @return array|int
    * @throws \CRM_Core_Exception
    */
-  public static function buildCustomDataView(&$form, &$groupTree, $returnCount = FALSE, $gID = NULL, $prefix = NULL, $customValueId = NULL, $entityId = NULL) {
+  public static function buildCustomDataView(&$form, $groupTree, $returnCount = FALSE, $gID = NULL, $prefix = NULL, $customValueId = NULL, $entityId = NULL, $checkEditPermission = FALSE) {
+    // Filter out pesky extra info
+    unset($groupTree['info']);
+
     $details = [];
+
+    $editableGroups = [];
+    if ($checkEditPermission) {
+      $editableGroups = \CRM_Core_Permission::customGroup(CRM_Core_Permission::EDIT);
+    }
+
     foreach ($groupTree as $key => $group) {
-      if ($key === 'info') {
-        continue;
-      }
 
       foreach ($group['fields'] as $k => $properties) {
         $groupID = $group['id'];
@@ -1915,7 +1930,7 @@ SELECT IF( EXISTS(SELECT name FROM civicrm_contact_type WHERE name like %1), 1, 
             if (!isset($details[$groupID][$values['id']]['editable'])) {
               $details[$groupID][$values['id']]['editable'] = FALSE;
             }
-            if (empty($properties['is_view'])) {
+            if (empty($properties['is_view']) && in_array($key, $editableGroups)) {
               $details[$groupID][$values['id']]['editable'] = TRUE;
             }
             // also return contact reference contact id if user has view all or edit all contacts perm
@@ -2263,6 +2278,16 @@ SELECT  civicrm_custom_group.id as groupID, civicrm_custom_group.title as groupT
       return $extends;
     }
     return CRM_Core_OptionGroup::values('custom_data_type', FALSE, FALSE, FALSE, NULL, 'name')[$extendsEntityColumn];
+  }
+
+  /**
+   * @param int $groupId
+   * @param int $operation
+   * @param int|null $userId
+   */
+  public static function checkGroupAccess($groupId, $operation = CRM_Core_Permission::EDIT, $userId = NULL): bool {
+    $allowedGroups = CRM_Core_Permission::customGroup($operation, FALSE, $userId);
+    return in_array($groupId, $allowedGroups);
   }
 
 }

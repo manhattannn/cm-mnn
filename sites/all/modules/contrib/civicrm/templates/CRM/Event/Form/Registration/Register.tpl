@@ -56,7 +56,7 @@
       </div>
     {/if}
 
-    {if $form.additional_participants.html}
+    {if !empty($form.additional_participants.html)}
       <div class="crm-public-form-item crm-section additional_participants-section" id="noOfparticipants">
         <div class="label">{$form.additional_participants.label} <span class="crm-marker" title="{ts}This field is required.{/ts}">*</span></div>
         <div class="content">
@@ -122,7 +122,7 @@
       </fieldset>
     {/if}
 
-    {if $form.payment_processor_id.label}
+    {if !empty($form.payment_processor_id.label)}
       <fieldset class="crm-public-form-item crm-group payment_options-group" style="display:none;">
         <legend>{ts}Payment Options{/ts}</legend>
         <div class="crm-section payment_processor-section">
@@ -159,7 +159,13 @@
     {literal}
 
     cj("#additional_participants").change(function () {
-      skipPaymentMethod();
+      if (typeof skipPaymentMethod == 'function') {
+        // For free event there is no involvement of payment processor, hence
+        // this function is not available. if above condition not present
+        // then you will receive JS Error in case you change multiple
+        // registrant option.
+        skipPaymentMethod();
+      }
     });
 
   {/literal}
@@ -225,7 +231,13 @@
         cj("#bypass_payment").val(0);
       }
       //reset value since user don't want or not eligible for waitlist
-      skipPaymentMethod();
+      if (typeof skipPaymentMethod == 'function') {
+        // For free event there is no involvement of payment processor, hence
+        // this function is not available. if above condition not present
+        // then you will receive JS Error in case register multiple participants
+        // enabled and require approval.
+        skipPaymentMethod();
+      }
     }
   }
 

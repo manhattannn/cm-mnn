@@ -258,7 +258,7 @@ class CRM_Event_Form_ManageEvent_Registration extends CRM_Event_Form_ManageEvent
     $this->assign('ruleFields', json_encode($ruleFields));
 
     $dedupeRules = [
-      '' => '- Unsupervised rule -',
+      '' => ts('- Unsupervised rule -'),
     ];
     $dedupeRules += CRM_Dedupe_BAO_DedupeRuleGroup::getByType('Individual');
     $this->add('select', 'dedupe_rule_group_id', ts('Duplicate matching rule'), $dedupeRules);
@@ -311,7 +311,7 @@ class CRM_Event_Form_ManageEvent_Registration extends CRM_Event_Form_ManageEvent
    * Subroutine to insert a Profile Editor widget.
    * depends on getProfileSelectorTypes
    *
-   * @param array &$form
+   * @param \CRM_Core_Form &$form
    * @param int $count
    *   Unique index.
    * @param string $prefix
@@ -392,7 +392,6 @@ class CRM_Event_Form_ManageEvent_Registration extends CRM_Event_Form_ManageEvent
    * Build Email Block.
    *
    * @param CRM_Core_Form $form
-   *
    */
   public function buildMailBlock(&$form) {
     $form->registerRule('emailList', 'callback', 'emailList', 'CRM_Utils_Rule');
@@ -420,7 +419,6 @@ class CRM_Event_Form_ManageEvent_Registration extends CRM_Event_Form_ManageEvent
 
   /**
    * Add local and global form rules.
-   *
    *
    * @return void
    */
@@ -621,7 +619,7 @@ class CRM_Event_Form_ManageEvent_Registration extends CRM_Event_Form_ManageEvent
    * Collect all email fields for an array of profile ids.
    *
    * @param $profileIds
-   * @return bool
+   * @return array
    */
   public static function getEmailFields($profileIds) {
     $emailFields = [];
@@ -770,7 +768,6 @@ class CRM_Event_Form_ManageEvent_Registration extends CRM_Event_Form_ManageEvent
 
   /**
    * Process the form submission.
-   *
    *
    * @return void
    */

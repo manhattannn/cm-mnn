@@ -82,10 +82,11 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
     //      self-registers.
     //    - 'register_pending_approval': Welcome message, user pending admin
     //      approval.
-    // @Todo: Should we only send off emails if $params['notify'] is set?
     switch (TRUE) {
       case $user_register_conf == 'admin_only' || $user->isAuthenticated():
-        _user_mail_notify('register_admin_created', $account);
+        if (!empty($params['notify'])) {
+          _user_mail_notify('register_admin_created', $account);
+        }
         break;
 
       case $user_register_conf == 'visitors':
@@ -355,7 +356,8 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    * @return int|null
    */
   public function getUfId($username) {
-    if ($id = user_load_by_name($username)->id()) {
+    $user = user_load_by_name($username);
+    if ($user && $id = $user->id()) {
       return $id;
     }
   }
@@ -551,9 +553,8 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
 
     $module_data = \Drupal::service('extension.list.module')->reset()->getList();
     foreach ($module_data as $module_name => $extension) {
-      if (!isset($extension->info['hidden']) && $extension->origin != 'core') {
-        $extension->schema_version = drupal_get_installed_schema_version($module_name);
-        $modules[] = new CRM_Core_Module('drupal.' . $module_name, ($extension->status == 1));
+      if (!isset($extension->info['hidden']) && $extension->origin != 'core' && $extension->status == 1) {
+        $modules[] = new CRM_Core_Module('drupal.' . $module_name, TRUE);
       }
     }
     return $modules;
@@ -848,6 +849,20 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
   }
 
   /**
+   * @inheritdoc
+   */
+  public function getSessionId() {
+    if (\Drupal::hasContainer()) {
+      $session = \Drupal::service('session');
+      if (!$session->has('civicrm.tempstore.sessionid')) {
+        $session->set('civicrm.tempstore.sessionid', \Drupal\Component\Utility\Crypt::randomBytesBase64());
+      }
+      return $session->get('civicrm.tempstore.sessionid');
+    }
+    return '';
+  }
+
+  /**
    * Load the user object.
    *
    * @param int $userID
@@ -866,6 +881,13 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
     if (class_exists('\Drupal') && \Drupal::hasContainer()) {
       \Drupal::service('router.builder')->rebuild();
     }
+  }
+
+  public function getVersion() {
+    if (class_exists('\Drupal')) {
+      return \Drupal::VERSION;
+    }
+    return 'Unknown';
   }
 
 }

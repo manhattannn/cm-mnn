@@ -52,7 +52,7 @@ abstract class AbstractEntity {
    * @return \Civi\Api4\Generic\CheckAccessAction
    */
   public static function checkAccess() {
-    return new CheckAccessAction(self::getEntityName(), __FUNCTION__);
+    return new CheckAccessAction(static::getEntityName(), __FUNCTION__);
   }
 
   /**
@@ -64,7 +64,7 @@ abstract class AbstractEntity {
     $permissions = \CRM_Core_Permission::getEntityActionPermissions();
 
     // For legacy reasons the permissions are keyed by lowercase entity name
-    $lcentity = \CRM_Core_DAO_AllCoreTables::convertEntityNameToLower(self::getEntityName());
+    $lcentity = \CRM_Core_DAO_AllCoreTables::convertEntityNameToLower(static::getEntityName());
     // Merge permissions for this entity with the defaults
     return ($permissions[$lcentity] ?? []) + $permissions['default'];
   }
@@ -129,46 +129,47 @@ abstract class AbstractEntity {
    * Reflection function called by Entity::get()
    *
    * @see \Civi\Api4\Action\Entity\Get
-   * @return array
+   * @return array{name: string, title: string, description: string, title_plural: string, type: string, paths: array, class: string, primary_key: array, searchable: string, dao: string, label_field: string, icon: string}
    */
   public static function getInfo() {
-    $cache = \Civi::cache('metadata');
     $entityName = static::getEntityName();
-    $info = $cache->get("api4.$entityName.info");
-    if (!$info) {
-      $info = [
-        'name' => $entityName,
-        'title' => static::getEntityTitle(),
-        'title_plural' => static::getEntityTitle(TRUE),
-        'type' => [self::stripNamespace(get_parent_class(static::class))],
-        'paths' => static::getEntityPaths(),
-        'class' => static::class,
-        'primary_key' => ['id'],
-        // Entities without a @searchable annotation will default to secondary,
-        // which makes them visible in SearchKit but not at the top of the list.
-        'searchable' => 'secondary',
-      ];
-      // Add info for entities with a corresponding DAO
-      $dao = \CRM_Core_DAO_AllCoreTables::getFullName($info['name']);
-      if ($dao) {
-        $info['paths'] = $dao::getEntityPaths();
-        $info['primary_key'] = $dao::$_primaryKey;
-        $info['icon'] = $dao::$_icon;
-        $info['label_field'] = $dao::$_labelField;
-        $info['dao'] = $dao;
-      }
-      foreach (ReflectionUtils::getTraits(static::class) as $trait) {
-        $info['type'][] = self::stripNamespace($trait);
-      }
-      $reflection = new \ReflectionClass(static::class);
-      $info = array_merge($info, ReflectionUtils::getCodeDocs($reflection, NULL, ['entity' => $info['name']]));
-      if ($dao) {
-        $info['description'] = $dao::getEntityDescription() ?? $info['description'] ?? NULL;
-      }
-      unset($info['package'], $info['method']);
-      $cache->set("api4.$entityName.info", $info);
+    $info = [
+      'name' => $entityName,
+      'title' => static::getEntityTitle(),
+      'title_plural' => static::getEntityTitle(TRUE),
+      'type' => [self::stripNamespace(get_parent_class(static::class))],
+      'paths' => static::getEntityPaths(),
+      'class' => static::class,
+      'primary_key' => ['id'],
+      // Entities without a @searchable annotation will default to secondary,
+      // which makes them visible in SearchKit but not at the top of the list.
+      'searchable' => 'secondary',
+    ];
+    // Add info for entities with a corresponding DAO
+    $dao = \CRM_Core_DAO_AllCoreTables::getFullName($info['name']);
+    if ($dao) {
+      $info['paths'] = $dao::getEntityPaths();
+      $info['primary_key'] = $dao::$_primaryKey;
+      $info['icon'] = $dao::$_icon;
+      $info['label_field'] = $dao::$_labelField;
+      $info['dao'] = $dao;
     }
-    return $info;
+    foreach (ReflectionUtils::getTraits(static::class) as $trait) {
+      $info['type'][] = self::stripNamespace($trait);
+    }
+    $reflection = new \ReflectionClass(static::class);
+    $info = array_merge($info, ReflectionUtils::getCodeDocs($reflection, NULL, ['entity' => $info['name']]));
+    if ($dao) {
+      $info['description'] = $dao::getEntityDescription() ?? $info['description'] ?? NULL;
+    }
+    unset($info['package'], $info['method']);
+
+    // Ensure all keys are snake_case
+    $keys = array_keys($info);
+    foreach ($keys as &$key) {
+      $key = \CRM_Utils_String::convertStringToSnakeCase($key);
+    }
+    return array_combine($keys, array_values($info));
   }
 
   /**

@@ -123,10 +123,10 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
 
     CRM_Contact_Form_Task_EmailCommon::preProcessFromAddress($this);
     if ($this->_selectedOutput == 'email') {
-      CRM_Utils_System::setTitle(ts('Email Invoice'));
+      $this->setTitle(ts('Email Invoice'));
     }
     else {
-      CRM_Utils_System::setTitle(ts('Print Contribution Invoice'));
+      $this->setTitle(ts('Print Contribution Invoice'));
     }
   }
 
@@ -135,9 +135,7 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
    */
   public function buildQuickForm() {
     $this->preventAjaxSubmit();
-    if (CRM_Core_Permission::check('administer CiviCRM')) {
-      $this->assign('isAdmin', 1);
-    }
+    $this->assign('isAdmin', CRM_Core_Permission::check('administer CiviCRM'));
 
     $this->add('select', 'from_email_address', ts('From'), $this->_fromEmails, TRUE);
     if ($this->_selectedOutput != 'email') {
@@ -368,13 +366,11 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
         'resourceBase' => $config->userFrameworkResourceURL,
         'defaultCurrency' => $config->defaultCurrency,
         'amount' => $contribution->total_amount,
-        'currency' => $contribution->currency,
         'amountDue' => $amountDue,
         'amountPaid' => $amountPaid,
         'invoice_date' => $invoiceDate,
         'dueDate' => $dueDate,
         'notes' => $invoiceNotes,
-        'display_name' => $contribution->_relatedObjects['contact']->display_name,
         'lineItem' => $lineItem,
         'dataArray' => $dataArray,
         'refundedStatusId' => $refundedStatusId,
@@ -417,9 +413,9 @@ class CRM_Contribute_Form_Task_Invoice extends CRM_Contribute_Form_Task {
       $sendTemplateParams = [
         'groupName' => 'msg_tpl_workflow_contribution',
         'valueName' => 'contribution_invoice_receipt',
-        'contactId' => $contribution->contact_id,
         'tplParams' => $tplParams,
         'PDFFilename' => $pdfFileName,
+        'tokenContext' => ['contributionId' => $contribution->id, 'contactId' => $contribution->contact_id],
       ];
 
       // from email address

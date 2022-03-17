@@ -37,7 +37,7 @@
 </tr>
 <tr>
   <td>
-    {if $form.member_auto_renew}
+    {if !empty($form.member_auto_renew)}
       <label>{$form.member_auto_renew.label}</label>
       {help id="id-member_auto_renew" file="CRM/Member/Form/Search.hlp"}
       <br/>
@@ -57,7 +57,7 @@
 </tr>
 
 {* campaign in membership search *}
-{include file="CRM/Campaign/Form/addCampaignToComponent.tpl" campaignContext="componentSearch"
+{include file="CRM/Campaign/Form/addCampaignToSearch.tpl"
 campaignTrClass='' campaignTdClass=''}
 
 {if !empty($membershipGroupTree)}

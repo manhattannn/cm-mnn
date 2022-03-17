@@ -59,14 +59,14 @@ class CRM_Custom_Form_Group extends CRM_Core_Form {
     // setting title for html page
     if ($this->_action == CRM_Core_Action::UPDATE) {
       $title = CRM_Core_BAO_CustomGroup::getTitle($this->_id);
-      CRM_Utils_System::setTitle(ts('Edit %1', [1 => $title]));
+      $this->setTitle(ts('Edit %1', [1 => $title]));
     }
     elseif ($this->_action == CRM_Core_Action::VIEW) {
       $title = CRM_Core_BAO_CustomGroup::getTitle($this->_id);
-      CRM_Utils_System::setTitle(ts('Preview %1', [1 => $title]));
+      $this->setTitle(ts('Preview %1', [1 => $title]));
     }
     else {
-      CRM_Utils_System::setTitle(ts('New Custom Field Set'));
+      $this->setTitle(ts('New Custom Field Set'));
     }
 
     if (isset($this->_id)) {
@@ -343,7 +343,7 @@ class CRM_Custom_Form_Group extends CRM_Core_Form {
       $defaults['weight'] = CRM_Utils_Weight::getDefaultWeight('CRM_Core_DAO_CustomGroup');
 
       $defaults['is_multiple'] = $defaults['min_multiple'] = 0;
-      $defaults['is_active'] = $defaults['is_public'] = $defaults['collapse_display'] = 1;
+      $defaults['is_active'] = $defaults['is_public'] = $defaults['collapse_adv_display'] = 1;
       $defaults['style'] = 'Inline';
     }
     elseif (empty($defaults['max_multiple']) && !$this->_isGroupEmpty) {

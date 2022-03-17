@@ -10,7 +10,6 @@
 {capture assign=labelStyle }style="padding: 4px; border-bottom: 1px solid #999; background-color: #f7f7f7;"{/capture}
 {capture assign=valueStyle }style="padding: 4px; border-bottom: 1px solid #999;"{/capture}
 
-<center>
   <table id="crm-event_receipt" style="font-family: Arial, Verdana, sans-serif; text-align: left; width:100%; max-width:700px; padding:0; margin:0; border:0px;">
 
   <!-- BEGIN HEADER -->
@@ -227,10 +226,10 @@
         {foreach from=$dataArray item=value key=priceset}
           <tr>
            {if $priceset || $priceset == 0}
-            <td>&nbsp;{if isset($taxTerm)}{$taxTerm}{/if} {$priceset|string_format:"%.2f"}%</td>
+            <td>&nbsp;{$taxTerm} {$priceset|string_format:"%.2f"}%</td>
             <td>&nbsp;{$value|crmMoney:$currency}</td>
            {else}
-            <td>&nbsp;{ts}No{/ts} {if isset($taxTerm)}{$taxTerm}{/if}</td>
+            <td>&nbsp;{ts}No{/ts} {$taxTerm}</td>
             <td>&nbsp;{$value|crmMoney:$currency}</td>
            {/if}
           </tr>
@@ -507,7 +506,6 @@
   </tr>
 
  </table>
-</center>
 
 </body>
 </html>
