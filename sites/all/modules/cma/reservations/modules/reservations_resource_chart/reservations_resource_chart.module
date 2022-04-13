@@ -861,6 +861,18 @@ function reservations_resource_chart_get_chart_html($bucket_categories,
       $header_end_minute = 30;
     }
   }
+  
+  dsm($header_start_hour, "start hour");
+  dsm($header_end_hour, "end hour");
+  dsm($header_start_minute, "start min");
+  dsm($header_end_minute, "end min");
+    $header_start_hour =  9;
+// 
+//     $header_end_hour =
+//       variable_get('reservations_resource_chart_staff_end', 24);
+// 
+//     $header_start_minute = 0;
+//     $header_end_minute = 0;
 
   $row_end_timestamp =
     reservations_resource_chart_get_timestamp($start_date,
@@ -1141,12 +1153,15 @@ function reservations_resource_chart_get_chart_html($bucket_categories,
 	//THIS ROW HAS RESERVATIONS SO WE WILL PLACE THE RESERVATIONS
 	if ($has_reservations) {
 	  $counter_test = 0;
+//	  dsm($has_reservations);
           for ($block_end_timestamp = $block_start_timestamp + 60*30;
 	       ($block_end_timestamp <= $row_end_timestamp);
 	       $block_end_timestamp += 60*30) {
-
+//dsm($block_end_timestamp, "block end");
+//dsm($row_end_timestamp, "row end");
 	    if ($counter_test == 50) {
 	      drupal_set_message("Infinite Loop Error #787438");
+
 	      break;
 	    }
 	    $counter_test++;
