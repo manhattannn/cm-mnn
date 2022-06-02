@@ -266,7 +266,7 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
 
     $this->_fromEmails = CRM_Core_BAO_Email::getFromEmail();
 
-    if (in_array('CiviPledge', CRM_Core_Config::singleton()->enableComponents) && !$this->_formType) {
+    if (CRM_Core_Component::isEnabled('CiviPledge') && !$this->_formType) {
       $this->preProcessPledge();
     }
 
@@ -280,14 +280,14 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
       $this->assignPremiumProduct($this->_id);
       $this->buildValuesAndAssignOnline_Note_Type($this->_id, $this->_values);
     }
+    if (!isset($this->_values['is_template'])) {
+      $this->_values['is_template'] = FALSE;
+    }
+    $this->assign('is_template', $this->_values['is_template']);
 
     // when custom data is included in this page
     if (!empty($_POST['hidden_custom'])) {
       $this->applyCustomData('Contribution', $this->getFinancialTypeID(), $this->_id);
-    }
-
-    if (!empty($this->_values['is_template'])) {
-      $this->assign('is_template', TRUE);
     }
 
     $this->_lineItems = [];
@@ -516,11 +516,6 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
     $this->assign('payNow', FALSE);
     $buildRecurBlock = FALSE;
 
-    // display tax amount on edit contribution page
-    if ($invoicing && $this->_action & CRM_Core_Action::UPDATE && isset($this->_values['tax_amount'])) {
-      $this->assign('totalTaxAmount', $this->_values['tax_amount']);
-    }
-
     if (empty($this->_lineItems) &&
       ($this->_priceSetId || !empty($_POST['price_set_id']))
     ) {
@@ -613,9 +608,9 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
     $this->assign('allPanes', $allPanes);
 
     $this->addFormRule(['CRM_Contribute_Form_Contribution', 'formRule'], $this);
+    $this->assign('formType', $this->_formType);
 
     if ($this->_formType) {
-      $this->assign('formType', $this->_formType);
       return;
     }
 
@@ -855,7 +850,7 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
    *   The input form values.
    * @param array $files
    *   The uploaded files if any.
-   * @param $self
+   * @param self $self
    *
    * @return bool|array
    *   true if no errors, else array of errors
@@ -2057,7 +2052,7 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
       return CRM_Contribute_BAO_Contribution_Utils::getPendingCompleteFailedAndCancelledStatuses();
     }
     $statusNames = CRM_Contribute_BAO_Contribution::buildOptions('contribution_status_id', 'validate');
-    $statusNamesToUnset = [
+    $statusNamesToUnset = array_diff([
       // For records which represent a data template for a recurring
       // contribution that may not yet have a payment. This status should not
       // be available from forms. 'Template' contributions should only be created
@@ -2065,15 +2060,15 @@ class CRM_Contribute_Form_Contribution extends CRM_Contribute_Form_AbstractEditP
       // is_template field set to 1. This status excludes them from reports
       // that are still ignorant of the is_template field.
       'Template',
-    ];
+      'Partially paid',
+      'Pending refund',
+    ], [$this->getPreviousContributionStatus()]);
     switch ($this->getPreviousContributionStatus()) {
       case 'Completed':
         // [CRM-17498] Removing unsupported status change options.
         $statusNamesToUnset = array_merge($statusNamesToUnset, [
           'Pending',
           'Failed',
-          'Partially paid',
-          'Pending refund',
         ]);
         break;
 

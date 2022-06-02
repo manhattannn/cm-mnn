@@ -23,11 +23,8 @@
     <tr>
       <td>
         {assign var="greeting" value="{contact.email_greeting}"}{if $greeting}<p>{$greeting},</p>{/if}
-        {if !empty($formValues.receipt_text_signup)}
-          <p>{$formValues.receipt_text_signup|htmlize}</p>
-        {elseif !empty($formValues.receipt_text_renewal)}
-          <p>{$formValues.receipt_text_renewal|htmlize}</p>
-        {else}
+        {if $receipt_text}
+          <p>{$receipt_text|htmlize}</p>
           <p>{ts}Thank you for this contribution.{/ts}</p>
         {/if}
       </td>
@@ -116,7 +113,7 @@
                               <td>
                                 {$line.unit_price*$line.qty|crmMoney}
                               </td>
-                              {if isset($line.tax_rate) and ($line.tax_rate != "" || $line.tax_amount != "")}
+                              {if $line.tax_rate || $line.tax_amount != ""}
                                 <td>
                                   {$line.tax_rate|string_format:"%.2f"}%
                                 </td>
@@ -144,7 +141,7 @@
                   </tr>
                 {/foreach}
                 {if !empty($dataArray)}
-                  {if isset($formValues.total_amount) and isset($totalTaxAmount)}
+                  {if $formValues.total_amount and $totalTaxAmount}
                   <tr>
                     <td {$labelStyle}>
                       {ts}Amount Before Tax:{/ts}
@@ -167,7 +164,7 @@
                   {/foreach}
                 {/if}
               {/if}
-              {if isset($totalTaxAmount)}
+              {if $totalTaxAmount}
                 <tr>
                   <td {$labelStyle}>
                     {ts}Total Tax Amount{/ts}

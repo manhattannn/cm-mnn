@@ -17,30 +17,20 @@
 class CRM_Event_BAO_Event extends CRM_Event_DAO_Event {
 
   /**
-   * Class constructor.
-   */
-  public function __construct() {
-    parent::__construct();
-  }
-
-  /**
-   * Fetch object based on array of properties.
+   * Retrieve DB object and copy to defaults array.
    *
    * @param array $params
-   *   (reference ) an assoc array of name/value pairs.
+   *   Array of criteria values.
    * @param array $defaults
-   *   (reference ) an assoc array to hold the flattened values.
+   *   Array to be populated with found values.
    *
-   * @return CRM_Event_DAO_Event
+   * @return self|null
+   *   The DAO object, if found.
+   *
+   * @deprecated
    */
-  public static function retrieve(&$params, &$defaults) {
-    $event = new CRM_Event_DAO_Event();
-    $event->copyValues($params);
-    if ($event->find(TRUE)) {
-      CRM_Core_DAO::storeValues($event, $defaults);
-      return $event;
-    }
-    return NULL;
+  public static function retrieve($params, &$defaults) {
+    return self::commonRetrieve(self::class, $params, $defaults);
   }
 
   /**
@@ -122,6 +112,19 @@ class CRM_Event_BAO_Event extends CRM_Event_DAO_Event {
         $copy = self::copy($params['template_id']);
         $params['id'] = $copy->id;
         unset($params['template_id']);
+
+        //fix for api from template creation bug
+        civicrm_api4('ActionSchedule', 'update', [
+          'checkPermissions' => FALSE,
+          'values' => [
+            'mapping_id' => CRM_Event_ActionMapping::EVENT_NAME_MAPPING_ID,
+          ],
+          'where' => [
+            ['entity_value', '=', $copy->id],
+            ['mapping_id', '=', CRM_Event_ActionMapping::EVENT_TPL_MAPPING_ID],
+          ],
+        ]);
+
       }
     }
 
@@ -2364,7 +2367,7 @@ LEFT  JOIN  civicrm_price_field_value value ON ( value.id = lineItem.price_field
         // @todo - the component is enabled check should be done within getIncomeFinancialType
         // It looks to me like test cover was NOT added to cover the change
         // that added this so we need to assume there is no test cover
-        if (array_key_exists('CiviContribute', CRM_Core_Component::getEnabledComponents())) {
+        if (CRM_Core_Component::isEnabled('CiviContribute')) {
           return CRM_Financial_BAO_FinancialType::getIncomeFinancialType($props['check_permissions'] ?? TRUE);
         }
         return [];

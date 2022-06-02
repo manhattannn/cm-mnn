@@ -13,8 +13,8 @@
         fieldsForJoinGetters = {};
 
       this.DEFAULT_AGGREGATE_FN = 'GROUP_CONCAT';
-      this.afformEnabled = CRM.crmSearchAdmin.afformEnabled;
-      this.afformAdminEnabled = CRM.crmSearchAdmin.afformAdminEnabled;
+      this.afformEnabled = 'org.civicrm.afform' in CRM.crmSearchAdmin.modules;
+      this.afformAdminEnabled = 'org.civicrm.afform_admin' in CRM.crmSearchAdmin.modules;
       this.displayTypes = _.indexBy(CRM.crmSearchAdmin.displayTypes, 'id');
       this.searchDisplayPath = CRM.url('civicrm/search');
       this.afformPath = CRM.url('civicrm/admin/afform');
@@ -57,6 +57,13 @@
             expr: '$ctrl.savedSearch.api_params',
             deep: true,
             default: defaults
+          });
+
+          $scope.$bindToRoute({
+            param: 'label',
+            expr: '$ctrl.savedSearch.label',
+            format: 'raw',
+            default: ''
           });
         }
 
@@ -135,10 +142,11 @@
       };
 
       this.addDisplay = function(type) {
-        var count = _.filter(ctrl.savedSearch.displays, {type: type}).length;
+        var count = _.filter(ctrl.savedSearch.displays, {type: type}).length,
+          searchLabel = ctrl.savedSearch.label || searchMeta.getEntity(ctrl.savedSearch.api_entity).title_plural;
         ctrl.savedSearch.displays.push({
           type: type,
-          label: ctrl.displayTypes[type].label + (count ? ' ' + (++count) : '')
+          label: searchLabel + ' ' + ctrl.displayTypes[type].label + ' ' + (count + 1),
         });
         $scope.selectTab('display_' + (ctrl.savedSearch.displays.length - 1));
       };
@@ -429,7 +437,7 @@
         }
         var arg = _.findWhere(searchMeta.parseExpr(col).args, {type: 'field'}) || {};
         // If the column is not a database field, no
-        if (!arg.field || !arg.field.entity || arg.field.type !== 'Field') {
+        if (!arg.field || !arg.field.entity || !_.includes(['Field', 'Custom', 'Extra'], arg.field.type)) {
           return false;
         }
         // If the column is used for a groupBy, no
@@ -442,7 +450,7 @@
       };
 
       $scope.fieldsForGroupBy = function() {
-        return {results: ctrl.getAllFields('', ['Field', 'Custom'], function(key) {
+        return {results: ctrl.getAllFields('', ['Field', 'Custom', 'Extra'], function(key) {
             return _.contains(ctrl.savedSearch.api_params.groupBy, key);
           })
         };
@@ -480,6 +488,7 @@
 
       this.getAllFields = function(suffix, allowedTypes, disabledIf, topJoin) {
         disabledIf = disabledIf || _.noop;
+        allowedTypes = allowedTypes || ['Field', 'Custom', 'Extra', 'Filter'];
 
         function formatEntityFields(entityName, join) {
           var prefix = join ? join.alias + '.' : '',
@@ -500,14 +509,14 @@
           prefix = typeof prefix === 'undefined' ? '' : prefix;
           _.each(fields, function(field) {
             var item = {
-              id: prefix + field.name + (field.options ? suffix : ''),
+              id: prefix + field.name + (field.suffixes && _.includes(field.suffixes, suffix.replace(':', '')) ? suffix : ''),
               text: field.label,
               description: field.description
             };
             if (disabledIf(item.id)) {
               item.disabled = true;
             }
-            if (!allowedTypes || _.includes(allowedTypes, field.type)) {
+            if (_.includes(allowedTypes, field.type)) {
               result.push(item);
             }
           });
@@ -542,7 +551,7 @@
         });
 
         // Include SearchKit's pseudo-fields if specifically requested
-        if (allowedTypes && _.includes(allowedTypes, 'Pseudo')) {
+        if (_.includes(allowedTypes, 'Pseudo')) {
           result.push({
             text: ts('Extra'),
             icon: 'fa-gear',
@@ -574,57 +583,27 @@
         return _.findIndex(CRM.crmSearchAdmin.pseudoFields, {name: name}) >= 0;
       };
 
-      /**
-       * Fetch pseudoconstants for main entity + joined entities
-       *
-       * Sets an optionsLoaded property on each entity to avoid duplicate requests
-       *
-       * @var string entity - optional additional entity to load
-       */
+      // Ensure options are loaded for main entity + joined entities
+      // And an optional additional entity
       function loadFieldOptions(entity) {
-        var mainEntity = searchMeta.getEntity(ctrl.savedSearch.api_entity),
-          entities = {};
+        // Main entity
+        var entitiesToLoad = [ctrl.savedSearch.api_entity];
 
-        function enqueue(entity) {
-          entity.optionsLoaded = false;
-          entities[entity.name] = [entity.name, 'getFields', {
-            loadOptions: ['id', 'name', 'label', 'description', 'color', 'icon'],
-            where: [['options', '!=', false]],
-            select: ['options']
-          }, {name: 'options'}];
-        }
-
-        if (typeof mainEntity.optionsLoaded === 'undefined') {
-          enqueue(mainEntity);
-        }
-
-        // Optional additional entity
-        if (entity && typeof searchMeta.getEntity(entity).optionsLoaded === 'undefined') {
-          enqueue(searchMeta.getEntity(entity));
-        }
-
+        // Join entities + bridge entities
         _.each(ctrl.savedSearch.api_params.join, function(join) {
-          var joinInfo = searchMeta.getJoin(join[0]),
-            joinEntity = searchMeta.getEntity(joinInfo.entity),
-            bridgeEntity = joinInfo.bridge ? searchMeta.getEntity(joinInfo.bridge) : null;
-          if (typeof joinEntity.optionsLoaded === 'undefined') {
-            enqueue(joinEntity);
-          }
-          if (bridgeEntity && typeof bridgeEntity.optionsLoaded === 'undefined') {
-            enqueue(bridgeEntity);
+          var joinInfo = searchMeta.getJoin(join[0]);
+          entitiesToLoad.push(joinInfo.entity);
+          if (joinInfo.bridge) {
+            entitiesToLoad.push(joinInfo.bridge);
           }
         });
-        if (!_.isEmpty(entities)) {
-          crmApi4(entities).then(function(results) {
-            _.each(results, function(fields, entityName) {
-              var entity = searchMeta.getEntity(entityName);
-              _.each(fields, function(options, fieldName) {
-                _.find(entity.fields, {name: fieldName}).options = options;
-              });
-              entity.optionsLoaded = true;
-            });
-          });
+
+        // Optional additional entity
+        if (entity) {
+          entitiesToLoad.push(entity);
         }
+
+        searchMeta.loadFieldOptions(entitiesToLoad);
       }
 
       // Build a list of all possible links to main entity & join entities

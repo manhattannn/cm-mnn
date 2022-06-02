@@ -19,31 +19,20 @@ use Civi\Api4\Group;
 class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
 
   /**
-   * Class constructor.
-   */
-  public function __construct() {
-    parent::__construct();
-  }
-
-  /**
-   * Retrieve DB object based on input parameters.
-   *
-   * It also stores all the retrieved values in the default array.
+   * Retrieve DB object and copy to defaults array.
    *
    * @param array $params
-   *   (reference ) an assoc array of name/value pairs.
+   *   Array of criteria values.
    * @param array $defaults
-   *   (reference ) an assoc array to hold the flattened values.
+   *   Array to be populated with found values.
    *
-   * @return CRM_Contact_BAO_Group
+   * @return self|null
+   *   The DAO object, if found.
+   *
+   * @deprecated
    */
-  public static function retrieve(&$params, &$defaults) {
-    $group = new CRM_Contact_DAO_Group();
-    $group->copyValues($params);
-    if ($group->find(TRUE)) {
-      CRM_Core_DAO::storeValues($group, $defaults);
-      return $group;
-    }
+  public static function retrieve($params, &$defaults) {
+    return self::commonRetrieve(self::class, $params, $defaults);
   }
 
   /**
@@ -464,12 +453,21 @@ class CRM_Contact_BAO_Group extends CRM_Contact_DAO_Group {
     }
 
     if (!empty($params['organization_id'])) {
-      // dev/core#382 Keeping the id here can cause db errors as it tries to update the wrong record in the Organization table
-      $groupOrg = [
-        'group_id' => $group->id,
-        'organization_id' => $params['organization_id'],
-      ];
-      CRM_Contact_BAO_GroupOrganization::add($groupOrg);
+      if ($params['organization_id'] == 'null') {
+        $groupOrganization = [];
+        CRM_Contact_BAO_GroupOrganization::retrieve($group->id, $groupOrganization);
+        if (!empty($groupOrganization['group_organization'])) {
+          CRM_Contact_BAO_GroupOrganization::deleteGroupOrganization($groupOrganization['group_organization']);
+        }
+      }
+      else {
+        // dev/core#382 Keeping the id here can cause db errors as it tries to update the wrong record in the Organization table
+        $groupOrg = [
+          'group_id' => $group->id,
+          'organization_id' => $params['organization_id'],
+        ];
+        CRM_Contact_BAO_GroupOrganization::add($groupOrg);
+      }
     }
 
     self::flushCaches();
@@ -1117,12 +1115,12 @@ WHERE  id IN $groupIdString
    *
    * This is a recursive function filling the $hierarchy parameter.
    *
-   * @param $hierarchy
-   * @param $group
-   * @param $tree
-   * @param $titleOnly
-   * @param $spacer
-   * @param $level
+   * @param array $hierarchy
+   * @param array $group
+   * @param array $tree
+   * @param bool $titleOnly
+   * @param string $spacer
+   * @param int $level
    */
   private static function buildGroupHierarchy(&$hierarchy, $group, $tree, $titleOnly, $spacer, $level) {
     $spaces = str_repeat($spacer, $level);
@@ -1142,7 +1140,7 @@ WHERE  id IN $groupIdString
     // For performance reasons we use a for loop rather than a foreach.
     // Metrics for performance in an installation with 2867 groups a foreach
     // caused the function getGroupsHierarchy with a foreach execution takes
-    // around 2.2 seoonds (2,200 ms).
+    // around 2.2 seconds (2,200 ms).
     // Changing to a for loop execustion takes around 0.02 seconds (20 ms).
     if (isset($tree[$group['id']]) && is_array($tree[$group['id']])) {
       for ($i = 0; $i < count($tree[$group['id']]); $i++) {

@@ -14,34 +14,23 @@
  * @package CRM
  * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
-class CRM_Core_BAO_Mapping extends CRM_Core_DAO_Mapping implements \Civi\Test\HookInterface {
+class CRM_Core_BAO_Mapping extends CRM_Core_DAO_Mapping implements \Civi\Core\HookInterface {
 
   /**
-   * Class constructor.
-   */
-  public function __construct() {
-    parent::__construct();
-  }
-
-  /**
-   * Fetch object based on array of properties.
+   * Retrieve DB object and copy to defaults array.
    *
    * @param array $params
-   *   (reference ) an assoc array of name/value pairs.
+   *   Array of criteria values.
    * @param array $defaults
-   *   (reference ) an assoc array to hold the flattened values.
+   *   Array to be populated with found values.
    *
-   * @return object
-   *   CRM_Core_DAO_Mapping object on success, otherwise NULL
+   * @return self|null
+   *   The DAO object, if found.
+   *
+   * @deprecated
    */
-  public static function retrieve(&$params, &$defaults) {
-    $mapping = new CRM_Core_DAO_Mapping();
-    $mapping->copyValues($params);
-    if ($mapping->find(TRUE)) {
-      CRM_Core_DAO::storeValues($mapping, $defaults);
-      return $mapping;
-    }
-    return NULL;
+  public static function retrieve($params, &$defaults) {
+    return self::commonRetrieve(self::class, $params, $defaults);
   }
 
   /**
@@ -208,7 +197,7 @@ class CRM_Core_BAO_Mapping extends CRM_Core_DAO_Mapping implements \Civi\Test\Ho
         $mappingOperator[$mapping->grouping][$mapping->column_number] = $mapping->operator;
       }
 
-      if (!empty($mapping->value)) {
+      if (isset($mapping->value)) {
         $mappingValue[$mapping->grouping][$mapping->column_number] = $mapping->value;
       }
     }
@@ -767,7 +756,7 @@ class CRM_Core_BAO_Mapping extends CRM_Core_DAO_Mapping implements \Civi\Test\Ho
       }
     }
     if (($mappingType == 'Search Builder') || ($exportMode == CRM_Export_Form_Select::GRANT_EXPORT)) {
-      if (CRM_Core_Permission::access('CiviGrant')) {
+      if (method_exists('CRM_Grant_BAO_Grant', 'exportableFields') && CRM_Core_Permission::check('access CiviGrant')) {
         $fields['Grant'] = CRM_Grant_BAO_Grant::exportableFields();
         unset($fields['Grant']['grant_contact_id']);
         if ($mappingType == 'Search Builder') {
@@ -946,7 +935,7 @@ class CRM_Core_BAO_Mapping extends CRM_Core_DAO_Mapping implements \Civi\Test\Ho
           $defaults["operator[$x][$i]"] = $mappingOperator[$x][$i] ?? NULL;
         }
 
-        if (CRM_Utils_Array::value($i, CRM_Utils_Array::value($x, $mappingValue))) {
+        if (isset($mappingValue[$x][$i])) {
           $defaults["value[$x][$i]"] = $mappingValue[$x][$i] ?? NULL;
         }
       }

@@ -83,15 +83,6 @@ function search_kit_civicrm_entityTypes(&$entityTypes) {
  * Implements hook_civicrm_pre().
  */
 function search_kit_civicrm_pre($op, $entity, $id, &$params) {
-  // Supply default name/label when creating new SearchDisplay
-  if ($entity === 'SearchDisplay' && $op === 'create') {
-    if (empty($params['label'])) {
-      $params['label'] = $params['name'];
-    }
-    elseif (empty($params['name'])) {
-      $params['name'] = \CRM_Utils_String::munge($params['label']);
-    }
-  }
   // When deleting a saved search, also delete the displays
   // This would happen anyway in sql because of the ON DELETE CASCADE foreign key,
   // But this ensures that pre and post hooks are called
@@ -99,5 +90,16 @@ function search_kit_civicrm_pre($op, $entity, $id, &$params) {
     \Civi\Api4\SearchDisplay::delete(FALSE)
       ->addWhere('saved_search_id', '=', $id)
       ->execute();
+  }
+}
+
+/**
+ * Implements hook_civicrm_post().
+ */
+function search_kit_civicrm_post($op, $entity, $id, $object) {
+  // Flush fieldSpec cache when saving a SearchSegment
+  if ($entity === 'SearchSegment') {
+    \Civi::$statics['all_search_segments'] = NULL;
+    \Civi::cache('metadata')->clear();
   }
 }

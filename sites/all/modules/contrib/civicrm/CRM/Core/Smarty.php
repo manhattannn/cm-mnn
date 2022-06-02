@@ -63,15 +63,6 @@ class CRM_Core_Smarty extends Smarty {
    */
   private $backupFrames = [];
 
-  /**
-   * Class constructor.
-   *
-   * @return CRM_Core_Smarty
-   */
-  public function __construct() {
-    parent::__construct();
-  }
-
   private function initialize() {
     $config = CRM_Core_Config::singleton();
 
@@ -209,6 +200,26 @@ class CRM_Core_Smarty extends Smarty {
         $this->assign($variable);
       }
     }
+  }
+
+  /**
+   * Avoid e-notices on pages with tabs,
+   * by ensuring tabHeader items contain the necessary keys
+   */
+  public function addExpectedTabHeaderKeys(): void {
+    $defaults = [
+      'class' => '',
+      'extra' => '',
+      'icon' => FALSE,
+      'count' => FALSE,
+      'template' => FALSE,
+    ];
+
+    $tabs = $this->get_template_vars('tabHeader');
+    foreach ((array) $tabs as $i => $tab) {
+      $tabs[$i] = array_merge($defaults, $tab);
+    }
+    $this->assign('tabHeader', $tabs);
   }
 
   /**

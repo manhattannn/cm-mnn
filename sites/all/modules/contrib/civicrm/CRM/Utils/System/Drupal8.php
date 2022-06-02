@@ -252,7 +252,7 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
    * FIXME: This is not a legacy function and the above is not a safe assumption.
    * External urls are allowed by CRM_Core_Resources and this needs to return the correct value.
    *
-   * @param $url
+   * @param string $url
    *
    * @return bool
    */
@@ -419,8 +419,11 @@ class CRM_Utils_System_Drupal8 extends CRM_Utils_System_DrupalBase {
     $kernel->preHandle($request);
     $container = $kernel->rebuildContainer();
     // Add our request to the stack and route context.
-    $request->attributes->set(\Symfony\Cmf\Component\Routing\RouteObjectInterface::ROUTE_OBJECT, new \Symfony\Component\Routing\Route('<none>'));
-    $request->attributes->set(\Symfony\Cmf\Component\Routing\RouteObjectInterface::ROUTE_NAME, '<none>');
+    $routeInterface = class_exists('\Drupal\Core\Routing\RouteObjectInterface')
+      ? '\Drupal\Core\Routing\RouteObjectInterface'
+      : '\Symfony\Cmf\Component\Routing\RouteObjectInterface';
+    $request->attributes->set($routeInterface::ROUTE_OBJECT, new \Symfony\Component\Routing\Route('<none>'));
+    $request->attributes->set($routeInterface::ROUTE_NAME, '<none>');
     $container->get('request_stack')->push($request);
     $container->get('router.request_context')->fromRequest($request);
 

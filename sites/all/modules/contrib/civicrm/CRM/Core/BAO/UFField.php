@@ -114,17 +114,20 @@ class CRM_Core_BAO_UFField extends CRM_Core_DAO_UFField {
   }
 
   /**
-   * Fetch object based on array of properties.
+   * Retrieve DB object and copy to defaults array.
    *
    * @param array $params
-   *   (reference ) an assoc array of name/value pairs.
+   *   Array of criteria values.
    * @param array $defaults
-   *   (reference ) an assoc array to hold the flattened values.
+   *   Array to be populated with found values.
    *
-   * @return CRM_Core_BAO_UFField
+   * @return self|null
+   *   The DAO object, if found.
+   *
+   * @deprecated
    */
-  public static function retrieve(&$params, &$defaults) {
-    return CRM_Core_DAO::commonRetrieve('CRM_Core_DAO_UFField', $params, $defaults);
+  public static function retrieve($params, &$defaults) {
+    return self::commonRetrieve(self::class, $params, $defaults);
   }
 
   /**
@@ -515,9 +518,8 @@ WHERE cf.id IN (" . $customFieldIds . ") AND is_multiple = 1 LIMIT 0,1";
     // suppress any subtypes if present
     CRM_Contact_BAO_ContactType::suppressSubTypes($profileTypes);
 
-    $contactTypes = ['Contact', 'Individual', 'Household', 'Organization'];
+    $contactTypes = array_merge(['Contact'], CRM_Contact_BAO_ContactType::basicTypes(TRUE));
     $components = ['Contribution', 'Participant', 'Membership', 'Activity'];
-    $fields = [];
 
     // check for mix profile condition
     if (count($profileTypes) > 1) {
@@ -583,7 +585,7 @@ WHERE cf.id IN (" . $customFieldIds . ") AND is_multiple = 1 LIMIT 0,1";
    */
   public static function calculateProfileType($ufGroupType, $returnMixType = TRUE, $onlyPure = FALSE, $skipComponentType = FALSE) {
     // profile types
-    $contactTypes = ['Contact', 'Individual', 'Household', 'Organization'];
+    $contactTypes = array_merge(['Contact'], CRM_Contact_BAO_ContactType::basicTypes(TRUE));
     $subTypes = CRM_Contact_BAO_ContactType::subTypes();
     $components = ['Contribution', 'Participant', 'Membership', 'Activity'];
 
@@ -707,7 +709,7 @@ SELECT  id
    *
    * @param int $profileID
    */
-  public function resetInSelectorANDSearchable($profileID) {
+  public static function resetInSelectorANDSearchable($profileID) {
     if (!$profileID) {
       return;
     }
