@@ -450,7 +450,7 @@ class CRM_Activity_BAO_Query {
       1 => ts('Added by'),
     ];
     $form->addRadio('activity_role', NULL, $activityRoles, ['allowClear' => TRUE]);
-    $form->setDefaults(['activity_role' => 3]);
+
     $activityStatus = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'status_id', [
       'flip' => 1,
       'labelColumn' => 'name',
@@ -461,12 +461,11 @@ class CRM_Activity_BAO_Query {
     if (!empty($ssID) && !empty($form->_formValues['activity_status_id'])) {
       $status = $form->_formValues['activity_status_id'];
     }
-    $form->setDefaults(['activity_status_id' => $status]);
 
     $form->addElement('text', 'activity_text', ts('Activity Text'), CRM_Core_DAO::getAttribute('CRM_Contact_DAO_Contact', 'sort_name'));
 
     $form->addRadio('activity_option', '', CRM_Core_SelectValues::activityTextOptions());
-    $form->setDefaults(['activity_option' => 'both']);
+    $form->setDefaults(['activity_option' => 6]);
 
     $form->addYesNo('activity_test', ts('Activity is a Test?'));
     $activity_tags = CRM_Core_BAO_Tag::getColorTags('civicrm_activity');

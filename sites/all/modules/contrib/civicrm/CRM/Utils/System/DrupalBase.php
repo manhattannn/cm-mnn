@@ -89,7 +89,8 @@ abstract class CRM_Utils_System_DrupalBase extends CRM_Utils_System_Base {
   /**
    * Check if a resource url is within the drupal directory and format appropriately.
    *
-   * @param $url (reference)
+   * @param string $url
+   *   URL (reference).
    *
    * @return bool
    *   TRUE for internal paths, FALSE for external. The drupal_add_js fn is able to add js more
@@ -707,6 +708,17 @@ abstract class CRM_Utils_System_DrupalBase extends CRM_Utils_System_Base {
    */
   public function getCMSPermissionsUrlParams() {
     return ['ufAccessURL' => url('admin/people/permissions')];
+  }
+
+  /**
+   * Return the CMS-specific UF Group Types for profiles.
+   * @return array
+   */
+  public function getUfGroupTypes() {
+    return [
+      'User Registration' => ts('Drupal User Registration'),
+      'User Account' => ts('View/Edit Drupal User Account'),
+    ];
   }
 
 }

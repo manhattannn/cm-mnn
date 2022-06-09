@@ -10,7 +10,6 @@
 {capture assign=labelStyle }style="padding: 4px; border-bottom: 1px solid #999; background-color: #f7f7f7;"{/capture}
 {capture assign=valueStyle }style="padding: 4px; border-bottom: 1px solid #999;"{/capture}
 
-<center>
   <table id="crm-event_receipt" style="font-family: Arial, Verdana, sans-serif; text-align: left; width:100%; max-width:700px; padding:0; margin:0; border:0px;">
 
   <!-- BEGIN HEADER -->
@@ -46,12 +45,12 @@
       </td>
      </tr>
      <tr>
-      {if !empty($formValues.contributionType_name)}
+      {if '{contribution.financial_type_id}'}
         <td {$labelStyle}>
          {ts}Financial Type{/ts}
         </td>
         <td {$valueStyle}>
-         {$formValues.contributionType_name}
+         {contribution.financial_type_id:label}
         </td>
       {/if}
      </tr>
@@ -87,7 +86,7 @@
               <td>
                 {$line.unit_price*$line.qty|crmMoney:$currency}
               </td>
-              {if isset($line.tax_rate) and ($line.tax_rate != "" || $line.tax_amount != "")}
+              {if $line.tax_rate || $line.tax_amount != ""}
                 <td>
                   {$line.tax_rate|string_format:"%.2f"}%
                 </td>
@@ -122,23 +121,23 @@
       {foreach from=$dataArray item=value key=priceset}
         <tr>
         {if $priceset ||  $priceset == 0 || $value != ''}
-          <td>&nbsp;{if isset($taxTerm)}{$taxTerm}{/if} {$priceset|string_format:"%.2f"}%</td>
+          <td>&nbsp;{$taxTerm} {$priceset|string_format:"%.2f"}%</td>
           <td>&nbsp;{$value|crmMoney:$currency}</td>
         {else}
-          <td>&nbsp;{ts}No{/ts} {if isset($taxTerm)}{$taxTerm}{/if}</td>
+          <td>&nbsp;{ts}No{/ts} {$taxTerm}</td>
           <td>&nbsp;{$value|crmMoney:$currency}</td>
         {/if}
         </tr>
       {/foreach}
      {/if}
 
-     {if isset($totalTaxAmount) && $totalTaxAmount !== 'null'}
+     {if $isShowTax}
       <tr>
         <td {$labelStyle}>
           {ts}Total Tax Amount{/ts}
         </td>
         <td {$valueStyle}>
-          {$totalTaxAmount|crmMoney:$currency}
+          {contribution.tax_amount}
         </td>
       </tr>
      {/if}
@@ -148,60 +147,60 @@
        {ts}Total Amount{/ts}
       </td>
       <td {$valueStyle}>
-       {$formValues.total_amount|crmMoney:$currency}
+        {contribution.total_amount}
       </td>
      </tr>
 
-     {if !empty($receive_date)}
-      <tr>
+     {if '{contribution.receive_date}'}
+       <tr>
        <td {$labelStyle}>
         {ts}Date Received{/ts}
        </td>
        <td {$valueStyle}>
-        {$receive_date|truncate:10:''|crmDate}
+         {contribution.receive_date|crmDate:"shortdate"}
        </td>
       </tr>
      {/if}
 
-      {if !empty($receipt_date)}
+      {if '{contribution.receipt_date}'}
       <tr>
        <td {$labelStyle}>
         {ts}Receipt Date{/ts}
        </td>
        <td {$valueStyle}>
-        {$receipt_date|truncate:10:''|crmDate}
+         {contribution.receipt_date|crmDate:"shortdate"}
        </td>
       </tr>
      {/if}
 
-     {if !empty($formValues.paidBy) and empty($formValues.hidden_CreditCard)}
+     {if '{contribution.payment_instrument_id}' and empty($formValues.hidden_CreditCard)}
       <tr>
        <td {$labelStyle}>
         {ts}Paid By{/ts}
        </td>
        <td {$valueStyle}>
-        {$formValues.paidBy}
+         {contribution.payment_instrument_id:label}
        </td>
       </tr>
-      {if !empty($formValues.check_number)}
+      {if '{contribution.check_number}'}
        <tr>
         <td {$labelStyle}>
          {ts}Check Number{/ts}
         </td>
         <td {$valueStyle}>
-         {$formValues.check_number}
+          {contribution.check_number}
         </td>
        </tr>
       {/if}
      {/if}
 
-     {if !empty($formValues.trxn_id)}
+     {if '{contribution.trxn_id}'}
       <tr>
        <td {$labelStyle}>
         {ts}Transaction ID{/ts}
        </td>
        <td {$valueStyle}>
-        {$formValues.trxn_id}
+         {contribution.trxn_id}
        </td>
       </tr>
      {/if}
@@ -320,7 +319,6 @@
   </tr>
 
  </table>
-</center>
 
 </body>
 </html>

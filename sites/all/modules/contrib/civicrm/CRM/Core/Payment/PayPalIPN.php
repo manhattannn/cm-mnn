@@ -70,19 +70,6 @@ class CRM_Core_Payment_PayPalIPN extends CRM_Core_Payment_BaseIPN {
    * @throws \CiviCRM_API3_Exception
    */
   public function recur($input, $recur, $contribution, $first) {
-    if (!isset($input['txnType'])) {
-      Civi::log()->debug('PayPalIPN: Could not find txn_type in input request');
-      echo "Failure: Invalid parameters<p>";
-      return;
-    }
-
-    if ($input['txnType'] === 'subscr_payment' &&
-      $input['paymentStatus'] !== 'Completed'
-    ) {
-      Civi::log()->debug('PayPalIPN: Ignore all IPN payments that are not completed');
-      echo 'Failure: Invalid parameters<p>';
-      return;
-    }
 
     // make sure the invoice ids match
     // make sure the invoice is valid and matches what we have in the contribution record
@@ -94,9 +81,8 @@ class CRM_Core_Payment_PayPalIPN extends CRM_Core_Payment_BaseIPN {
     $now = date('YmdHis');
 
     // set transaction type
-    $txnType = $this->getTrxnType();
     $contributionStatuses = array_flip(CRM_Contribute_BAO_Contribution::buildOptions('contribution_status_id', 'validate'));
-    switch ($txnType) {
+    switch ($this->getTrxnType()) {
       case 'subscr_signup':
         $recur->create_date = $now;
         // sometimes subscr_signup response come after the subscr_payment and set to pending mode.
@@ -109,23 +95,27 @@ class CRM_Core_Payment_PayPalIPN extends CRM_Core_Payment_BaseIPN {
         }
         $recur->processor_id = $this->retrieve('subscr_id', 'String');
         $recur->trxn_id = $recur->processor_id;
-        break;
+        $recur->save();
+        return;
 
       case 'subscr_eot':
         if ($recur->contribution_status_id != $contributionStatuses['Cancelled']) {
           $recur->contribution_status_id = $contributionStatuses['Completed'];
         }
         $recur->end_date = $now;
-        break;
+        $recur->save();
+        return;
 
       case 'subscr_cancel':
         $recur->contribution_status_id = $contributionStatuses['Cancelled'];
         $recur->cancel_date = $now;
-        break;
+        $recur->save();
+        return;
 
       case 'subscr_failed':
         $recur->contribution_status_id = $contributionStatuses['Failed'];
         $recur->modified_date = $now;
+        $recur->save();
         break;
 
       case 'subscr_modify':
@@ -133,25 +123,14 @@ class CRM_Core_Payment_PayPalIPN extends CRM_Core_Payment_BaseIPN {
         echo "Failure: We do not handle modifications to subscriptions right now<p>";
         return;
 
-      case 'subscr_payment':
-        if ($first) {
-          $recur->start_date = $now;
-        }
-        else {
-          $recur->modified_date = $now;
-        }
-
-        // make sure the contribution status is not done
-        // since order of ipn's is unknown
-        if ($recur->contribution_status_id != $contributionStatuses['Completed']) {
-          $recur->contribution_status_id = $contributionStatuses['In Progress'];
-        }
-        break;
     }
 
-    $recur->save();
-
-    if ($txnType !== 'subscr_payment') {
+    if ($this->getTrxnType() !== 'subscr_payment') {
+      return;
+    }
+    if ($input['paymentStatus'] !== 'Completed') {
+      Civi::log()->debug('PayPalIPN: Ignore all IPN payments that are not completed');
+      echo 'Failure: Invalid parameters<p>';
       return;
     }
 
@@ -162,7 +141,7 @@ class CRM_Core_Payment_PayPalIPN extends CRM_Core_Payment_BaseIPN {
       $contribution->trxn_id = $input['trxn_id'];
       if ($contribution->trxn_id && $contribution->find()) {
         Civi::log()->debug('PayPalIPN: Returning since contribution has already been handled (trxn_id: ' . $contribution->trxn_id . ')');
-        echo "Success: Contribution has already been handled<p>";
+        echo 'Success: Contribution has already been handled<p>';
         return;
       }
 
@@ -237,37 +216,11 @@ class CRM_Core_Payment_PayPalIPN extends CRM_Core_Payment_BaseIPN {
       $input['component'] = $component;
 
       $contributionID = $this->getContributionID();
-      $membershipID = $this->retrieve('membershipID', 'Integer', FALSE);
-
       $this->getInput($input);
 
       $paymentProcessorID = $this->getPayPalPaymentProcessorID($input, $this->getContributionRecurID());
 
       Civi::log()->debug('PayPalIPN: Received (ContactID: ' . $this->getContactID() . '; trxn_id: ' . $input['trxn_id'] . ').');
-
-      // Debugging related to possible missing membership linkage
-      if ($this->getContributionRecurID() && $this->retrieve('membershipID', 'Integer', FALSE)) {
-        $templateContribution = CRM_Contribute_BAO_ContributionRecur::getTemplateContribution($this->getContributionRecurID());
-        $membershipPayment = civicrm_api3('MembershipPayment', 'get', [
-          'contribution_id' => $templateContribution['id'],
-          'membership_id' => $membershipID,
-        ]);
-        $lineItems = civicrm_api3('LineItem', 'get', [
-          'contribution_id' => $templateContribution['id'],
-          'entity_id' => $membershipID,
-          'entity_table' => 'civicrm_membership',
-        ]);
-        Civi::log()->debug('PayPalIPN: Received payment for membership ' . (int) $membershipID
-          . '. Original contribution was ' . (int) $contributionID . '. The template for this contribution is '
-          . $templateContribution['id'] . ' it is linked to ' . $membershipPayment['count']
-          . 'payments for this membership. It has ' . $lineItems['count'] . ' line items linked to  this membership.'
-          . '  it is  expected the original contribution will be linked by both entities to the membership.'
-        );
-        if (empty($membershipPayment['count']) && empty($lineItems['count'])) {
-          Civi::log()->debug('PayPalIPN: Will attempt to compensate');
-          $input['membership_id'] = $this->retrieve('membershipID', 'Integer', FALSE);
-        }
-      }
       $contribution = $this->getContribution();
 
       $input['payment_processor_id'] = $paymentProcessorID;
@@ -336,7 +289,6 @@ class CRM_Core_Payment_PayPalIPN extends CRM_Core_Payment_BaseIPN {
    */
   public function getInput(&$input) {
     $billingID = CRM_Core_BAO_LocationType::getBilling();
-    $input['txnType'] = $this->retrieve('txn_type', 'String', FALSE);
     $input['paymentStatus'] = $this->retrieve('payment_status', 'String', FALSE);
     $input['invoice'] = $this->retrieve('invoice', 'String', TRUE);
     $input['amount'] = $this->retrieve('mc_gross', 'Money', FALSE);
@@ -428,8 +380,7 @@ class CRM_Core_Payment_PayPalIPN extends CRM_Core_Payment_BaseIPN {
    * @throws \CRM_Core_Exception
    */
   protected function getTrxnType() {
-    $txnType = $this->retrieve('txn_type', 'String');
-    return $txnType;
+    return $this->retrieve('txn_type', 'String');
   }
 
   /**

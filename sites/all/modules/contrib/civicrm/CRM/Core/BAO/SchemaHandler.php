@@ -157,7 +157,7 @@ class CRM_Core_BAO_SchemaHandler {
    * @param array $params
    * @param string $separator
    * @param string $prefix
-   * @param string|NULL $existingIndex
+   * @param string|null $existingIndex
    *
    * @return NULL|string
    */
@@ -552,9 +552,7 @@ MODIFY      {$columnName} varchar( $length )
    * @return bool TRUE if FK is found
    */
   public static function checkFKExists($table_name, $constraint_name) {
-    $config = CRM_Core_Config::singleton();
-    $dsn = CRM_Utils_SQL::autoSwitchDSN($config->dsn);
-    $dbUf = DB::parseDSN($dsn);
+    $dao = new CRM_Core_DAO();
     $query = "
       SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
       WHERE TABLE_SCHEMA = %1
@@ -563,7 +561,7 @@ MODIFY      {$columnName} varchar( $length )
       AND CONSTRAINT_TYPE = 'FOREIGN KEY'
     ";
     $params = [
-      1 => [$dbUf['database'], 'String'],
+      1 => [$dao->_database, 'String'],
       2 => [$table_name, 'String'],
       3 => [$constraint_name, 'String'],
     ];
@@ -611,7 +609,7 @@ MODIFY      {$columnName} varchar( $length )
    * @param bool $dropFalseIndices
    *  If set - this function deletes false indices present in the DB which mismatches the expected
    *  values of xml file so that civi re-creates them with correct values using createMissingIndices() function.
-   * @param array|FALSE $tables
+   * @param array|false $tables
    *   An optional array of tables - if provided the results will be restricted to these tables.
    *
    * @return array
@@ -920,7 +918,7 @@ MODIFY      {$columnName} varchar( $length )
    */
   public static function databaseSupportsUTF8MB4(): bool {
     if (!isset(\Civi::$statics[__CLASS__][__FUNCTION__])) {
-      \Civi::$statics[__CLASS__][__FUNCTION__] = stripos(self::getInUseCollation(), 'utf8mb4') === TRUE;
+      \Civi::$statics[__CLASS__][__FUNCTION__] = stripos(self::getInUseCollation(), 'utf8mb4') === 0;
     }
     return \Civi::$statics[__CLASS__][__FUNCTION__];
   }

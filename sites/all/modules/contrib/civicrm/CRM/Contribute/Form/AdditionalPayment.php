@@ -76,7 +76,7 @@ class CRM_Contribute_Form_AdditionalPayment extends CRM_Contribute_Form_Abstract
 
     if ($this->_view == 'transaction' && ($this->_action & CRM_Core_Action::BROWSE)) {
       $title = $this->assignPaymentInfoBlock();
-      CRM_Utils_System::setTitle($title);
+      $this->setTitle($title);
       return;
     }
     if ($this->_component == 'event') {
@@ -264,7 +264,7 @@ class CRM_Contribute_Form_AdditionalPayment extends CRM_Contribute_Form_Abstract
   /**
    * @param $fields
    * @param $files
-   * @param $self
+   * @param self $self
    *
    * @return array
    */

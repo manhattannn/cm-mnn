@@ -69,7 +69,6 @@ function civicrm_drush_command() {
       'langtarfile' => 'Path to your l10n tar.gz file.',
       'site_url' => 'Base Url for your drupal/CiviCRM website without http (e.g. mysite.com)',
       'ssl' => 'Using ssl for your drupal/CiviCRM website if set to on (e.g. --ssl=on)',
-      'load_generated_data' => 'Loads the demo generated data. Defaults to FALSE.',
     ],
     'aliases' => ['cvi'],
   ];
@@ -136,6 +135,18 @@ function civicrm_drush_command() {
   ];
   $items['civicrm-disable-debug'] = [
     'description' => "Disable CiviCRM Debugging.",
+  ];
+  $items['civicrm-pipe'] = [
+    'description' => 'Start a Civi::pipe session (JSON-RPC 2.0)',
+    'examples' => [
+      'drush civicrm-pipe' => 'Begin a session with default flags',
+      'drush civicrm-pipe vt' => 'Begin a session with connection flags (ex: version, trusted)',
+      'drush civicrm-pipe vu' => 'Begin a session with connection flags (ex: version, untrusted)',
+    ],
+    'arguments' => [
+      'connection-flags' => 'List of connection flags (https://docs.civicrm.org/dev/en/latest/framework/pipe#flags)',
+    ],
+    'aliases' => ['cvpipe'],
   ];
   $items['civicrm-upgrade'] = [
     'description' => 'Replace CiviCRM codebase with new specified tarfile and upgrade database by executing the CiviCRM upgrade process - civicrm/upgrade?reset=1.',
@@ -309,7 +320,6 @@ function drush_civicrm_install() {
   $drupalRoot = drush_get_context('DRUSH_DRUPAL_ROOT');
   $modPath = "$drupalRoot/$crmpath";
   $lang = drush_get_option('lang', '');
-  $loadGeneratedData = drush_get_option('load_generated_data', FALSE);
 
   if (!is_dir("$modPath/civicrm")) {
     // extract tarfile at right place
@@ -333,7 +343,7 @@ function drush_civicrm_install() {
   }
 
   // install database
-  _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname, $modPath, $lang, $loadGeneratedData);
+  _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname, $modPath, $lang);
 
   // generate civicrm.settings.php file
   _civicrm_generate_settings_file($dbuser, $dbpass, $dbhost, $dbname, $modPath);
@@ -352,7 +362,7 @@ function _civicrm_extract_tarfile($destinationPath, $option = 'tarfile') {
 }
 
 function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
-  $modPath, $lang, $loadGeneratedData
+  $modPath, $lang
 ) {
   $drupalRoot = drush_get_context('DRUSH_DRUPAL_ROOT');
   $siteRoot = drush_get_context('DRUSH_DRUPAL_SITE_ROOT', FALSE);
@@ -400,9 +410,6 @@ function _civicrm_install_db($dbuser, $dbpass, $dbhost, $dbname,
   civicrm_source($dsn, $data_file);
   civicrm_source($dsn, $acl_file);
 
-  if ($loadGeneratedData) {
-    civicrm_source($dsn, $sqlPath . DIRECTORY_SEPARATOR . 'civicrm_generated.mysql', TRUE);
-  }
   drush_log(dt('CiviCRM database loaded successfully.'), 'ok');
 }
 
@@ -1618,6 +1625,26 @@ function drush_civicrm_api() {
 
     default:
       return drush_set_error('CIVICRM_UNKNOWN_FORMAT', dt('Unknown format: @format', ['@format' => $format]));
+  }
+}
+
+/**
+ * (Drush callback)
+ *
+ * Implementation of command 'civicrm-pipe'
+ */
+function drush_civicrm_pipe(?string $connection_flags = NULL) {
+  if (!civicrm_initialize()) {
+    return drush_set_error('CIVICRM_UNINSTALLED', dt('CiviCRM is not setup.'));
+  }
+  if (!is_callable(['Civi', 'pipe'])) {
+    return drush_set_error('CIVICRM_PIPE_UNSUPPORTED', dt('This version of CiviCRM does not include Civi::pipe() support.'));
+  }
+  if (!empty($connection_flags)) {
+    Civi::pipe($connection_flags);
+  }
+  else {
+    Civi::pipe();
   }
 }
 

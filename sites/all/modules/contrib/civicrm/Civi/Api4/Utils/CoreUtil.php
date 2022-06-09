@@ -12,6 +12,7 @@
 
 namespace Civi\Api4\Utils;
 
+use Civi\API\Exception\NotImplementedException;
 use Civi\API\Request;
 use CRM_Core_DAO_AllCoreTables as AllCoreTables;
 
@@ -28,14 +29,8 @@ class CoreUtil {
     if ($entityName === 'CustomValue' || strpos($entityName, 'Custom_') === 0) {
       return 'CRM_Core_BAO_CustomValue';
     }
-    $dao = self::getInfoItem($entityName, 'dao');
-    if (!$dao) {
-      return NULL;
-    }
-    $bao = str_replace("DAO", "BAO", $dao);
-    // Check if this entity actually has a BAO. Fall back on the DAO if not.
-    $file = strtr($bao, '_', '/') . '.php';
-    return stream_resolve_include_path($file) ? $bao : $dao;
+    $dao = AllCoreTables::getFullName($entityName);
+    return $dao ? AllCoreTables::getBAOClassName($dao) : NULL;
   }
 
   /**
@@ -43,24 +38,32 @@ class CoreUtil {
    * @return string|\Civi\Api4\Generic\AbstractEntity
    */
   public static function getApiClass($entityName) {
-    if (strpos($entityName, 'Custom_') === 0) {
-      $groupName = substr($entityName, 7);
-      return self::isCustomEntity($groupName) ? 'Civi\Api4\CustomValue' : NULL;
+    $className = 'Civi\Api4\\' . $entityName;
+    if (class_exists($className)) {
+      return $className;
     }
-    // Because "Case" is a reserved php keyword
-    $className = 'Civi\Api4\\' . ($entityName === 'Case' ? 'CiviCase' : $entityName);
-    return class_exists($className) ? $className : NULL;
+    return self::getInfoItem($entityName, 'class');
   }
 
   /**
-   * Get item from an entity's getInfo array
+   * Get a piece of metadata about an entity
    *
    * @param string $entityName
    * @param string $keyToReturn
    * @return mixed
    */
   public static function getInfoItem(string $entityName, string $keyToReturn) {
-    return self::getApiClass($entityName)::getInfo()[$keyToReturn] ?? NULL;
+    $provider = \Civi::service('action_object_provider');
+    return $provider->getEntities()[$entityName][$keyToReturn] ?? NULL;
+  }
+
+  /**
+   * Get name of unique identifier, typically "id"
+   * @param string $entityName
+   * @return string
+   */
+  public static function getIdFieldName(string $entityName): string {
+    return self::getInfoItem($entityName, 'primary_key')[0] ?? 'id';
   }
 
   /**
@@ -71,11 +74,7 @@ class CoreUtil {
    * @return string
    */
   public static function getTableName($entityName) {
-    if (strpos($entityName, 'Custom_') === 0) {
-      $customGroup = substr($entityName, 7);
-      return \CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup', $customGroup, 'table_name', 'name');
-    }
-    return AllCoreTables::getTableForEntityName($entityName);
+    return self::getInfoItem($entityName, 'table_name');
   }
 
   /**
@@ -85,15 +84,13 @@ class CoreUtil {
    * @return string|NULL
    */
   public static function getApiNameFromTableName($tableName) {
-    $entityName = AllCoreTables::getBriefName(AllCoreTables::getClassForTable($tableName));
-    // Real entities
-    if ($entityName) {
-      // Verify class exists
-      return self::getApiClass($entityName) ? $entityName : NULL;
+    $provider = \Civi::service('action_object_provider');
+    foreach ($provider->getEntities() as $entityName => $info) {
+      if (($info['table_name'] ?? NULL) === $tableName) {
+        return $entityName;
+      }
     }
-    // Multi-value custom group pseudo-entities
-    $customGroup = \CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup', $tableName, 'name', 'table_name');
-    return self::isCustomEntity($customGroup) ? "Custom_$customGroup" : NULL;
+    return NULL;
   }
 
   /**
@@ -104,6 +101,8 @@ class CoreUtil {
     $operators[] = 'CONTAINS';
     $operators[] = 'IS EMPTY';
     $operators[] = 'IS NOT EMPTY';
+    $operators[] = 'REGEXP';
+    $operators[] = 'NOT REGEXP';
     return $operators;
   }
 
@@ -116,17 +115,11 @@ class CoreUtil {
    * @throws \Civi\API\Exception\UnauthorizedException
    */
   public static function getCustomGroupExtends(string $entityName) {
-    // Custom_group.extends pretty much maps 1-1 with entity names, except for a couple oddballs (Contact, Participant).
+    // Custom_group.extends pretty much maps 1-1 with entity names, except for Contact.
     switch ($entityName) {
       case 'Contact':
         return [
           'extends' => array_merge(['Contact'], array_keys(\CRM_Core_SelectValues::contactType())),
-          'column' => 'id',
-        ];
-
-      case 'Participant':
-        return [
-          'extends' => ['Participant', 'ParticipantRole', 'ParticipantEventName', 'ParticipantEventType'],
           'column' => 'id',
         ];
 
@@ -152,7 +145,7 @@ class CoreUtil {
    * @return bool
    * @throws \CRM_Core_Exception
    */
-  private static function isCustomEntity($customGroupName) {
+  public static function isCustomEntity($customGroupName) {
     return $customGroupName && \CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup', $customGroupName, 'is_multiple', 'name');
   }
 
@@ -221,6 +214,39 @@ class CoreUtil {
       return FALSE;
     }
     return static::checkAccessRecord($apiRequest, $record, $userID);
+  }
+
+  /**
+   * @return \Civi\Api4\Service\Schema\SchemaMap
+   */
+  public static function getSchemaMap() {
+    $cache = \Civi::cache('metadata');
+    $schemaMap = $cache->get('api4.schema.map');
+    if (!$schemaMap) {
+      $schemaMap = \Civi::service('schema_map_builder')->build();
+      $cache->set('api4.schema.map', $schemaMap);
+    }
+    return $schemaMap;
+  }
+
+  /**
+   * Fetches database references + those returned by hook
+   *
+   * @see \CRM_Utils_Hook::referenceCounts()
+   * @param string $entityName
+   * @param int $entityId
+   * @return array{name: string, type: string, count: int, table: string|null, key: string|null}[]
+   * @throws NotImplementedException
+   */
+  public static function getRefCount(string $entityName, $entityId) {
+    $daoName = self::getInfoItem($entityName, 'dao');
+    if (!$daoName) {
+      throw new NotImplementedException("Cannot getRefCount for $entityName - dao not found.");
+    }
+    /** @var \CRM_Core_DAO $dao */
+    $dao = new $daoName();
+    $dao->id = $entityId;
+    return $dao->getReferenceCounts();
   }
 
 }

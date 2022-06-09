@@ -94,14 +94,14 @@
                 <ul class="panel" id="panel_participants_{$row.id}">
                   {if $findParticipants.statusCounted}
                     <li>
-                      <a title="Counted" class="action-item crm-hover-button" href="{crmURL p='civicrm/event/search'
+                      <a class="action-item crm-hover-button" href="{crmURL p='civicrm/event/search'
                       q="reset=1&force=1&status=true&event=`$row.id`"}">{$findParticipants.statusCounted}
                       </a>
                     </li>
                   {/if}
                   {if $findParticipants.statusNotCounted}
                     <li>
-                      <a title="Not Counted" class="action-item crm-hover-button"
+                      <a class="action-item crm-hover-button"
                            href="{crmURL p='civicrm/event/search'
                            q="reset=1&force=1&status=false&event=`$row.id`"}">{$findParticipants.statusNotCounted}
                       </a>
@@ -109,7 +109,7 @@
                   {/if}
                   {if $row.participant_listing_id}
                     <li>
-                      <a title="Public Participant Listing" class="action-item crm-hover-button"
+                      <a class="action-item crm-hover-button"
                          href="{crmURL p='civicrm/event/participant' q="reset=1&id=`$row.id`"
                          fe='true'}">{ts}Public Participant Listing{/ts}
                       </a>
@@ -119,10 +119,10 @@
               </span>
             </div>
             <div class="crm-event-links">
-              {$row.eventlinks|replace:'xx':$row.id}
+              {$row.eventlinks|smarty:nodefaults|replace:'xx':$row.id}
             </div>
             <div class="crm-event-more">
-              {$row.action|replace:'xx':$row.id}
+              {$row.action|smarty:nodefaults|replace:'xx':$row.id}
             </div>
           </td>
           <td class="crm-event-start_date hiddenElement">{$row.start_date|crmDate}</td>

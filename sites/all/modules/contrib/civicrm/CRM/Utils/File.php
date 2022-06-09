@@ -293,7 +293,7 @@ class CRM_Utils_File {
   }
 
   /**
-   * @param string|NULL $dsn
+   * @param string|null $dsn
    *   Use NULL to load the default/active connection from CRM_Core_DAO.
    *   Otherwise, give a full DSN string.
    * @param string $fileName
@@ -312,7 +312,7 @@ class CRM_Utils_File {
 
   /**
    *
-   * @param string|NULL $dsn
+   * @param string|null $dsn
    * @param string $queryString
    * @param string $prefix
    * @param bool $dieOnErrors
@@ -327,7 +327,8 @@ class CRM_Utils_File {
       require_once 'DB.php';
       $dsn = CRM_Utils_SQL::autoSwitchDSN($dsn);
       try {
-        $db = DB::connect($dsn);
+        $options = CRM_Utils_SQL::isSSLDSN($dsn) ? ['ssl' => TRUE] : [];
+        $db = DB::connect($dsn, $options);
       }
       catch (Exception $e) {
         die("Cannot open $dsn: " . $e->getMessage());
@@ -376,7 +377,7 @@ class CRM_Utils_File {
   }
 
   /**
-   * @param $ext
+   * @param string $ext
    *
    * @return bool
    */
@@ -414,14 +415,11 @@ class CRM_Utils_File {
    *   whether the file can be include()d or require()d
    */
   public static function isIncludable($name) {
-    $x = @fopen($name, 'r', TRUE);
-    if ($x) {
-      fclose($x);
-      return TRUE;
-    }
-    else {
+    $full_filepath = stream_resolve_include_path($name);
+    if ($full_filepath === FALSE) {
       return FALSE;
     }
+    return is_readable($full_filepath);
   }
 
   /**
@@ -459,6 +457,27 @@ class CRM_Utils_File {
     else {
       return CRM_Utils_String::munge("{$basename}_{$uniqID}", '_', 240) . "." . CRM_Utils_Array::value('extension', $info);
     }
+  }
+
+  /**
+   * CRM_Utils_String::munge() doesn't handle unicode and needs to be able
+   * to generate valid database tablenames so will sometimes generate a
+   * random string. Here what we want is a human-sensible filename that might
+   * contain unicode.
+   * Note that this does filter out emojis and such, but keeps characters that
+   * are considered alphanumeric in non-english languages.
+   *
+   * @param string $input
+   * @param string $replacementString Character or string to replace invalid characters with. Can be the empty string.
+   * @param int $cutoffLength Length to truncate the result after replacements.
+   * @return string
+   */
+  public static function makeFilenameWithUnicode(string $input, string $replacementString = '_', int $cutoffLength = 63): string {
+    $filename = preg_replace('/\W/u', $replacementString, $input);
+    if ($cutoffLength) {
+      return mb_substr($filename, 0, $cutoffLength);
+    }
+    return $filename;
   }
 
   /**
@@ -783,6 +802,9 @@ HTACCESS;
     if ($checkRealPath) {
       $parent = realpath($parent);
       $child = realpath($child);
+      if ($parent === FALSE || $child === FALSE) {
+        return FALSE;
+      }
     }
     $parentParts = explode('/', rtrim($parent, '/'));
     $childParts = explode('/', rtrim($child, '/'));
@@ -1079,6 +1101,52 @@ HTACCESS;
    */
   public static function getExtensionFromPath($path) {
     return pathinfo($path, PATHINFO_EXTENSION);
+  }
+
+  /**
+   * Wrapper for is_dir() to avoid flooding logs when open_basedir is used.
+   *
+   * Don't use this function as a swap-in replacement for is_dir() for all
+   * situations as this might silence errors that you want to know about
+   * and would help troubleshoot problems. It should only be used when
+   * doing something like iterating over a set of folders where you know some
+   * of them might not legitimately exist or might be outside open_basedir
+   * because you're trying to find the right one. If you expect the path you're
+   * checking to be inside open_basedir, then you should use the regular
+   * is_dir(). (e.g. it might not exist but might be something
+   * like a cache folder in templates_c, which can't be outside open_basedir,
+   * so there you would use regular is_dir).
+   *
+   * **** Security alert ****
+   * If you change this function so that it would be possible to return
+   * TRUE without checking the real value of is_dir() then it opens up a
+   * possible security issue.
+   * It should either return FALSE, or the value returned from is_dir().
+   *
+   * @param string|null $dir
+   * @return bool|null
+   *   In php8 the return value from is_dir() is always bool but in php7 it can be null.
+   */
+  public static function isDir(?string $dir) {
+    set_error_handler(function($errno, $errstr) {
+      // If this is open_basedir-related, convert it to an exception so we
+      // can catch it.
+      if (strpos($errstr, 'open_basedir restriction in effect') !== FALSE) {
+        throw new \ErrorException($errstr, $errno);
+      }
+      // Continue with normal error handling so other errors still happen.
+      return FALSE;
+    });
+    try {
+      $is_dir = is_dir($dir);
+    }
+    catch (\ErrorException $e) {
+      $is_dir = FALSE;
+    }
+    finally {
+      restore_error_handler();
+    }
+    return $is_dir;
   }
 
 }

@@ -861,6 +861,8 @@ function reservations_resource_chart_get_chart_html($bucket_categories,
       $header_end_minute = 30;
     }
   }
+  //temp fix made by eric
+  $header_start_hour =  9;
 
   $row_end_timestamp =
     reservations_resource_chart_get_timestamp($start_date,

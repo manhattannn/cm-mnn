@@ -7,7 +7,23 @@
      <desc>Configure custom fields to collect and store custom data which is not included in the standard CiviCRM forms.</desc>
      <page_callback>CRM_Custom_Page_Group</page_callback>
      <adminGroup>Customize Data and Screens</adminGroup>
+     <access_arguments>administer CiviCRM data</access_arguments>
      <weight>10</weight>
+  </item>
+  <item>
+     <path>civicrm/admin/custom/group/edit</path>
+     <title>Configure Custom Set</title>
+     <page_callback>CRM_Custom_Form_Group</page_callback>
+  </item>
+  <item>
+     <path>civicrm/admin/custom/group/preview</path>
+     <title>Custom Field Preview</title>
+     <page_callback>CRM_Custom_Form_Preview</page_callback>
+  </item>
+  <item>
+     <path>civicrm/admin/custom/group/delete</path>
+     <title>Delete Custom Set</title>
+     <page_callback>CRM_Custom_Form_DeleteGroup</page_callback>
   </item>
   <item>
      <path>civicrm/admin/custom/group/field</path>
@@ -15,6 +31,11 @@
      <page_callback>CRM_Custom_Page_Field</page_callback>
      <skipBreadcrumb>true</skipBreadcrumb>
      <weight>11</weight>
+  </item>
+  <item>
+    <path>civicrm/admin/custom/group/field/delete</path>
+    <title>Delete Custom Field</title>
+    <page_callback>CRM_Custom_Form_DeleteField</page_callback>
   </item>
   <item>
      <path>civicrm/admin/custom/group/field/option</path>

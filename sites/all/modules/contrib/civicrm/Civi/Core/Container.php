@@ -168,9 +168,11 @@ class Container {
       'contactTypes' => 'contactTypes',
       'metadata' => 'metadata',
     ];
+    $verSuffixCaches = ['metadata'];
+    $verSuffix = '_' . preg_replace(';[^0-9a-z_];', '_', \CRM_Utils_System::version());
     foreach ($basicCaches as $cacheSvc => $cacheGrp) {
       $definitionParams = [
-        'name' => $cacheGrp,
+        'name' => $cacheGrp . (in_array($cacheGrp, $verSuffixCaches) ? $verSuffix : ''),
         'type' => ['*memory*', 'SqlGroup', 'ArrayCache'],
       ];
       // For Caches that we don't really care about the ttl for and/or maybe accessed
@@ -213,6 +215,11 @@ class Container {
       []
     ))->setPublic(TRUE);
 
+    $container->setDefinition('format', new Definition(
+      '\Civi\Core\Format',
+      []
+    ))->setPublic(TRUE);
+
     $container->setDefinition('bundle.bootstrap3', new Definition('CRM_Core_Resources_Bundle', ['bootstrap3']))
       ->setFactory('CRM_Core_Resources_Common::createBootstrap3Bundle')->setPublic(TRUE);
 
@@ -225,7 +232,7 @@ class Container {
     $container->setDefinition('pear_mail', new Definition('Mail'))
       ->setFactory('CRM_Utils_Mail::createMailer')->setPublic(TRUE);
 
-    $container->setDefinition('crypto.registry', new Definition('Civi\Crypto\CryptoService'))
+    $container->setDefinition('crypto.registry', new Definition('Civi\Crypto\CryptoRegistry'))
       ->setFactory('Civi\Crypto\CryptoRegistry::createDefaultRegistry')->setPublic(TRUE);
 
     $container->setDefinition('crypto.token', new Definition('Civi\Crypto\CryptoToken', []))
@@ -256,6 +263,11 @@ class Container {
         ->setFactory([$class, 'singleton'])->setPublic(TRUE);
     }
     $container->setAlias('cache.short', 'cache.default')->setPublic(TRUE);
+
+    $container->setDefinition('civi.pipe', new Definition(
+      'Civi\Pipe\PipeSession',
+      []
+    ))->setPublic(TRUE)->setShared(FALSE);
 
     $container->setDefinition('resources', new Definition(
       'CRM_Core_Resources',
@@ -304,14 +316,14 @@ class Container {
             'table' => 'civicrm_case_activity',
             'when' => 'AFTER',
             'event' => ['INSERT'],
-            'sql' => "\nUPDATE civicrm_case SET modified_date = CURRENT_TIMESTAMP WHERE id = NEW.case_id;\n",
+            'sql' => "UPDATE civicrm_case SET modified_date = CURRENT_TIMESTAMP WHERE id = NEW.case_id;",
           ],
           [
             'upgrade_check' => ['table' => 'civicrm_case', 'column' => 'modified_date'],
             'table' => 'civicrm_activity',
             'when' => 'BEFORE',
             'event' => ['UPDATE', 'DELETE'],
-            'sql' => "\nUPDATE civicrm_case SET modified_date = CURRENT_TIMESTAMP WHERE id IN (SELECT ca.case_id FROM civicrm_case_activity ca WHERE ca.activity_id = OLD.id);\n",
+            'sql' => "UPDATE civicrm_case SET modified_date = CURRENT_TIMESTAMP WHERE id IN (SELECT ca.case_id FROM civicrm_case_activity ca WHERE ca.activity_id = OLD.id);",
           ],
         ],
       ]
@@ -323,16 +335,32 @@ class Container {
       []
     ))->addTag('kernel.event_subscriber')->setPublic(TRUE);
     $container->setDefinition("crm_mailing_action_tokens", new Definition(
-      "CRM_Mailing_ActionTokens",
+      'CRM_Mailing_ActionTokens',
       []
     ))->addTag('kernel.event_subscriber')->setPublic(TRUE);
 
-    foreach (['Activity', 'Contribute', 'Event', 'Mailing', 'Member'] as $comp) {
-      $container->setDefinition("crm_" . strtolower($comp) . "_tokens", new Definition(
+    foreach (['Activity', 'Contact', 'Contribute', 'Event', 'Mailing', 'Member', 'Case'] as $comp) {
+      $container->setDefinition('crm_' . strtolower($comp) . '_tokens', new Definition(
         "CRM_{$comp}_Tokens",
         []
       ))->addTag('kernel.event_subscriber')->setPublic(TRUE);
     }
+    $container->setDefinition('civi_token_impliedcontext', new Definition(
+      'Civi\Token\ImpliedContextSubscriber',
+      []
+    ))->addTag('kernel.event_subscriber')->setPublic(TRUE);
+    $container->setDefinition('crm_participant_tokens', new Definition(
+      'CRM_Event_ParticipantTokens',
+      []
+    ))->addTag('kernel.event_subscriber')->setPublic(TRUE);
+    $container->setDefinition('crm_contribution_recur_tokens', new Definition(
+      'CRM_Contribute_RecurTokens',
+      []
+    ))->addTag('kernel.event_subscriber')->setPublic(TRUE);
+    $container->setDefinition('crm_domain_tokens', new Definition(
+      'CRM_Core_DomainTokens',
+      []
+    ))->addTag('kernel.event_subscriber')->setPublic(TRUE);
 
     $dispatcherDefn = $container->getDefinition('dispatcher');
     foreach (\CRM_Core_DAO_AllCoreTables::getBaoClasses() as $baoEntity => $baoClass) {
@@ -380,6 +408,7 @@ class Container {
 
     $dispatcher->addListener('civi.api4.validate', $aliasMethodEvent('civi.api4.validate', 'getEntityName'), 100);
     $dispatcher->addListener('civi.api4.authorizeRecord', $aliasMethodEvent('civi.api4.authorizeRecord', 'getEntityName'), 100);
+    $dispatcher->addListener('civi.api4.entityTypes', ['\Civi\Api4\Provider\CustomEntityProvider', 'addCustomEntities'], 100);
 
     $dispatcher->addListener('civi.core.install', ['\Civi\Core\InstallationCanary', 'check']);
     $dispatcher->addListener('civi.core.install', ['\Civi\Core\DatabaseInitializer', 'initialize']);
@@ -406,6 +435,8 @@ class Container {
     $dispatcher->addListener('hook_civicrm_coreResourceList', ['\CRM_Utils_System', 'appendCoreResources']);
     $dispatcher->addListener('hook_civicrm_getAssetUrl', ['\CRM_Utils_System', 'alterAssetUrl']);
     $dispatcher->addListener('hook_civicrm_alterExternUrl', ['\CRM_Utils_System', 'migrateExternUrl'], 1000);
+    // Not a BAO class so it can't implement hookInterface
+    $dispatcher->addListener('hook_civicrm_post', ['CRM_Utils_Recent', 'on_hook_civicrm_post']);
     $dispatcher->addListener('hook_civicrm_permissionList', ['CRM_Core_Permission_List', 'findConstPermissions'], 975);
     $dispatcher->addListener('hook_civicrm_permissionList', ['CRM_Core_Permission_List', 'findCiviPermissions'], 950);
     $dispatcher->addListener('hook_civicrm_permissionList', ['CRM_Core_Permission_List', 'findCmsPermissions'], 925);
@@ -584,7 +615,9 @@ class Container {
       \CRM_Core_DAO::init($runtime->dsn);
       \CRM_Utils_Hook::singleton(TRUE);
       \CRM_Extension_System::singleton(TRUE);
-      \CRM_Extension_System::singleton(TRUE)->getClassLoader()->register();
+      \CRM_Extension_System::singleton()->getClassLoader()->register();
+      \CRM_Extension_System::singleton()->getMixinLoader()->run();
+      \CRM_Utils_Hook::singleton()->commonBuildModuleList('civicrm_boot');
       $bootServices['dispatcher.boot']->setDispatchPolicy($mainDispatchPolicy);
 
       $runtime->includeCustomPath();

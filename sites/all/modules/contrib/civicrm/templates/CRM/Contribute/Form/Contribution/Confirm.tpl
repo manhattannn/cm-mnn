@@ -13,7 +13,7 @@
 
 {include file="CRM/common/TrackingFields.tpl"}
 
-<div class="crm-contribution-page-id-{$contributionPageID} crm-block crm-contribution-confirm-form-block">
+<div class="crm-contribution-page-id-{$contributionPageID} crm-block crm-contribution-confirm-form-block" data-page-id="{$contributionPageID}" data-page-template="confirm">
   <div class="help">
     <p>{ts}Please verify the information below carefully. Click <strong>Go Back</strong> if you need to make changes.{/ts}
       {$continueText}
@@ -110,14 +110,28 @@
               {/if}
             {else}
               {if $frequency_interval > 1}
-                <p>
-                  <strong>{ts 1=$frequency_interval 2=$frequency_unit}I want to contribute this amount every %1 %2s.{/ts}</strong>
-                </p>
+                {if $frequency_unit eq 'day'}
+                  <p><strong>{ts 1=$frequency_interval}I want to contribute this amount every %1 days.{/ts}</strong></p>
+                {elseif $frequency_unit eq 'week'}
+                  <p><strong>{ts 1=$frequency_interval}I want to contribute this amount every %1 weeks.{/ts}</strong></p>
+                {elseif $frequency_unit eq 'month'}
+                  <p><strong>{ts 1=$frequency_interval}I want to contribute this amount every %1 months.{/ts}</strong></p>
+                {elseif $frequency_unit eq 'year'}
+                  <p><strong>{ts 1=$frequency_interval}I want to contribute this amount every %1 years.{/ts}</strong></p>
+                {/if}
               {else}
-                <p><strong>{ts 1=$frequency_unit }I want to contribute this amount every %1.{/ts}</strong></p>
+                {if $frequency_unit eq 'day'}
+                  <p><strong>{ts}I want to contribute this amount every day.{/ts}</strong></p>
+                {elseif $frequency_unit eq 'week'}
+                  <p><strong>{ts}I want to contribute this amount every week.{/ts}</strong></p>
+                {elseif $frequency_unit eq 'month'}
+                  <p><strong>{ts}I want to contribute this amount every month.{/ts}</strong></p>
+                {elseif $frequency_unit eq 'year'}
+                  <p><strong>{ts}I want to contribute this amount every year.{/ts}</strong></p>
+                {/if}
               {/if}
             {/if}
-              <p>{ts}Your initial contribution will be processed once you complete the confirmation step. You will be able to cancel the recurring contribution by visiting the web page link that will be included in your receipt.{/ts}</p>
+            <p>{ts}Your initial contribution will be processed once you complete the confirmation step. You will be able to cancel the recurring contribution by visiting the web page link that will be included in your receipt.{/ts}</p>
             {/crmRegion}
           {/if}
         {/if}
@@ -155,7 +169,7 @@
       </div>
       <div class="display-block">
         <div class="label-left crm-section honoree_profile-section">
-          <strong>{$honorName}</strong></br>
+          <strong>{$honorName}</strong><br/>
           {include file="CRM/UF/Form/Block.tpl" fields=$honoreeProfileFields mode=8 prefix='honor'}
         </div>
       </div>

@@ -16,6 +16,26 @@
  * @copyright CiviCRM LLC https://civicrm.org/licensing
  */
 class CRM_Extension_Downloader {
+
+  /**
+   * @var GuzzleHttp\Client
+   */
+  protected $guzzleClient;
+
+  /**
+   * @return \GuzzleHttp\Client
+   */
+  public function getGuzzleClient(): \GuzzleHttp\Client {
+    return $this->guzzleClient ?? new \GuzzleHttp\Client();
+  }
+
+  /**
+   * @param \GuzzleHttp\Client $guzzleClient
+   */
+  public function setGuzzleClient(\GuzzleHttp\Client $guzzleClient) {
+    $this->guzzleClient = $guzzleClient;
+  }
+
   /**
    * @var CRM_Extension_Container_Basic
    * The place where downloaded extensions are ultimately stored
@@ -75,9 +95,11 @@ class CRM_Extension_Downloader {
       $requiredExtensions = CRM_Extension_System::singleton()->getManager()->findInstallRequirements([$extensionInfo->key], $extensionInfo);
       foreach ($requiredExtensions as $extension) {
         if (CRM_Extension_System::singleton()->getManager()->getStatus($extension) !== CRM_Extension_Manager::STATUS_INSTALLED && $extension !== $extensionInfo->key) {
+          $requiredExtensionInfo = CRM_Extension_System::singleton()->getBrowser()->getExtension($extension);
+          $requiredExtensionInfoName = empty($requiredExtensionInfo->name) ? $extension : $requiredExtensionInfo->name;
           $errors[] = [
             'title' => ts('Missing Requirement: %1', [1 => $extension]),
-            'message' => ts('You will not be able to install/upgrade %1 until you have installed the %2 extension.', [1 => $extensionInfo->key, 2 => $extension]),
+            'message' => ts('You will not be able to install/upgrade %1 until you have installed the %2 extension.', [1 => $extensionInfo->name, 2 => $requiredExtensionInfoName]),
           ];
         }
       }
@@ -134,14 +156,12 @@ class CRM_Extension_Downloader {
    *   Whether the download was successful.
    */
   public function fetch($remoteFile, $localFile) {
-    $result = CRM_Utils_HttpClient::singleton()->fetch($remoteFile, $localFile);
-    switch ($result) {
-      case CRM_Utils_HttpClient::STATUS_OK:
-        return TRUE;
-
-      default:
-        return FALSE;
+    $client = $this->getGuzzleClient();
+    $response = $client->request('GET', $remoteFile, ['sink' => $localFile, 'timeout' => \Civi::settings()->get('http_timeout')]);
+    if ($response->getStatusCode() === 200) {
+      return TRUE;
     }
+    return FALSE;
   }
 
   /**

@@ -17,13 +17,6 @@
 class CRM_Member_BAO_MembershipBlock extends CRM_Member_DAO_MembershipBlock {
 
   /**
-   * Class constructor.
-   */
-  public function __construct() {
-    parent::__construct();
-  }
-
-  /**
    * Create or update a MembershipBlock.
    *
    * @param array $params
@@ -37,18 +30,11 @@ class CRM_Member_BAO_MembershipBlock extends CRM_Member_DAO_MembershipBlock {
    * Delete membership Blocks.
    *
    * @param int $id
-   *
+   * @deprecated
    * @return bool
    */
   public static function del($id) {
-    $dao = new CRM_Member_DAO_MembershipBlock();
-    $dao->id = $id;
-    $result = FALSE;
-    if ($dao->find(TRUE)) {
-      $dao->delete();
-      $result = TRUE;
-    }
-    return $result;
+    return (bool) self::deleteRecord(['id' => $id]);
   }
 
 }

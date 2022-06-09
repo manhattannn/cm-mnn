@@ -18,11 +18,24 @@ class SqlFunctionCURDATE extends SqlFunction {
 
   protected static $category = self::CATEGORY_DATE;
 
+  protected static $dataType = 'Date';
+
+  protected static function params(): array {
+    return [];
+  }
+
   /**
    * @return string
    */
   public static function getTitle(): string {
-    return ts('Now');
+    return ts('Today');
+  }
+
+  /**
+   * @return string
+   */
+  public static function getDescription(): string {
+    return ts('The current date.');
   }
 
 }

@@ -13,7 +13,7 @@
 
 {include file="CRM/common/TrackingFields.tpl"}
 
-<div class="crm-contribution-page-id-{$contributionPageID} crm-block crm-contribution-thankyou-form-block">
+<div class="crm-contribution-page-id-{$contributionPageID} crm-block crm-contribution-thankyou-form-block" data-page-id="{$contributionPageID}" data-page-template="thankyou">
   {if $thankyou_text}
     <div id="thankyou_text" class="crm-section thankyou_text-section">
       {$thankyou_text}
@@ -133,29 +133,37 @@
                 {if $frequency_interval > 1}
                   <p><strong>{ts 1=$frequency_interval 2=$frequency_unit 3=$installments}This recurring contribution will be automatically processed every %1 %2s for a total %3 installments (including this initial contribution).{/ts}</strong></p>
                 {else}
-                    <p><strong>{ts 1=$frequency_unit 2=$installments}This recurring contribution will be automatically processed every %1 for a total %2 installments (including this initial contribution).{/ts}</strong></p>
+                  <p><strong>{ts 1=$frequency_unit 2=$installments}This recurring contribution will be automatically processed every %1 for a total %2 installments (including this initial contribution).{/ts}</strong></p>
+                {/if}
+              {else}
+                {if $frequency_interval > 1}
+                  {if $frequency_unit eq 'day'}
+                    <p><strong>{ts 1=$frequency_interval}This recurring contribution will be automatically processed every %1 days.{/ts}</strong></p>
+                  {elseif $frequency_unit eq 'week'}
+                    <p><strong>{ts 1=$frequency_interval}This recurring contribution will be automatically processed every %1 weeks.{/ts}</strong></p>
+                  {elseif $frequency_unit eq 'month'}
+                    <p><strong>{ts 1=$frequency_interval}This recurring contribution will be automatically processed every %1 months.{/ts}</strong></p>
+                  {elseif $frequency_unit eq 'year'}
+                    <p><strong>{ts 1=$frequency_interval}This recurring contribution will be automatically processed every %1 years.{/ts}</strong></p>
                   {/if}
                 {else}
-                  {if $frequency_interval > 1}
-                    <p><strong>{ts 1=$frequency_interval 2=$frequency_unit}This recurring contribution will be automatically processed every %1 %2s.{/ts}</strong></p>
-                  {else}
-                    {* dev/translation#32 All 'every %1' strings are incorrectly using ts, but focusing on the most important one until we find a better fix. *}
-                    {if $frequency_unit eq 'day'}
-                      <p><strong>{ts}This contribution will be automatically processed every day.{/ts}</strong></p>
-                    {elseif $frequency_unit eq 'week'}
-                      <p><strong>{ts}This contribution will be automatically processed every week.{/ts}</strong></p>
-                    {elseif $frequency_unit eq 'month'}
-                      <p><strong>{ts}This contribution will be automatically processed every month.{/ts}</strong></p>
-                    {elseif $frequency_unit eq 'year'}
-                      <p><strong>{ts}This contribution will be automatically processed every year.{/ts}</strong></p>
-                    {/if}
+                  {* dev/translation#32 All 'every %1' strings are incorrectly using ts, but focusing on the most important one until we find a better fix. *}
+                  {if $frequency_unit eq 'day'}
+                    <p><strong>{ts}This contribution will be automatically processed every day.{/ts}</strong></p>
+                  {elseif $frequency_unit eq 'week'}
+                    <p><strong>{ts}This contribution will be automatically processed every week.{/ts}</strong></p>
+                  {elseif $frequency_unit eq 'month'}
+                    <p><strong>{ts}This contribution will be automatically processed every month.{/ts}</strong></p>
+                  {elseif $frequency_unit eq 'year'}
+                    <p><strong>{ts}This contribution will be automatically processed every year.{/ts}</strong></p>
                   {/if}
                 {/if}
-                  <p>
-                  {if $is_email_receipt}
-                    {ts}You will receive an email receipt which includes information about how to update or cancel this recurring contribution.{/ts}
-                  {/if}
+              {/if}
+              {if $is_email_receipt}
+                <p>
+                  {ts}You will receive an email receipt which includes information about how to update or cancel this recurring contribution.{/ts}
                 </p>
+              {/if}
             {/crmRegion}
           {/if}
         {/if}
@@ -194,7 +202,7 @@
       </div>
       <div class="display-block">
        <div class="label-left crm-section honoree_profile-section">
-          <strong>{$honorName}</strong></br>
+          <strong>{$honorName}</strong><br/>
           {include file="CRM/UF/Form/Block.tpl" fields=$honoreeProfileFields prefix='honor'}
         </div>
       </div>

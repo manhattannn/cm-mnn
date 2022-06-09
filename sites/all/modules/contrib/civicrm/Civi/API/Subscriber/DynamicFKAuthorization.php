@@ -119,7 +119,7 @@ class DynamicFKAuthorization implements EventSubscriberInterface {
    *   See docblock in DynamicFKAuthorization::$lookupDelegateSql.
    * @param string $lookupCustomFieldSql
    *   See docblock in DynamicFKAuthorization::$lookupCustomFieldSql.
-   * @param array|NULL $allowedDelegates
+   * @param array|null $allowedDelegates
    *   e.g. "civicrm_mailing","civicrm_activity"; NULL to allow any.
    */
   public function __construct($kernel, $entityName, $actions, $lookupDelegateSql, $lookupCustomFieldSql, $allowedDelegates = NULL) {
@@ -174,9 +174,6 @@ class DynamicFKAuthorization implements EventSubscriberInterface {
       }
 
       if (isset($apiRequest['params']['entity_table'])) {
-        if (!\CRM_Core_DAO_AllCoreTables::isCoreTable($apiRequest['params']['entity_table'])) {
-          throw new \API_Exception("Unrecognized target entity table {$apiRequest['params']['entity_table']}");
-        }
         $this->authorizeDelegate(
           $apiRequest['action'],
           $apiRequest['params']['entity_table'],

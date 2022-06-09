@@ -35,10 +35,10 @@
       <thead class="sticky">
       {foreach from=$columnHeaders item=header}
         <th>
-          {if $header.sort}
+          {if !empty($header.sort)}
             {assign var='key' value=$header.sort}
             {$sort->_response.$key.link}
-          {else}
+          {elseif !empty($header.name)}
             {$header.name}
           {/if}
         </th>
@@ -70,7 +70,7 @@
        {if call_user_func(array('CRM_Campaign_BAO_Campaign','isCampaignEnable'))}
           <td class="crm-mailing-campaign">{$row.campaign}</td>
       {/if}
-        <td>{$row.action|replace:'xx':$row.id}</td>
+        <td>{$row.action|smarty:nodefaults|replace:'xx':$row.id}</td>
       </tr>
       {/foreach}
     </table>

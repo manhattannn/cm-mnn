@@ -53,8 +53,6 @@ class CRM_Core_Form_ShortCode extends CRM_Core_Form {
    * Build form data. Can be modified via hook_civicrm_preProcess.
    */
   public function preProcess() {
-    $config = CRM_Core_Config::singleton();
-
     $this->components['user-dashboard'] = [
       'label' => ts("User Dashboard"),
       'select' => NULL,
@@ -73,7 +71,7 @@ class CRM_Core_Form_ShortCode extends CRM_Core_Form {
       ],
     ];
 
-    if (in_array('CiviContribute', $config->enableComponents)) {
+    if (CRM_Core_Component::isEnabled('CiviContribute')) {
       $this->components['contribution'] = [
         'label' => ts("Contribution Page"),
         'select' => [
@@ -92,7 +90,7 @@ class CRM_Core_Form_ShortCode extends CRM_Core_Form {
       ];
     }
 
-    if (in_array('CiviEvent', $config->enableComponents)) {
+    if (CRM_Core_Component::isEnabled('CiviEvent')) {
       $this->components['event'] = [
         'label' => ts("Event Page"),
         'select' => [
@@ -103,7 +101,7 @@ class CRM_Core_Form_ShortCode extends CRM_Core_Form {
       ];
     }
 
-    if (in_array('CiviCampaign', $config->enableComponents)) {
+    if (CRM_Core_Component::isEnabled('CiviCampaign')) {
       $this->components['petition'] = [
         'label' => ts("Petition"),
         'select' => [
@@ -120,6 +118,14 @@ class CRM_Core_Form_ShortCode extends CRM_Core_Form {
     }
 
     $this->options = [
+      [
+        'key' => 'action',
+        'components' => ['contribution'],
+        'options' => [
+          'transact' => ts('Contribution Page'),
+          'setup' => ts('Setup a Personal Campaign Page'),
+        ],
+      ],
       [
         'key' => 'action',
         'components' => ['event'],
@@ -152,6 +158,7 @@ class CRM_Core_Form_ShortCode extends CRM_Core_Form {
           'edit' => ts('Edit'),
           'view' => ts('View'),
           'search' => ts('Search/Public Directory'),
+          'map' => ts('Map View'),
         ],
       ],
       [

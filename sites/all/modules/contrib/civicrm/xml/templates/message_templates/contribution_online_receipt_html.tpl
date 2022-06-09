@@ -10,7 +10,6 @@
 {capture assign=labelStyle }style="padding: 4px; border-bottom: 1px solid #999; background-color: #f7f7f7;"{/capture}
 {capture assign=valueStyle }style="padding: 4px; border-bottom: 1px solid #999;"{/capture}
 
-<center>
   <table id="crm-event_receipt" style="font-family: Arial, Verdana, sans-serif; text-align: left; width:100%; max-width:700px; padding:0; margin:0; border:0px;">
 
   <!-- BEGIN HEADER -->
@@ -27,7 +26,7 @@
     {/if}
 
     {if $is_pay_later}
-     <p>{if isset($pay_later_receipt)}{$pay_later_receipt}{/if}</p> {* FIXME: this might be text rather than HTML *}
+     <p>{$pay_later_receipt}</p> {* FIXME: this might be text rather than HTML *}
     {/if}
 
    </td>
@@ -44,7 +43,7 @@
        </th>
       </tr>
 
-      {if !empty($lineItem) and !empty($priceSetID) and empty($is_quick_config)}
+      {if $isShowLineItems}
 
        {foreach from=$lineItem item=value key=priceset}
         <tr>
@@ -76,7 +75,7 @@
               <td>
                {$line.unit_price*$line.qty|crmMoney:$currency}
               </td>
-              {if isset($line.tax_rate) and ($line.tax_rate != "" || $line.tax_amount != "")}
+              {if $line.tax_rate || $line.tax_amount != ""}
                <td>
                 {$line.tax_rate|string_format:"%.2f"}%
                </td>
@@ -110,17 +109,17 @@
         {foreach from=$dataArray item=value key=priceset}
          <tr>
           {if $priceset || $priceset == 0}
-           <td>&nbsp;{if isset($taxTerm)}{$taxTerm}{/if} {$priceset|string_format:"%.2f"}%</td>
+           <td>&nbsp;{$taxTerm} {$priceset|string_format:"%.2f"}%</td>
            <td>&nbsp;{$value|crmMoney:$currency}</td>
           {else}
-           <td>&nbsp;{ts}No{/ts} {if isset($taxTerm)}{$taxTerm}{/if}</td>
+           <td>&nbsp;{ts}No{/ts} {$taxTerm}</td>
            <td>&nbsp;{$value|crmMoney:$currency}</td>
           {/if}
          </tr>
         {/foreach}
 
        {/if}
-       {if isset($totalTaxAmount)}
+       {if $isShowTax}
         <tr>
          <td {$labelStyle}>
           {ts}Total Tax{/ts}
@@ -147,7 +146,7 @@
              {ts}Total Tax Amount{/ts}
            </td>
            <td {$valueStyle}>
-             {$totalTaxAmount|crmMoney:$currency}
+             {contribution.tax_amount|crmMoney}
            </td>
          </tr>
        {/if}
@@ -156,7 +155,7 @@
          {ts}Amount{/ts}
         </td>
         <td {$valueStyle}>
-         {$amount|crmMoney:$currency} {if isset($amount_level)} - {$amount_level}{/if}
+         {$amount|crmMoney:$currency} {if '{contribution.amount_level}'} - {contribution.amount_level}{/if}
         </td>
        </tr>
 
@@ -466,7 +465,6 @@
      {/if}
 
   </table>
-</center>
 
 </body>
 </html>

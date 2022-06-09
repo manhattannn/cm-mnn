@@ -160,8 +160,10 @@ class CRM_Utils_Date {
    *
    */
   public static function getAbbrWeekdayNames() {
-    static $days = [];
+    $key = 'abbrDays_' . \CRM_Core_I18n::getLocale();
+    $days = &\Civi::$statics[__CLASS__][$key];
     if (!$days) {
+      $days = [];
       // First day of the week
       $firstDay = Civi::settings()->get('weekBegins');
 
@@ -189,8 +191,10 @@ class CRM_Utils_Date {
    *
    */
   public static function getFullWeekdayNames() {
-    static $days = [];
+    $key = 'fullDays_' . \CRM_Core_I18n::getLocale();
+    $days = &\Civi::$statics[__CLASS__][$key];
     if (!$days) {
+      $days = [];
       // First day of the week
       $firstDay = Civi::settings()->get('weekBegins');
 
@@ -214,7 +218,8 @@ class CRM_Utils_Date {
    *
    */
   public static function &getAbbrMonthNames($month = FALSE) {
-    static $abbrMonthNames;
+    $key = 'abbrMonthNames_' . \CRM_Core_I18n::getLocale();
+    $abbrMonthNames = &\Civi::$statics[__CLASS__][$key];
     if (!isset($abbrMonthNames)) {
 
       // set LC_TIME and build the arrays from locale-provided names
@@ -237,20 +242,32 @@ class CRM_Utils_Date {
    *
    */
   public static function &getFullMonthNames() {
-    static $fullMonthNames;
-    if (!isset($fullMonthNames)) {
-
-      // set LC_TIME and build the arrays from locale-provided names
-      CRM_Core_I18n::setLcTime();
-      for ($i = 1; $i <= 12; $i++) {
-        $fullMonthNames[$i] = strftime('%B', mktime(0, 0, 0, $i, 10, 1970));
-      }
+    $key = 'fullMonthNames_' . \CRM_Core_I18n::getLocale();
+    if (empty(\Civi::$statics[__CLASS__][$key])) {
+      // Not relying on strftime because it depends on the operating system
+      // and most people will not have a non-US locale configured out of the box
+      // Ignoring other date names for now, since less visible by default
+      \Civi::$statics[__CLASS__][$key] = [
+        1 => ts('January'),
+        2 => ts('February'),
+        3 => ts('March'),
+        4 => ts('April'),
+        5 => ts('May'),
+        6 => ts('June'),
+        7 => ts('July'),
+        8 => ts('August'),
+        9 => ts('September'),
+        10 => ts('October'),
+        11 => ts('November'),
+        12 => ts('December'),
+      ];
     }
-    return $fullMonthNames;
+
+    return \Civi::$statics[__CLASS__][$key];
   }
 
   /**
-   * @param $string
+   * @param string $string
    *
    * @return int
    */
@@ -523,8 +540,6 @@ class CRM_Utils_Date {
    */
   public static function convertToDefaultDate(&$params, $dateType, $dateParam) {
     $now = getdate();
-    $cen = substr($now['year'], 0, 2);
-    $prevCen = $cen - 1;
 
     $value = NULL;
     if (!empty($params[$dateParam])) {
@@ -676,15 +691,15 @@ class CRM_Utils_Date {
     $month = ($month < 10) ? "0" . "$month" : $month;
     $day = ($day < 10) ? "0" . "$day" : $day;
 
-    $year = (int ) $year;
-    // simple heuristic to determine what century to use
-    // 00 - 20 is always 2000 - 2020
-    // 21 - 99 is always 1921 - 1999
-    if ($year < 21) {
-      $year = (strlen($year) == 1) ? $cen . '0' . $year : $cen . $year;
-    }
-    elseif ($year < 100) {
-      $year = $prevCen . $year;
+    $year = (int) $year;
+    if ($year < 100) {
+      $year = substr($now['year'], 0, 2) * 100 + $year;
+      if ($year > ($now['year'] + 5)) {
+        $year = $year - 100;
+      }
+      elseif ($year <= ($now['year'] - 95)) {
+        $year = $year + 100;
+      }
     }
 
     if ($params[$dateParam]) {
@@ -698,21 +713,9 @@ class CRM_Utils_Date {
   }
 
   /**
-   * @param $date
-   *
-   * @return bool
-   */
-  public static function isDate(&$date) {
-    if (CRM_Utils_System::isNull($date)) {
-      return FALSE;
-    }
-    return TRUE;
-  }
-
-  /**
    * Translate a TTL to a concrete expiration time.
    *
-   * @param NULL|int|DateInterval $ttl
+   * @param null|int|DateInterval $ttl
    * @param int $default
    *   The value to use if $ttl is not specified (NULL).
    * @return int
@@ -738,7 +741,7 @@ class CRM_Utils_Date {
   /**
    * Normalize a TTL.
    *
-   * @param NULL|int|DateInterval $ttl
+   * @param null|int|DateInterval $ttl
    * @param int $default
    *   The value to use if $ttl is not specified (NULL).
    * @return int
@@ -761,7 +764,7 @@ class CRM_Utils_Date {
   }
 
   /**
-   * @param null $timeStamp
+   * @param int|false|null $timeStamp
    *
    * @return bool|string
    */
@@ -896,7 +899,7 @@ class CRM_Utils_Date {
    * @param date $targetDate
    *   Target Date. (show age on specific date)
    *
-   * @return int
+   * @return array
    *   array $results contains years or months
    */
   public static function calculateAge($birthDate, $targetDate = NULL) {
@@ -2210,6 +2213,59 @@ class CRM_Utils_Date {
     $systemTimeZone = new DateTimeZone(CRM_Core_Config::singleton()->userSystem->getTimeZoneString());
     $dateObject->setTimezone($systemTimeZone);
     return $dateObject->format($format);
+  }
+
+  /**
+   * Check if the value returned by a date picker has a date section (ie: includes
+   * a '-' character) if it includes a time section (ie: includes a ':').
+   *
+   * @param string $value
+   *   A date/time string input from a datepicker value.
+   *
+   * @return bool
+   *   TRUE if valid, FALSE if there is a time without a date.
+   */
+  public static function datePickerValueWithTimeHasDate($value) {
+    // If there's no : (time) or a : and a - (date) then return true
+    return (
+      strpos($value, ':') === FALSE
+      || strpos($value, ':') !== FALSE && strpos($value, '-') !== FALSE
+    );
+  }
+
+  /**
+   * Validate start and end dates entered on a form to make sure they are
+   * logical. Expects the form keys to be start_date and end_date.
+   *
+   * @param string $startFormKey
+   *   The form element key of the 'start date'
+   * @param string $startValue
+   *   The value of the 'start date'
+   * @param string $endFormKey
+   *   The form element key of the 'end date'
+   * @param string $endValue
+   * The value of the 'end date'
+   *
+   * @return array|bool
+   *   TRUE if valid, an array of the erroneous form key, and error message to
+   *   use otherwise.
+   */
+  public static function validateStartEndDatepickerInputs($startFormKey, $startValue, $endFormKey, $endValue) {
+
+    // Check date as well as time is set
+    if (!empty($startValue) && !self::datePickerValueWithTimeHasDate($startValue)) {
+      return ['key' => $startFormKey, 'message' => ts('Please enter a date as well as a time.')];
+    }
+    if (!empty($endValue) && !self::datePickerValueWithTimeHasDate($endValue)) {
+      return ['key' => $endFormKey, 'message' => ts('Please enter a date as well as a time.')];
+    }
+
+    // Check end date is after start date
+    if (!empty($startValue) && !empty($endValue) && $endValue < $startValue) {
+      return ['key' => $endFormKey, 'message' => ts('The end date should be after the start date.')];
+    }
+
+    return TRUE;
   }
 
 }
