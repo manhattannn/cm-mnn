@@ -76,7 +76,7 @@ function mnn_airing_access_menu_tab($node) {
 
 function mnn_airing_form_alter(&$form, &$form_state, $form_id) {
   if ($form_id == 'cm_airing_form') {
-dsm($form_state);
+      //dsm($form_state);
     //FETCH THE QUERY ARGS THAT WERE PASSED TO THE PROJECT PICKER AND STORED
     //IN THE SESSION BY THE PROJECT PICKER
     $query_args = $_SESSION[CM_PROJECT_PICKET_QUERY_ARGUMENT_SESSION_VARIABLE];
