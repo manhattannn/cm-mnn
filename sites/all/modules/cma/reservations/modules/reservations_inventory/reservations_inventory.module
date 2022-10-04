@@ -57,7 +57,7 @@ function reservations_inventory_menu() {
   $half = round(count($tree)/2);
 
   $position = 'left';
-
+      dsm($tree);
   foreach ($tree as $term) {
     $term = taxonomy_term_load($term->tid);
     if (isset($term->field_inventory_show_on_menu[LANGUAGE_NONE][0]['value']) &&

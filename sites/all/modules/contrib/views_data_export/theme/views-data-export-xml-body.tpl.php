@@ -10,6 +10,7 @@
  * - $themed_rows: a array of rows with themed fields.
  * @ingroup views_templates
  */
+
 ?>
 <?php foreach ($themed_rows as $count => $row): ?>
   <<?php print $item_node; ?>>
