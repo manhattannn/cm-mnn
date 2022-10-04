@@ -1,11 +1,12 @@
 <?php
-// $Id: panels_node.node_convert.inc,v 1.1.4.2 2011/01/11 04:12:43 placinta Exp $
 
 /**
  * @file
  * Node convert panels_node.module include
  *
  * Performs necessary changes regarding panels_node type conversions.
+ *
+ * @TODO Fix for Drupal 7.
  */
 
 /**

@@ -94,6 +94,7 @@ function reservations_resource_chart_menu() {
 	    'weight' => 1000,
 	    );
   }
+watchdog("reservations debug", '<pre>' . print_r( $items, true) . '</pre>');
 
 
   $items['admin/config/reservations/chart'] =
