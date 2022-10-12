@@ -162,17 +162,27 @@ function ip_login_field_access($op, $field, $entity_type, $entity, $account) {
 function ip_login_boot() {
   // skip rest of this if user is logged in
   global $user;
+  watchdog("ip login", '<pre>' . print_r( $user, true) . '</pre>');
+  $is_cli = drupal_is_cli();
+//    watchdog("ip login", '<pre>' . print_r( $is_cli, true) . '</pre>');
   if ($user->uid != 0 || drupal_is_cli()) return;
+  //watchdog("ip login", '<pre>' . print_r( $user, true) . '</pre>');
 
   // skip rest of this if the admin has disabled IP login
   if (!variable_get('ip_login_enabled', 1)) return;
+  //watchdog("ip login", '<pre>' . print_r( $user, true) . '</pre>');
 
   // Avoid settings cookies if not on an IP Login-enabled page to improve
   // external caching support - http://drupal.org/node/1263234 thanks Vacilando
   if (ip_login_check_path() === FALSE) return;
-
+watchdog("ip login", '<pre>' . print_r( $user, true) . '</pre>');
+$userip = ip_login_ip_address();
   // check the user IP
   $matched_uid = ip_login_check(ip_login_ip_address());
+     watchdog("ip login ip", '<pre>' . print_r( $userip, true) . '</pre>');
+ //  watchdog("ip login", '<pre>' . print_r( $matched_uidr, true) . '</pre>');
+
+ //  watchdog("ip login", '<pre>' . print_r( $matched_uidr, true) . '</pre>');
   if ($matched_uid > 0) {
     $can_login_as_another_user = isset($_COOKIE[LOGIN_AS_DIFFERENT_USER]) ? $_COOKIE[LOGIN_AS_DIFFERENT_USER] : NULL;
 
