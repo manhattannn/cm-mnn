@@ -1,0 +1,75 @@
+<?php
+function myers_airing_import_node_presave($node) {
+//   dsm($node);
+  if ($node->type =='myers_airing_data_upload') {
+    // Alter title, add time stamp at the end of title:
+ //   $node->title = $node->title.' '.date('M j Y h:i A');
+//   watchdog("myers airing import", '<pre>' . print_r( $node, true) . '</pre>');
+
+//      dsm($node);
+   
+      libxml_use_internal_errors(TRUE);
+      $file_to_load = $node->original->field_xml_file['und'][0]["uri"]; 
+      dsm($file_to_load);
+      $file_to_load = drupal_realpath($file_to_load);
+      dsm($file_to_load);
+
+      $objXmlDocument = simplexml_load_file($file_to_load);
+      dsm($objXmlDocument->Content);
+    watchdog("myers airing import", '<pre>' . print_r($objXmlDocument, true) . '</pre>');
+
+// found this suggestion online for how to make the xml object easier to work with
+
+ 
+      $objJsonDocument = json_encode($objXmlDocument);
+      $arrOutput = json_decode($objJsonDocument, TRUE);
+      dsm($arrOutput);
+    watchdog("myers airing import", '<pre>' . print_r($arrOutput, true) . '</pre>');
+ 
+
+    // loop over the contents of the xml and for each item 
+    // create an airing entity 
+    // with reference to show and project
+    // air time 
+    // channel 
+
+// we'll likely use    entity_metadata_wrapper(). 
+// $bundleName = "airing";
+// $e = entity_create($entityType, array('type' => $bundleName));
+// $wrapper = entity_metadata_wrapper($entityType, $e);
+// $wrapper->field_name->set('value');
+// $wrapper->field_file->set( array( 'fid'=>1234 ) );
+// $wrapper->save();    
+
+// documentation https://www.drupal.org/docs/7/api/entity-api/entity-metadata-wrappers#example-value-set-save 
+
+//  or entity_create if that does not work
+//  $new_ent = entity_create('airing', array(
+//   'uid' => 1,
+//   'type' => 'airing', //bundle
+//   'field_x' => array(      
+//     LANGUAGE_NONE => array(
+//       0 => array(
+//         'nid' => 1,
+//       ),
+//     ),
+//   ),
+// ))->save();
+
+   
+ 
+  }
+  // Remove $node->is_new to call at node updation time
+}
+
+function myers_airing_import_node_save($node) {
+   dsm($node);
+  if ($node->type =='myers_airing_data_upload') {
+    // Alter title, add time stamp at the end of title:
+ //   $node->title = $node->title.' '.date('M j Y h:i A');
+ 
+ //  dsm($node);
+ 
+  }
+  // Remove $node->is_new to call at node updation time
+}

@@ -1,0 +1,5 @@
+name = myers_airing_import
+description = imports myers airing xml file and creates airing entities
+core = 7.x
+version = "7.x-1.x"
+
