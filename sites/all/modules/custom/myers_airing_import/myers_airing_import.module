@@ -15,19 +15,18 @@ function myers_airing_import_node_presave($node) {
       dsm($file_to_load);
 
       $objXmlDocument = simplexml_load_file($file_to_load);
-      dsm($objXmlDocument->Content);
-    watchdog("myers airing import", '<pre>' . print_r($objXmlDocument, true) . '</pre>');
+//      dsm($objXmlDocument->Content);
+//    watchdog("myers airing import", '<pre>' . print_r($objXmlDocument, true) . '</pre>');
 
 // found this suggestion online for how to make the xml object easier to work with
 
  
       $objJsonDocument = json_encode($objXmlDocument);
       $arrOutput = json_decode($objJsonDocument, TRUE);
-      dsm($arrOutput);
-    watchdog("myers airing import", '<pre>' . print_r($arrOutput, true) . '</pre>');
+      dsm($arrOutput, "this is the array for all items");
  
 
-    // loop over the contents of the xml and for each item 
+    // loop over the contents of the array and for each item 
     // create an airing entity 
     // with reference to show and project
     // air time 
