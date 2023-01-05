@@ -6,32 +6,37 @@ function myers_airing_import_node_presave($node) {
  //   $node->title = $node->title.' '.date('M j Y h:i A');
 //   watchdog("myers airing import", '<pre>' . print_r( $node, true) . '</pre>');
 
-//      dsm($node);
-   
+      dsm($node);
+      
+      //load the file so we can get the uri 
+      $xml_uploaded = file_load($node->field_xml_file['und'][0]["fid"]);
+      dsm($xml_uploaded);
       libxml_use_internal_errors(TRUE);
-      $file_to_load = $node->original->field_xml_file['und'][0]["uri"]; 
+      $file_to_load = $xml_uploaded->uri; 
       dsm($file_to_load);
       $file_to_load = drupal_realpath($file_to_load);
       dsm($file_to_load);
 
       $objXmlDocument = simplexml_load_file($file_to_load);
-      dsm($objXmlDocument->Content);
-    watchdog("myers airing import", '<pre>' . print_r($objXmlDocument, true) . '</pre>');
+//      dsm($objXmlDocument->Content);
+//    watchdog("myers airing import", '<pre>' . print_r($objXmlDocument, true) . '</pre>');
 
 // found this suggestion online for how to make the xml object easier to work with
 
  
       $objJsonDocument = json_encode($objXmlDocument);
       $arrOutput = json_decode($objJsonDocument, TRUE);
-      dsm($arrOutput);
-    watchdog("myers airing import", '<pre>' . print_r($arrOutput, true) . '</pre>');
+      dsm($arrOutput, "this is the array for all items");
+      
+      $shows_to_insert = $arrOutput["PsipEvent"];
  
-
-    // loop over the contents of the xml and for each item 
+ 
+     // loop over the contents of the array and for each item 
     // create an airing entity 
     // with reference to show and project
     // air time 
     // channel 
+
 
 // we'll likely use    entity_metadata_wrapper(). 
 // $bundleName = "airing";
@@ -55,6 +60,50 @@ function myers_airing_import_node_presave($node) {
 //     ),
 //   ),
 // ))->save();
+ 
+ 
+      foreach ($shows_to_insert as $show_to_insert){
+      
+      dsm($show_to_insert["@attributes"]["startTime"], "start time");
+      dsm($show_to_insert["@attributes"]["duration"], "duration");
+      dsm($show_to_insert["EventId"]["@attributes"]["channelNumber"], "channel");
+      dsm($show_to_insert["ContentId"]["AlternateId"][0], "project nid");
+      dsm($show_to_insert["ContentId"]["AlternateId"][1], "episode nid");      
+      dsm($show_to_insert["ShowData"]["Name"], "airing title");
+      
+      $entity = entity_get_controller('airing')->create();
+      // Save entity properties.
+      dsm($entity);
+      
+      $entity->field_airing_title['und'][0]['value'] = $show_to_insert["ShowData"]["Name"];
+      $entity->field_airing_date['und'][0]['value'] = "2022-11-15 06:00:00.00";
+      $entity->field_airing_date['und'][0]['value2'] = "2022-11-15 06:29:00.00";
+      $entity->type = 'airing'; // set the bundle
+      $entity->$language = isset($user->language)? $user->language : 'und';
+      $entity->field_airing_channel['und'][0]['tid'] = 965;
+      // Save attached fields.
+      $entity->field_airing_project_ref['und'][0]['target_id'] = $show_to_insert["ContentId"]["AlternateId"][0];
+      $entity->field_airing_show_ref['und'][0]['target_id'] = $show_to_insert["ContentId"]["AlternateId"][1];      
+      entity_save('airing', $entity);
+ //      $bundleName = "airing";
+//       $e = entity_create($entityType, array('type' => $bundleName));
+//       $wrapper = entity_metadata_wrapper($entityType, $e);
+// //      $wrapper->field_airing_title->set("test");
+// //      $wrapper->field_airing_project_ref->set(1123);
+// //      $wrapper->field_airing_show_ref->set(11222);
+// //      $wrapper->field_airing_date->set("2013-05-05T16:34:42+00:00");
+// //      $wrapper->field_airing_date->set($show_to_insert["@attributes"]["startTime"]);
+// //      $wrapper->field_airing_duration->set($show_to_insert["@attributes"]["duration"]); 
+// //      $wrapper->field_airing_channel->set($show_to_insert["EventId"]["@attributes"]["channelNumber"]);
+//       $wrapper->field_airing_channel->set("965");
+//       // $wrapper->field_file->set( array( 'fid'=>1234 ) );
+//       $wrapper->save();    
+//       
+      
+      }
+      
+      
+
 
    
  
@@ -62,13 +111,13 @@ function myers_airing_import_node_presave($node) {
   // Remove $node->is_new to call at node updation time
 }
 
-function myers_airing_import_node_save($node) {
-   dsm($node);
+function myers_airing_import_node_insert($node) {
+//   dsm($node);
   if ($node->type =='myers_airing_data_upload') {
     // Alter title, add time stamp at the end of title:
  //   $node->title = $node->title.' '.date('M j Y h:i A');
  
- //  dsm($node);
+  // dsm($node, "in the save hook");
  
   }
   // Remove $node->is_new to call at node updation time
